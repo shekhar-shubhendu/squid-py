@@ -7,15 +7,36 @@ from eth_account.messages import defunct_hash_message
 import json
 import requests
 
-json_consume = {"publisherId": "0x01",
+json_consume0 = {"publisherId": "0x01",
                 "metadata": {
                     "name": "testzkp",
-                    "links": ["https://testocnfiles.blob.core.windows.net/testfiles/testzkp.pdf"],
+                    "links": "https://testocnfiles.blob.core.windows.net/testfiles/testzkp.pdf",
                     "size": "1.08MiB",
                     "format": "pdf",
                     "description": "description"
                 },
                 "assetId": "0x01"}
+
+json_consume1 = {"publisherId": "0x01",
+                "metadata": {
+                    "name": "boston",
+                    "links": "https://testocnfiles.blob.core.windows.net/testfiles/boston.txt",
+                    "size": "1.08KiB",
+                    "format": "txt",
+                    "description": "description"
+                },
+                "assetId": "0x01"}
+
+json_consume2 = {"publisherId": "0x01",
+                "metadata": {
+                    "name": "ec2",
+                    "links": "https://testocnfiles.blob.core.windows.net/testfiles/ec2.txt",
+                    "size": "1.08KiB",
+                    "format": "txt",
+                    "description": "description"
+                },
+                "assetId": "0x01"}
+
 json_request_consume = {
     'requestId': "",
     'consumerId': "",
@@ -48,10 +69,10 @@ def get_events(event_filter, max_iterations=100, pause_duration=0.1):
 
 def process_enc_token(event):
     # should get accessId and encryptedAccessToken in the event
-    print("token published event: %s" % event)
-
-
-def register():
+    # print("token published event: %s" % event)
+    pass
+    
+def register0():
     consumer_account = ocean.web3.eth.accounts[1]
     provider_account = ocean.web3.eth.accounts[0]
     print("Starting test_commit_access_requested")
@@ -61,14 +82,47 @@ def register():
     resource_id = market_concise.generateId('resource', transact={'from': provider_account})
     print("recource_id: %s" % resource_id)
     resource_price = 10
-    json_consume['assetId'] = ocean.web3.toHex(resource_id)
-    json_consume['links'] = ocean.web3.toHex(resource_id)
+    json_consume0['assetId'] = ocean.web3.toHex(resource_id)
     headers = {'content-type': 'application/json'}
     post = requests.post('http://localhost:5000/api/v1/provider/assets/metadata',
-                         data=json.dumps(json_consume),
+                         data=json.dumps(json_consume0),
                          headers=headers)
     return ocean.web3.toHex(resource_id)
 
+def register1():
+    consumer_account = ocean.web3.eth.accounts[1]
+    provider_account = ocean.web3.eth.accounts[0]
+    print("Starting test_commit_access_requested")
+    print("buyer: %s" % consumer_account)
+    print("seller: %s" % provider_account)
+
+    resource_id = market_concise.generateId('resource', transact={'from': provider_account})
+    print("recource_id: %s" % resource_id)
+    resource_price = 10
+    json_consume1['assetId'] = ocean.web3.toHex(resource_id)
+    headers = {'content-type': 'application/json'}
+    post = requests.post('http://localhost:5000/api/v1/provider/assets/metadata',
+                         data=json.dumps(json_consume1),
+                         headers=headers)
+    return ocean.web3.toHex(resource_id)
+
+
+def register2():
+    consumer_account = ocean.web3.eth.accounts[1]
+    provider_account = ocean.web3.eth.accounts[0]
+    print("Starting test_commit_access_requested")
+    print("buyer: %s" % consumer_account)
+    print("seller: %s" % provider_account)
+
+    resource_id = market_concise.generateId('resource', transact={'from': provider_account})
+    print("recource_id: %s" % resource_id)
+    resource_price = 10
+    json_consume2['assetId'] = ocean.web3.toHex(resource_id)
+    headers = {'content-type': 'application/json'}
+    post = requests.post('http://localhost:5000/api/v1/provider/assets/metadata',
+                         data=json.dumps(json_consume2),
+                         headers=headers)
+    return ocean.web3.toHex(resource_id)
 
 def consume(resource):
     expire_seconds = 9999999999
@@ -92,15 +146,16 @@ def consume(resource):
     send_event = acl.events.AccessConsentRequested().processReceipt(receipt)
     request_id = send_event[0]['args']['_id']
 
-    filter_token_published = ocean.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished', process_enc_token, 0.5,
+    filter_token_published = ocean.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished', process_enc_token, 0.25,
                                                fromBlock='latest')
 
     i = 0
-    while acl_concise.verifyCommitted(request_id, 1) is False and i < 100:
+    while (acl_concise.statusOfAccessRequest(request_id)==1) is False and i < 100:
         i += 1
         time.sleep(0.1)
 
-    assert acl_concise.verifyCommitted(request_id, 1)
+    assert acl_concise.statusOfAccessRequest(request_id)==1
+
     token.approve(ocean.web3.toChecksumAddress(market_concise.address),
                   resource_price,
                   transact={'from': consumer_account})
@@ -114,16 +169,6 @@ def consume(resource):
     send_event = acl.events.EncryptedTokenPublished().processReceipt(receipt)
 
 
-    print('buyer balance = ', token.balanceOf(consumer_account))
-    print('seller balance = ', token.balanceOf(provider_account))
-
-    # tx_hashes = set()
-    # events = get_events(filter_payment)
-    # for ev in events:
-    #     tx_hashes.add(ev['transactionHash'])
-
-    # assert events
-    # assert send_payment in tx_hashes
 
     events = get_events(filter_token_published)
     assert events
@@ -138,12 +183,6 @@ def consume(resource):
 
     sig = ocean.split_signature(signature)
 
-    assert acl_concise.isSigned(consumer_account,
-                                ocean.web3.toHex(fixed_msg),
-                                sig.v,
-                                sig.r,
-                                sig.s,
-                                call={'from': provider_account})
     json_request_consume['fixed_msg'] = ocean.web3.toHex(fixed_msg)
     json_request_consume['consumerId'] = consumer_account
     json_request_consume['sigEncJWT'] = ocean.web3.toHex(signature)
@@ -156,12 +195,11 @@ def consume(resource):
         'http://localhost:5000/api/v1/provider/assets/metadata/consume/%s' % ocean.web3.toHex(resource_id),
         data=json.dumps(json_request_consume), headers=headers)
     assert post.status_code == 200
-    assert acl_concise.verifyCommitted(request_id, 2)
+    return(post.text)
 
 
-def test_commit_access_requested():
-    asset1 = register()
-    asset2 = register()
-    consume(asset1)
-    consume(asset2)
+
+
+    
+ 
 
