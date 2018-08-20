@@ -89,7 +89,6 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
         i += 1
         time.sleep(0.1)
 
-    assert acl_concise.statusOfAccessRequest(request_id) == 1
     token_concise.approve(ocean_contracts_wrapper.web3.toChecksumAddress(market_concise.address),
                   resource_price,
                   transact={'from': consumer_account})
