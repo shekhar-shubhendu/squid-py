@@ -1,6 +1,5 @@
-import os, site, configparser
-
-KEEPER_CONTRACTS = 'keeper-contracts'
+import os
+import configparser
 
 
 def load_config_section(file_path, section):
@@ -11,7 +10,6 @@ def load_config_section(file_path, section):
     except Exception as err:
         # TODO: replace Exception with custom error class
         raise Exception("You should provide a valid config: %s" % str(err))
-
 
 
 def parse_config(file_path, section):
@@ -33,11 +31,11 @@ def parse_config(file_path, section):
 
 def get_contracts_path(conf):
     try:
-        if 'contracts.folder' in conf:
+        if conf is not None and 'contracts.folder' in conf:
             return conf['contracts.folder']
         elif os.getenv('VIRTUAL_ENV') is not None:
             return "%s/contracts" % (os.getenv('VIRTUAL_ENV'))
         else:
-            return "%s/contracts" % site.getsitepackages()[0]
+            return "/usr/local/contracts"
     except Exception as e:
         return e
