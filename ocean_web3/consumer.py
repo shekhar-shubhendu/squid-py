@@ -81,8 +81,8 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     request_id = send_event[0]['args']['_id']
 
 
-    filter_token_published = ocean_contracts_wrapper.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished', process_enc_token, 0.25,
-                                               fromBlock='latest')
+    # filter_token_published = ocean_contracts_wrapper.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished', process_enc_token, 0.25,
+    #                                            fromBlock='latest')
 
     i = 0
     while (acl_concise.statusOfAccessRequest(request_id) == 1) is False and i < 100:
@@ -99,11 +99,11 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
                                               transact={'from': consumer_account, 'gas': 6000000})
 
 
-    events = get_events(filter_token_published)
-    assert events
-    assert events[0].args['_id'] == request_id
-    on_chain_enc_token = events[0].args["_encryptedAccessToken"]
-    on_chain_enc_token2 = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
+    # events = get_events(filter_token_published)
+    # assert events
+    # assert events[0].args['_id'] == request_id
+    # on_chain_enc_token = events[0].args["_encryptedAccessToken"]
+    on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
 
     decrypted_token = dec(on_chain_enc_token, privkey)
     # pub_key = ocean.encoding_key_pair.public_key
