@@ -22,6 +22,7 @@ class OceanContractsWrapper(object):
     def __init__(self, host=None, port=None, config_path=None):
 
         try:
+            config_path = os.getenv('CONFIG_FILE') if not config_path else config_path
             self.config = load_config_section(config_path, OceanContracts.KEEPER_CONTRACTS)
         except Exception:
             self.config = None
