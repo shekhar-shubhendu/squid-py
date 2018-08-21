@@ -51,7 +51,7 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
     return ocean_contracts_wrapper.web3.toHex(resource_id)
 
 
-def consume(resource, consumer_account, provider_account, ocean_contracts_wrapper, json_metadata):
+def consume(resource, consumer_account, provider_account, ocean_contracts_wrapper):
     if not bool(ocean_contracts_wrapper.contracts):
         ocean_contracts_wrapper.init_contracts()
     market_concise = ocean_contracts_wrapper.contracts[OceanContracts.OMKT][0]
@@ -80,10 +80,6 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     send_event = acl.events.AccessConsentRequested().processReceipt(receipt)
     request_id = send_event[0]['args']['_id']
 
-    filter_token_published = ocean_contracts_wrapper.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished',
-                                                                 process_enc_token, 0.25,
-                                                                 fromBlock='latest')
-
     i = 0
     while (acl_concise.statusOfAccessRequest(request_id) == 1) is False and i < 100:
         i += 1
@@ -98,10 +94,12 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
                                               expiry,
                                               transact={'from': consumer_account, 'gas': 400000})
 
-    events = get_events(filter_token_published)
-    assert events[0].args['_id'] == request_id
-    on_chain_enc_token = events[0].args["_encryptedAccessToken"]
-    # on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
+    i = 0
+    while (acl_concise.statusOfAccessRequest(request_id) == 2) is False and i < 500:
+        i += 1
+        time.sleep(0.1)
+
+    on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
 
     decrypted_token = dec(on_chain_enc_token, privkey)
     # pub_key = ocean.encoding_key_pair.public_key
@@ -114,6 +112,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
 
     sig = ocean_contracts_wrapper.split_signature(signature)
 
+    json_metadata = dict()
     json_metadata['fixed_msg'] = ocean_contracts_wrapper.web3.toHex(fixed_msg)
     json_metadata['consumerId'] = consumer_account
     json_metadata['sigEncJWT'] = ocean_contracts_wrapper.web3.toHex(signature)
