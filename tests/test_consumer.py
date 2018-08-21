@@ -1,4 +1,4 @@
-from ocean_web3.consumer import register, consume
+from ocean_web3.consumer import register
 from ocean_web3.ocean_contracts import OceanContractsWrapper
 import requests
 

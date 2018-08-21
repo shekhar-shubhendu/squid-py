@@ -105,12 +105,9 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     # pub_key = ocean.encoding_key_pair.public_key
     access_token = decode(decrypted_token)
 
-    assert pubkey == access_token['temp_pubkey']
     signature = ocean_contracts_wrapper.web3.eth.sign(consumer_account, data=on_chain_enc_token)
 
     fixed_msg = defunct_hash_message(hexstr=ocean_contracts_wrapper.web3.toHex(on_chain_enc_token))
-
-    sig = ocean_contracts_wrapper.split_signature(signature)
 
     json_metadata = dict()
     json_metadata['fixed_msg'] = ocean_contracts_wrapper.web3.toHex(fixed_msg)
@@ -120,7 +117,6 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
         hexstr=ocean_contracts_wrapper.web3.toHex(decrypted_token)).decode('utf-8')
 
     headers = {'content-type': 'application/json'}
-    post = requests.post(
+    return requests.post(
         access_token['service_endpoint'] + '/%s' % ocean_contracts_wrapper.web3.toHex(resource_id),
         data=json.dumps(json_metadata), headers=headers)
-    return post
