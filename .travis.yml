@@ -1,22 +1,19 @@
 language: python
 python:
 - 3.6
-
 sudo: required
 services:
 - docker
-
 before_install:
 - docker-compose -f docker/docker-compose.yml up -d
-
 install: pip install -U tox-travis
 script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: leucothia
+  user: $USER_NAME
   password:
-    secure: PVYqsR830kFUThrj8iFklEKtQvL1A+3P4qeghX98VPv+n7CxPWF0eExW5dxP8Qll3S08sZqPr8i76a21vpwwzelZ+Z0dRQQ6fuDfdBUv7DI33xKUa31AVFpH3kAWjUmMpV/jliQv1lTTGMRYPv+cJfVy7rzpaie2SaOGLs94vaPU5npCEw3gRSyytZiwLhM3BRdKB+XZusWCBXzhbjQP+kEIkuhWn0B2sk7L1IVbH24HKBYps32G5RCOjU3kSrpN+G2jcHOHDdNkSaaTLv2rP1SJ33D7tn1WxRsFoIG5grPJwmMXEskn6oHK77zbGynE52UkkksMioX24ZDcwBPNub/tupfl/qn8nBZmKh+ioJwEZGNZXOSe0Kgrwp44kWLtNyHg+Gu4w1+w9bwOlokN9i8aFslIlxQXw+L+ZyAl2famKuqbKUJMVobLtv+2nvpsOLqfzEHhXhSbhSJ90tVXugUJ9DWD85k+UqlOBpbpOs8Cz1QJVaPW8quoFuh5g3XlotVvua8BE/aGsJZ74A1dbsE9qzCbSS+5SOMj98k/r59FqqGhs0Sva9EK8mwRl/Z1Dg03YNDF0WTAR3fd4eSw2A+H44fkBzdjV5fxyxAZ5zJQfvORvoVyB19AxFjAv9YA7OcyeYMPHwFff2k4jrpkS0ihGPOnL76MEtf8wM1zydM=
+    secure: $SECURE
   on:
     tags: true
     repo: oceanprotocol/ocean-web3
