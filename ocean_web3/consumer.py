@@ -43,7 +43,7 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
                             transact={'from': provider_account})
     json_metadata['assetId'] = ocean_contracts_wrapper.web3.toHex(resource_id)
     headers = {'content-type': 'application/json'}
-    post = requests.post(provider_host + '/api/v1/provider/assets/metadata',
+    requests.post(provider_host + '/api/v1/provider/assets/metadata',
                          data=json.dumps(json_metadata),
                          headers=headers)
     print("Metadata published with success")
@@ -88,7 +88,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     token_concise.approve(ocean_contracts_wrapper.web3.toChecksumAddress(market_concise.address),
                           resource_price,
                           transact={'from': consumer_account})
-    send_payment = market_concise.sendPayment(request_id,
+    market_concise.sendPayment(request_id,
                                               provider_account,
                                               resource_price,
                                               expiry,
