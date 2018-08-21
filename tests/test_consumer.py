@@ -24,7 +24,8 @@ def test_register_consume():
                           provider_account=ocean.web3.eth.accounts[0],
                           price=10,
                           ocean_contracts_wrapper=ocean,
-                          json_metadata=json_consume
+                          json_metadata=json_consume,
+                          provider_host='http://0.0.0.0:5000'
                           )
     consum = consume(resource=resouce_id,
                      consumer_account=ocean.web3.eth.accounts[2],
