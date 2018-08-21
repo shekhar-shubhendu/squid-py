@@ -1,7 +1,7 @@
 import time
 
 from ocean_web3.constants import OceanContracts
-from ocean_web3.acl import generate_encryption_keys, dec , decode
+from ocean_web3.acl import generate_encryption_keys, dec, decode
 from eth_account.messages import defunct_hash_message
 import json
 import requests
@@ -13,7 +13,7 @@ def get_events(event_filter, max_iterations=100, pause_duration=0.1):
     while not events and i < max_iterations:
         i += 1
         time.sleep(pause_duration)
-        events = event_filter.get_new_entries()
+        events = event_filter.get_all_entries()
 
     if not events:
         print('no events found in %s events filter.' % str(event_filter))
@@ -23,6 +23,7 @@ def get_events(event_filter, max_iterations=100, pause_duration=0.1):
 def process_enc_token(event):
     # should get accessId and encryptedAccessToken in the event
     print("token published event: %s" % event)
+
 
 def register(publisher_account, provider_account, price, ocean_contracts_wrapper, json_metadata,
              provider_host='http://localhost:5000'):
@@ -48,7 +49,6 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
     print("Metadata published with success")
     print("Resource published with resource_id: %s" % resource_id)
     return ocean_contracts_wrapper.web3.toHex(resource_id)
-
 
 
 def consume(resource, consumer_account, provider_account, ocean_contracts_wrapper, json_metadata):
@@ -80,9 +80,9 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     send_event = acl.events.AccessConsentRequested().processReceipt(receipt)
     request_id = send_event[0]['args']['_id']
 
-
-    filter_token_published = ocean_contracts_wrapper.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished', process_enc_token, 0.25,
-                                               fromBlock='latest')
+    filter_token_published = ocean_contracts_wrapper.watch_event(OceanContracts.OACL, 'EncryptedTokenPublished',
+                                                                 process_enc_token, 0.25,
+                                                                 fromBlock='latest')
 
     i = 0
     while (acl_concise.statusOfAccessRequest(request_id) == 1) is False and i < 100:
@@ -90,18 +90,15 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
         time.sleep(0.1)
 
     token_concise.approve(ocean_contracts_wrapper.web3.toChecksumAddress(market_concise.address),
-                  resource_price,
-                  transact={'from': consumer_account})
+                          resource_price,
+                          transact={'from': consumer_account})
     send_payment = market_concise.sendPayment(request_id,
                                               provider_account,
                                               resource_price,
                                               expiry,
                                               transact={'from': consumer_account, 'gas': 6000000})
-    receipt = ocean_contracts_wrapper.get_tx_receipt(send_payment)
-    send_event = acl.events.EncryptedTokenPublished().processReceipt(receipt)
 
     events = get_events(filter_token_published)
-    assert events
     assert events[0].args['_id'] == request_id
     on_chain_enc_token = events[0].args["_encryptedAccessToken"]
     # on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
@@ -113,7 +110,6 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     assert pubkey == access_token['temp_pubkey']
     signature = ocean_contracts_wrapper.web3.eth.sign(consumer_account, data=on_chain_enc_token)
 
-
     fixed_msg = defunct_hash_message(hexstr=ocean_contracts_wrapper.web3.toHex(on_chain_enc_token))
 
     sig = ocean_contracts_wrapper.split_signature(signature)
@@ -121,7 +117,8 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     json_metadata['fixed_msg'] = ocean_contracts_wrapper.web3.toHex(fixed_msg)
     json_metadata['consumerId'] = consumer_account
     json_metadata['sigEncJWT'] = ocean_contracts_wrapper.web3.toHex(signature)
-    json_metadata['jwt'] = ocean_contracts_wrapper.web3.toBytes(hexstr=ocean_contracts_wrapper.web3.toHex(decrypted_token)).decode('utf-8')
+    json_metadata['jwt'] = ocean_contracts_wrapper.web3.toBytes(
+        hexstr=ocean_contracts_wrapper.web3.toHex(decrypted_token)).decode('utf-8')
 
     headers = {'content-type': 'application/json'}
     post = requests.post(
