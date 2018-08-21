@@ -30,9 +30,9 @@ def test_register_consume():
                           )
     assert requests.get('http://0.0.0.0:5000/api/v1/provider/assets/metadata/%s' % resouce_id).status_code == 200
 
-    consum = consume(resource=resouce_id,
-                     consumer_account=ocean.web3.eth.accounts[2],
-                     provider_account=ocean.web3.eth.accounts[0],
-                     ocean_contracts_wrapper=ocean
-                     )
-    assert consum.status_code == 200
+    # consum = consume(resource=resouce_id,
+    #                  consumer_account=ocean.web3.eth.accounts[2],
+    #                  provider_account=ocean.web3.eth.accounts[0],
+    #                  ocean_contracts_wrapper=ocean
+    #                  )
+    # assert consum.status_code == 200
