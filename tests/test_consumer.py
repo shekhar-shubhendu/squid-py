@@ -19,8 +19,7 @@ json_request_consume = {
 
 
 def test_register_consume():
-    ocean = OceanContractsWrapper(host='http://localhost', port=8545)
-    ocean.init_contracts()
+    ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545)
     resouce_id = register(publisher_account=ocean.web3.eth.accounts[1],
                           provider_account=ocean.web3.eth.accounts[0],
                           price=10,
@@ -28,7 +27,7 @@ def test_register_consume():
                           json_metadata=json_consume
                           )
     consum = consume(resource=resouce_id,
-                     consumer_account=ocean.web3.eth.accounts[1],
+                     consumer_account=ocean.web3.eth.accounts[2],
                      provider_account=ocean.web3.eth.accounts[0],
                      ocean_contracts_wrapper=ocean,
                      json_metadata=json_request_consume)
