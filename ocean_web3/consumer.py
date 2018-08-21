@@ -13,7 +13,7 @@ def get_events(event_filter, max_iterations=100, pause_duration=0.1):
     while not events and i < max_iterations:
         i += 1
         time.sleep(pause_duration)
-        events = event_filter.get_all_entries()
+        events = event_filter.get_new_entries()
 
     if not events:
         print('no events found in %s events filter.' % str(event_filter))
@@ -96,7 +96,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
                                               provider_account,
                                               resource_price,
                                               expiry,
-                                              transact={'from': consumer_account, 'gas': 6000000})
+                                              transact={'from': consumer_account, 'gas': 400000})
 
     events = get_events(filter_token_published)
     assert events[0].args['_id'] == request_id
