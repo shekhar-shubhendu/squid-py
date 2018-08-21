@@ -24,7 +24,8 @@ def parse_config(file_path, section):
             if config_dict[option] == -1:
                 print("skip: %s" % option)
         except Exception as err:
-            print("exception on %s!" % option)
+            print("error on %s!" % option)
+            print("exception on %s" % str(err))
             config_dict[option] = None
     return config_dict
 
