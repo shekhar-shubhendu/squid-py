@@ -5,6 +5,13 @@
 > 💧 Python wrapper, allowing to integrate the basic Ocean/web3.py capabilities
 > [oceanprotocol.com](https://oceanprotocol.com)
 
+[![Travis (.com)](https://img.shields.io/travis/com/oceanprotocol/ocean-web3.svg)](https://travis-ci.com/oceanprotocol/ocean-web3)
+[![Codacy coverage](https://img.shields.io/codacy/coverage/7084fbf528934327904a49d458bc46d1.svg)](https://app.codacy.com/project/ocean-protocol/ocean-web3/dashboard)
+[![PyPI](https://img.shields.io/pypi/v/ocean-web3.svg)](https://pypi.org/project/ocean-web3/)
+[![GitHub contributors](https://img.shields.io/github/contributors/oceanprotocol/ocean-web3.svg)](https://github.com/oceanprotocol/ocean-web3/graphs/contributors)
+
+---
+
 ## Table of Contents
 
   - [Features](#features)
