@@ -1,7 +1,7 @@
 import time
 
 from ocean_web3.constants import OceanContracts
-from ocean_web3.acl import generate_encryption_keys, dec, decode
+from ocean_web3.acl import generate_encryption_keys, decrypt, decode
 from eth_account.messages import defunct_hash_message
 import json
 import requests
@@ -43,7 +43,7 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
                             transact={'from': provider_account})
     json_metadata['assetId'] = ocean_contracts_wrapper.web3.toHex(resource_id)
     headers = {'content-type': 'application/json'}
-    post = requests.post(provider_host + '/api/v1/provider/assets/metadata',
+    requests.post(provider_host + '/api/v1/provider/assets/metadata',
                          data=json.dumps(json_metadata),
                          headers=headers)
     print("Metadata published with success")
@@ -88,7 +88,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
     token_concise.approve(ocean_contracts_wrapper.web3.toChecksumAddress(market_concise.address),
                           resource_price,
                           transact={'from': consumer_account})
-    send_payment = market_concise.sendPayment(request_id,
+    market_concise.sendPayment(request_id,
                                               provider_account,
                                               resource_price,
                                               expiry,
@@ -101,7 +101,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
 
     on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
 
-    decrypted_token = dec(on_chain_enc_token, privkey)
+    decrypted_token = decrypt(on_chain_enc_token, privkey)
     # pub_key = ocean.encoding_key_pair.public_key
     access_token = decode(decrypted_token)
 

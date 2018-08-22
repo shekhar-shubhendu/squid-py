@@ -12,9 +12,11 @@ Signature = namedtuple('Signature', ('v', 'r', 's'))
 def convert_to_bytes(data):
     return Web3.toBytes(text=data)
 
-
 def convert_to_string(data):
     return Web3.toHex(data)
+
+def convert_to_text(data):
+    return Web3.toText(data)
 
 
 class OceanContractsWrapper(object):
@@ -89,7 +91,8 @@ class OceanContractsWrapper(object):
         ).start()
         return event_filter
 
-    def watcher(self, event_filter, callback):
+    @staticmethod
+    def watcher(event_filter, callback):
         while True:
             try:
                 events = event_filter.get_all_entries()
