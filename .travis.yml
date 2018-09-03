@@ -11,10 +11,12 @@ script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: $USER_NAME
+  user:
+    secure: ${PYPI_USER}
   password:
-    secure: $SECURE
+    secure: ${PYPI_PASSWORD}
   on:
     tags: true
+    branch: master
     repo: oceanprotocol/ocean-web3
     python: 3.6
