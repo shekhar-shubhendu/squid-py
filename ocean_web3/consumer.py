@@ -1,7 +1,7 @@
 import time
 
 from ocean_web3.constants import OceanContracts
-from ocean_web3.acl import generate_encryption_keys, dec, decode
+from ocean_web3.acl import generate_encryption_keys, decrypt, decode
 from eth_account.messages import defunct_hash_message
 import json
 import requests
@@ -101,7 +101,7 @@ def consume(resource, consumer_account, provider_account, ocean_contracts_wrappe
 
     on_chain_enc_token = acl_concise.getEncryptedAccessToken(request_id, call={'from': consumer_account})
 
-    decrypted_token = dec(on_chain_enc_token, privkey)
+    decrypted_token = decrypt(on_chain_enc_token, privkey)
     # pub_key = ocean.encoding_key_pair.public_key
     access_token = decode(decrypted_token)
 

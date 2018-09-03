@@ -1,4 +1,4 @@
-from ocean_web3.acl import encode, decode, enc, dec, generate_encryption_keys, generate_encoding_pair
+from ocean_web3.acl import encode, decode, encrypt, decrypt, generate_encryption_keys, generate_encoding_pair
 
 token = {
     "iss": "resourceowner.com",
@@ -25,7 +25,7 @@ def test_encode_decode():
 def test_encrypt_decrypt():
     provider_keypair = generate_encoding_pair()
     consumer_keypair = generate_encryption_keys()
-    encod = encode(token, provider_keypair.private_key)
-    encrypt = enc(encod, consumer_keypair.public_key)
-    decrypt = dec(encrypt, consumer_keypair.private_key)
-    assert token == decode(decrypt)
+    encoded = encode(token, provider_keypair.private_key)
+    encrypted = encrypt(encoded, consumer_keypair.public_key)
+    decrypted = decrypt(encrypted, consumer_keypair.private_key)
+    assert token == decode(decrypted)

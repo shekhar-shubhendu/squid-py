@@ -1,4 +1,5 @@
 import os
+import site
 import configparser
 
 
@@ -37,6 +38,6 @@ def get_contracts_path(conf):
         elif os.getenv('VIRTUAL_ENV') is not None:
             return "%s/contracts" % (os.getenv('VIRTUAL_ENV'))
         else:
-            return "/usr/local/contracts"
+            return "%s/contracts" % (site.PREFIXES[0])
     except Exception as e:
         return e

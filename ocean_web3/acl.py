@@ -2,7 +2,7 @@ import jwt as jwt
 from OpenSSL import crypto
 from collections import namedtuple
 from ecies.utils import generate_eth_key
-from ecies import encrypt, decrypt
+import ecies as ecies
 
 CryptoKeypair = namedtuple('CryptoKeypair', ('private_key', 'public_key'))
 
@@ -29,9 +29,9 @@ def decode(encoded):
     return jwt.decode(encoded, algorithms='HS256', verify=False)
 
 
-def enc(data, public_key):
-    return encrypt(public_key, data)
+def encrypt(data, public_key):
+    return ecies.encrypt(public_key, data)
 
 
-def dec(encrypted, private_key):
-    return decrypt(private_key, encrypted)
+def decrypt(encrypted, private_key):
+    return ecies.decrypt(private_key, encrypted)
