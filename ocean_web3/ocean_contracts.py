@@ -10,8 +10,6 @@ from ocean_web3.log import setup_logging
 import logging
 setup_logging()
 
-logging.debug("Test log".format())
-
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
