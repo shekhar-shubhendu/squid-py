@@ -1,4 +1,4 @@
-name: test23
+name: ocean_web3
 dependencies:
   - python=3.6
   - pip:
