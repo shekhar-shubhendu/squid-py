@@ -1,7 +1,7 @@
 from ocean_web3.ocean_contracts import OceanContractsWrapper, convert_to_bytes, convert_to_string, convert_to_text
 from ocean_web3.config_parser import load_config_section
 from ocean_web3.constants import OceanContracts
-
+import logging
 
 def test_ocean_contracts():
     ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545)
@@ -9,7 +9,9 @@ def test_ocean_contracts():
     assert ocean.contracts is not None
 
 
-def test_ocean_contracts_with_conf():
+def test_ocean_contracts_with_conf(caplog):
+    caplog.set_level(logging.DEBUG)
+    # Need to ensure config.ini is populated!
     ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545, config_path='config.ini')
     ocean.init_contracts()
     conf = load_config_section('config.ini', OceanContracts.KEEPER_CONTRACTS)

@@ -1,5 +1,6 @@
 name: ocean_web3
 dependencies:
+  - coloredlogs
   - python=3.6
   - pip:
     - pip
@@ -21,3 +22,4 @@ dependencies:
     - codacy-coverage
     - pytest
     - pytest-runner
+
