@@ -9,7 +9,7 @@ from ocean_web3.constants import OceanContracts
 from ocean_web3.log import setup_logging
 import logging
 setup_logging()
-logging
+
 logging.debug("Test log".format())
 
 
@@ -35,6 +35,8 @@ class OceanContractsWrapper(object):
             self.config = load_config_section(config_path, OceanContracts.KEEPER_CONTRACTS)
         except Exception:
             self.config = None
+        logging.info("Configuration loaded from {}".format(config_path))
+
         self.host = self.get_value('keeper.host', 'KEEPER_HOST', host)
         self.port = self.get_value('keeper.port', 'KEEPER_PORT', port)
         self.web3 = OceanContractsWrapper.connect_web3(self.host, self.port)

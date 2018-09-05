@@ -12,9 +12,9 @@ def test_ocean_contracts():
 def test_ocean_contracts_with_conf(caplog):
     caplog.set_level(logging.DEBUG)
     # Need to ensure config.ini is populated!
-    ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545, config_path='config.ini')
+    ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545, config_path='config_local.ini')
     ocean.init_contracts()
-    conf = load_config_section('config.ini', OceanContracts.KEEPER_CONTRACTS)
+    conf = load_config_section('config_local.ini', OceanContracts.KEEPER_CONTRACTS)
     assert ocean.contracts[OceanContracts.OMKT][0].address == ocean.web3.toChecksumAddress(conf['market.address'])
 
 
