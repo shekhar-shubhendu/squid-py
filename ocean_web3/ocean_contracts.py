@@ -6,6 +6,11 @@ from collections import namedtuple
 from ocean_web3.config_parser import load_config_section, get_contracts_path
 from ocean_web3.constants import OceanContracts
 
+from ocean_web3.log import setup_logging
+import logging
+setup_logging()
+
+
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
@@ -28,9 +33,13 @@ class OceanContractsWrapper(object):
             self.config = load_config_section(config_path, OceanContracts.KEEPER_CONTRACTS)
         except Exception:
             self.config = None
+        logging.info("Configuration loaded from {}".format(config_path))
+
         self.host = self.get_value('keeper.host', 'KEEPER_HOST', host)
         self.port = self.get_value('keeper.port', 'KEEPER_PORT', port)
         self.web3 = OceanContractsWrapper.connect_web3(self.host, self.port)
+        logging.info("web3 connection {}".format(self.web3))
+
         self.account = self.get_value('provider.account', 'PROVIDER_ACCOUNT', self.web3.eth.accounts[0])
         self.contracts_abis_path = get_contracts_path(self.config)
         self.contracts = {}
@@ -40,6 +49,14 @@ class OceanContractsWrapper(object):
             OceanContracts.OTKN: self.get_value('token.address', 'TOKEN_ADDRESS', None)
         }
         self.network = self.get_value('keeper.network', 'KEEPER_NETWORK', 'development')
+
+        logging.info("New Ocean Contracts Wrapper, hosted at {}:{}".format(self.host,self.port))
+        logging.info("OceanContracts.OMKT : {}".format(self.default_contract_address_map[OceanContracts.OMKT]))
+        logging.info("OceanContracts.OACL : {}".format(self.default_contract_address_map[OceanContracts.OACL]))
+        logging.info("OceanContracts.OTKN : {}".format(self.default_contract_address_map[OceanContracts.OTKN]))
+
+        #self.default_contract_address_map
+
 
     def get_value(self, value, env_var, default):
         if os.getenv(env_var) is not None:

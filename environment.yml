@@ -1,0 +1,25 @@
+name: ocean_web3
+dependencies:
+  - coloredlogs
+  - python=3.6
+  - pip:
+    - pip
+    - bumpversion
+    - wheel
+    - watchdog
+    - flake8
+    - tox
+    - coverage
+    - keeper-contracts
+    - singletonify
+    - twine
+    - setuptools
+    - py-solc
+    - web3
+    - PyJWT
+    - pyopenssl
+    - eciespy
+    - codacy-coverage
+    - pytest
+    - pytest-runner
+
