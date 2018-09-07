@@ -34,6 +34,12 @@ This repository include also the methods to encrypt and decrypt information.
 You should have running a instance of BigchainDB and ganache-cli. 
 You can start running the docker-compose in the docker directory:
 
+Mac: 
+if you are running on mac, gnu-sed needs to be installed
+```
+brew install --with-default-names gnu-sed
+```
+
 ## Quick-start
 
 When you want to interact with the contracts you have to instantiate this class:
