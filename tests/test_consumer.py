@@ -1,5 +1,5 @@
-from ocean_web3.consumer import register
-from ocean_web3.ocean_contracts import OceanContractsWrapper
+from squid_py.consumer import register
+from squid_py.ocean_contracts import OceanContractsWrapper
 import requests
 
 json_consume = {"publisherId": "0x01",

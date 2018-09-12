@@ -1,6 +1,6 @@
-from ocean_web3.ocean_contracts import OceanContractsWrapper, convert_to_bytes, convert_to_string, convert_to_text
-from ocean_web3.config_parser import load_config_section
-from ocean_web3.constants import OceanContracts
+from squid_py.ocean_contracts import OceanContractsWrapper, convert_to_bytes, convert_to_string, convert_to_text
+from squid_py.config_parser import load_config_section
+from squid_py.constants import OceanContracts
 import logging
 
 def test_ocean_contracts():

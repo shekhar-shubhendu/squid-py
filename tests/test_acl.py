@@ -1,4 +1,4 @@
-from ocean_web3.acl import encode, decode, encrypt, decrypt, generate_encryption_keys, generate_encoding_pair
+from squid_py.acl import encode, decode, encrypt, decrypt, generate_encryption_keys, generate_encoding_pair
 
 token = {
     "iss": "resourceowner.com",

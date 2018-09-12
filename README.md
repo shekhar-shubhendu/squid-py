@@ -1,14 +1,14 @@
 [![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
 
-<h1 align="center">ocean-web3</h1>
+# squid-py
 
 > 💧 Python wrapper, allowing to integrate the basic Ocean/web3.py capabilities
 > [oceanprotocol.com](https://oceanprotocol.com)
 
-[![Travis (.com)](https://img.shields.io/travis/com/oceanprotocol/ocean-web3.svg)](https://travis-ci.com/oceanprotocol/ocean-web3)
-[![Codacy coverage](https://img.shields.io/codacy/coverage/7084fbf528934327904a49d458bc46d1.svg)](https://app.codacy.com/project/ocean-protocol/ocean-web3/dashboard)
-[![PyPI](https://img.shields.io/pypi/v/ocean-web3.svg)](https://pypi.org/project/ocean-web3/)
-[![GitHub contributors](https://img.shields.io/github/contributors/oceanprotocol/ocean-web3.svg)](https://github.com/oceanprotocol/ocean-web3/graphs/contributors)
+[![Travis (.com)](https://img.shields.io/travis/com/oceanprotocol/squid-py.svg)](https://travis-ci.com/oceanprotocol/squid-py)
+[![Codacy coverage](https://img.shields.io/codacy/coverage/7084fbf528934327904a49d458bc46d1.svg)](https://app.codacy.com/project/ocean-protocol/squid-py/dashboard)
+[![PyPI](https://img.shields.io/pypi/v/squid-py.svg)](https://pypi.org/project/squid-py/)
+[![GitHub contributors](https://img.shields.io/github/contributors/oceanprotocol/squid-py.svg)](https://github.com/oceanprotocol/squid-py/graphs/contributors)
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## Features
 
-Ocean-web3 include the methods to make easy the connection with contracts deployed in different networks.
+Squid-py include the methods to make easy the connection with contracts deployed in different networks.
 This repository include also the methods to encrypt and decrypt information.
 
 ## Prerequisites
@@ -39,7 +39,7 @@ You can start running the docker-compose in the docker directory:
 When you want to interact with the contracts you have to instantiate this class:
 
 ```python
-from ocean_web3.ocean_contracts import OceanContractsWrapper
+from squid_py.ocean_contracts import OceanContractsWrapper
 ocean = OceanContractsWrapper(host='http://localhost', port=8545, config_path='config.ini')    
 ocean.init_contracts()
 ```
@@ -48,7 +48,7 @@ After that you have to init the contracts. And you can start to use the methods 
 
 You will find as well two methods that allow you to register and consume an asset.
 ```python
-from ocean_web3.consumer import register, consume
+from squid_py.consumer import register, consume
 register(publisher_account=ocean.web3.eth.accounts[1],
          provider_account=ocean.web3.eth.accounts[0],
          price=10,
