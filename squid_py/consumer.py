@@ -1,7 +1,7 @@
 import time
 
-from ocean_web3.constants import OceanContracts
-from ocean_web3.acl import generate_encryption_keys, decrypt, decode
+from squid_py.constants import OceanContracts
+from squid_py.acl import generate_encryption_keys, decrypt, decode
 from eth_account.messages import defunct_hash_message
 import json
 import requests

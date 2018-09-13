@@ -3,10 +3,10 @@ from web3 import Web3, HTTPProvider
 from web3.contract import ConciseContract
 from threading import Thread
 from collections import namedtuple
-from ocean_web3.config_parser import load_config_section, get_contracts_path
-from ocean_web3.constants import OceanContracts
+from squid_py.config_parser import load_config_section, get_contracts_path
+from squid_py.constants import OceanContracts
 
-from ocean_web3.log import setup_logging
+from squid_py.log import setup_logging
 import logging
 setup_logging()
 
