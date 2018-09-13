@@ -31,8 +31,16 @@ This repository include also the methods to encrypt and decrypt information.
 
 ## Prerequisites
 
-You should have running a instance of BigchainDB and ganache-cli. 
-You can start running the docker-compose in the docker directory:
+You should have running an instance of BigchainDB and ganache-cli. To get started quickly,
+you can start the docker instance in the docker directory:
+
+`docker-compose -f ./docker/docker-compose.yml up`
+
+The docker container has three main service images running;
+
+1. [bigchaindb/bigchaindb](https://hub.docker.com/r/bigchaindb/bigchaindb/):2.0.0-beta1 (with tendermint)
+1. [oceanprotocol/keeper-contracts](https://hub.docker.com/r/oceanprotocol/keeper-contracts/):0.1
+1. [oceanprotocol/provider](https://hub.docker.com/r/oceanprotocol/provider/):0.1 (API documentation exposed at http://localhost:5000/api/v1/docs/)
 
 ## Quick-start
 
