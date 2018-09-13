@@ -38,7 +38,7 @@ class OceanContractsWrapper(object):
         self.host = self.get_value('keeper.host', 'KEEPER_HOST', host)
         self.port = self.get_value('keeper.port', 'KEEPER_PORT', port)
         self.web3 = OceanContractsWrapper.connect_web3(self.host, self.port)
-        logging.info("web3 connection {}".format(self.web3))
+        logging.info("web3 connection: {}".format(self.web3))
 
         self.account = self.get_value('provider.account', 'PROVIDER_ACCOUNT', self.web3.eth.accounts[0])
         self.contracts_abis_path = get_contracts_path(self.config)
