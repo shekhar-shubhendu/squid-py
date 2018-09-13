@@ -42,6 +42,12 @@ The docker container has three main service images running;
 1. [oceanprotocol/keeper-contracts](https://hub.docker.com/r/oceanprotocol/keeper-contracts/):0.1
 1. [oceanprotocol/provider](https://hub.docker.com/r/oceanprotocol/provider/):0.1 (API documentation exposed at http://localhost:5000/api/v1/docs/)
 
+Mac: 
+if you are running on mac, gnu-sed needs to be installed
+```
+brew install --with-default-names gnu-sed
+```
+
 ## Quick-start
 
 When you want to interact with the contracts you have to instantiate this class:
