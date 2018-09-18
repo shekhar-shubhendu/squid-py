@@ -57,7 +57,20 @@ from squid_py.ocean_contracts import OceanContractsWrapper
 ocean = OceanContractsWrapper(host='http://localhost', port=8545, config_path='config.ini')    
 ocean.init_contracts()
 ```
-If you do not pass the config_path you can pass using $CONFIG_FILE environment variable.
+
+If you do not pass the config_path you can pass using **$CONFIG_FILE** environment variable.
+
+It is possible do not pass the config file, but you should be sure of provide the host, port and addresses.
+If you opt for this you can pass the addresses using the following environment variables:
+
+
+- **MARKET_ADDRESS**  Address of your market contract deployed in the network
+- **AUTH_ADDRESS**    Address of your auth contract deployed in the network.
+- **TOKEN_ADDRESS**   Address of your token contract deployed in the network.
+- **KEEPER_HOST**     You can pass the host of your keeper instead of call it explicitly in class.
+- **KEEPER_PORT**     You can pass the port of your keeper instead of call it explicitly in class.
+
+
 After that you have to init the contracts. And you can start to use the methods in the different contracts.
 
 You will find as well two methods that allow you to register and consume an asset.
