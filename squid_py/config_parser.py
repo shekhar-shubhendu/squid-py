@@ -1,6 +1,7 @@
 import os
 import site
 import configparser
+import logging
 
 
 def load_config_section(file_path, section):
@@ -8,9 +9,9 @@ def load_config_section(file_path, section):
         assert file_path and os.path.exists(file_path), 'config file_path is required.'
         config = parse_config(file_path, section)
         return config
-    except Exception as err:
-        # TODO: replace Exception with custom error class
-        raise Exception("You should provide a valid config: %s" % str(err))
+    except Exception:
+        logging.warning("You are not providing a valid configuration.")
+        return None
 
 
 def parse_config(file_path, section):
@@ -23,10 +24,10 @@ def parse_config(file_path, section):
         try:
             config_dict[option] = config_parser.get(section, option)
             if config_dict[option] == -1:
-                print("skip: %s" % option)
+                logging.info("skip: %s" % option)
         except Exception as err:
-            print("error on %s!" % option)
-            print("exception on %s" % str(err))
+            logging.error("error on %s!" % option)
+            logging.error("exception on %s" % str(err))
             config_dict[option] = None
     return config_dict
 

@@ -1,7 +1,6 @@
 import time
-
-from ocean_web3.constants import OceanContracts
-from ocean_web3.acl import generate_encryption_keys, decrypt, decode
+from squid_py.constants import OCEAN_MARKET_CONTRACT, OCEAN_ACL_CONTRACT, OCEAN_TOKEN_CONTRACT
+from squid_py.acl import generate_encryption_keys, decrypt, decode
 from eth_account.messages import defunct_hash_message
 import json
 import requests
@@ -29,12 +28,11 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
              provider_host='http://localhost:5000'):
     if not bool(ocean_contracts_wrapper.contracts):
         ocean_contracts_wrapper.init_contracts()
-    market_concise = ocean_contracts_wrapper.contracts[OceanContracts.OMKT][0]
+    market_concise = ocean_contracts_wrapper.contracts[OCEAN_MARKET_CONTRACT][0]
     publisher_account = publisher_account
     provider_account = provider_account
     print("publisher: %s" % publisher_account)
     print("provider: %s" % provider_account)
-
     resource_id = market_concise.generateId('resource', transact={'from': provider_account})
     print("recource_id: %s" % resource_id)
     resource_price = price
@@ -54,10 +52,10 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
 def consume(resource, consumer_account, provider_account, ocean_contracts_wrapper):
     if not bool(ocean_contracts_wrapper.contracts):
         ocean_contracts_wrapper.init_contracts()
-    market_concise = ocean_contracts_wrapper.contracts[OceanContracts.OMKT][0]
-    acl_concise = ocean_contracts_wrapper.contracts[OceanContracts.OACL][0]
-    acl = ocean_contracts_wrapper.contracts[OceanContracts.OACL][1]
-    token_concise = ocean_contracts_wrapper.contracts[OceanContracts.OTKN][0]
+    market_concise = ocean_contracts_wrapper.contracts[OCEAN_MARKET_CONTRACT][0]
+    acl_concise = ocean_contracts_wrapper.contracts[OCEAN_ACL_CONTRACT][0]
+    acl = ocean_contracts_wrapper.contracts[OCEAN_ACL_CONTRACT][1]
+    token_concise = ocean_contracts_wrapper.contracts[OCEAN_TOKEN_CONTRACT][0]
 
     expire_seconds = 9999999999
     consumer_account = consumer_account
