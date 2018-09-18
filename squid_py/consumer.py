@@ -34,7 +34,6 @@ def register(publisher_account, provider_account, price, ocean_contracts_wrapper
     provider_account = provider_account
     print("publisher: %s" % publisher_account)
     print("provider: %s" % provider_account)
-
     resource_id = market_concise.generateId('resource', transact={'from': provider_account})
     print("recource_id: %s" % resource_id)
     resource_price = price

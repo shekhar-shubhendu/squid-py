@@ -20,7 +20,7 @@ json_request_consume = {
 
 
 def test_register_consume():
-    ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545)
+    ocean = OceanContractsWrapper(host='http://0.0.0.0', port=8545, config_path='config_local.ini')
     resouce_id = register(publisher_account=ocean.web3.eth.accounts[1],
                           provider_account=ocean.web3.eth.accounts[0],
                           price=10,
