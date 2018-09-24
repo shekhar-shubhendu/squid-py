@@ -42,3 +42,13 @@ def get_contracts_path(conf):
             return "%s/contracts" % (site.PREFIXES[0])
     except Exception as e:
         return e
+
+
+def get_value(conf, value, env_var, default):
+    """Helper to get the values from the environment."""
+    if os.getenv(env_var) is not None:
+        return os.getenv(env_var)
+    elif conf is not None and value in conf:
+        return conf[value]
+    else:
+        return default
