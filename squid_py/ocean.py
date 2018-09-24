@@ -10,6 +10,9 @@ from squid_py.keeper.market import Market
 from squid_py.keeper.auth import Auth
 from squid_py.keeper.token import Token
 from squid_py.metadata import Metadata
+from squid_py.log import setup_logging
+
+setup_logging()
 
 
 class Ocean(object):

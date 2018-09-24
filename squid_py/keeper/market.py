@@ -5,11 +5,12 @@ from squid_py.constants import OCEAN_MARKET_CONTRACT
 class Market(object):
 
     def __init__(self, web3_helper):
+        market = web3_helper.load(OCEAN_MARKET_CONTRACT, 'market')
         self.helper = web3_helper
-        self.contract_concise = web3_helper.load(OCEAN_MARKET_CONTRACT, 'market')[0]
-        self.contract = web3_helper.load(OCEAN_MARKET_CONTRACT, 'market')[1]
+        self.contract_concise = market[0]
+        self.contract = market[1]
+        self.address = web3_helper.to_checksum_address(market[2])
         self.defaultGas = 300000
-        logging.info('Market contract loaded')
 
     # call functions (costs no gas)
     def check_asset(self, asset_id):

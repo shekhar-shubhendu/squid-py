@@ -4,8 +4,10 @@ from squid_py.constants import OCEAN_ACL_CONTRACT
 class Auth(object):
 
     def __init__(self, web3_helper):
-        self.concise_contract = web3_helper.load(OCEAN_ACL_CONTRACT, 'auth')[0]
-        self.contract = web3_helper.load(OCEAN_ACL_CONTRACT, 'auth')[1]
+        auth = web3_helper.load(OCEAN_ACL_CONTRACT, 'auth')
+        self.concise_contract = auth[0]
+        self.contract = auth[1]
+        self.address = web3_helper.to_checksum_address(auth[2])
 
     def cancel_access_request(self, order_id, sender_address):
         return self.concise_contract.cancelAccessRequest(order_id, call={'from': sender_address})

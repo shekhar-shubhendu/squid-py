@@ -37,7 +37,7 @@ json_dict = {"publisherId": "0x1",
 
 
 def test_ocean_provider():
-    ocean_provider = Metadata('http://localhost:5000')
+    ocean_provider = Metadata('http://0.0.0.0:5000')
     asset = ocean_provider.register_asset(json_dict)
     assert ocean_provider.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
     ocean_provider.retire_asset(asset['assetId'])
