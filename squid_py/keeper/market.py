@@ -2,10 +2,10 @@ import logging
 
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 
-
 class Market(object):
 
     def __init__(self, web3_helper):
+        self.helper = web3_helper
         self.contract_concise = web3_helper.load(OCEAN_MARKET_CONTRACT, 'market')[0]
         self.contract = web3_helper.load(OCEAN_MARKET_CONTRACT, 'market')[1]
         self.defaultGas = 300000
@@ -44,6 +44,7 @@ class Market(object):
             price,
             transact={'from': publisher_address, 'gas': self.defaultGas}
         )
+        self.helper.get_tx_receipt(result)
         logging.info('registered: %s' % result)
         return asset_id
 
