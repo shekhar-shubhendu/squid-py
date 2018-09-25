@@ -30,7 +30,7 @@ class Ocean(object):
             raise Exception('You should provide a valid config file.')
 
         # self.web3provider =
-        # self.node_uri =
+        self.node_uri = "%s:%s" % (self.host, self.port)
         self.default_gas = get_value(self.config, 'gas.limit', 'GAS_LIMIT', 300000)
         self.helper = Web3Helper(self.web3, self.config)
         self.provider_uri = get_value(self.config, 'provider.uri', 'PROVIDER_URI', 'http://localhost:5000')

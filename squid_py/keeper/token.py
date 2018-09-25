@@ -1,4 +1,3 @@
-import logging
 from squid_py.constants import OCEAN_TOKEN_CONTRACT
 from squid_py.utils.web3_helper import Web3Helper
 
@@ -8,8 +7,7 @@ class Token(object):
         token = web3_helper.load(OCEAN_TOKEN_CONTRACT, 'token')
         self.contract_concise = token[0]
         self.contract = token[1]
-        self.address =  web3_helper.to_checksum_address(token[2])
-        logging.info('Token contract loaded')
+        self.address = web3_helper.to_checksum_address(token[2])
 
     def get_token_balance(self, account_address):
         """Retrieve the ammount of tokens of an account address"""

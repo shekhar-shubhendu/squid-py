@@ -90,9 +90,9 @@ class Web3Helper(object):
             # always take a rest
             time.sleep(0.1)
 
-    def install_filter(self, contract_name, event_name, fromBlock=0, toBlock='latest', filters=None):
-        contract_instance = self.contracts[contract_name][1]
-        event = getattr(contract_instance.events, event_name)
+    def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
+        # contract_instance = self.contracts[contract_name][1]
+        event = getattr(contract.events, event_name)
         event_filter = event.createFilter(
             fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
         )

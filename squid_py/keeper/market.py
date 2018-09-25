@@ -2,6 +2,7 @@ import logging
 
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 
+
 class Market(object):
 
     def __init__(self, web3_helper):

@@ -1,6 +1,12 @@
-from squid_py.ocean import Ocean
 import time
+
 import squid_py.acl as acl
+from squid_py.ocean import Ocean
+
+
+def process_enc_token(event):
+    # should get accessId and encryptedAccessToken in the event
+    print("token published event: %s" % event)
 
 
 def test_keeper():
@@ -34,3 +40,16 @@ def test_keeper():
 
     send_event = auth.contract.events.AccessConsentRequested().processReceipt(receipt)
     request_id = send_event[0]['args']['_id']
+
+    # assert auth.concise_contract.statusOfAccessRequest(request_id) == 0 or auth.concise_contract.statusOfAccessRequest(
+    #     request_id) == 1
+    #
+    # filter_token_published = ocean.helper.watch_event(auth.contract, 'EncryptedTokenPublished', process_enc_token, 0.25,
+    #                                                   fromBlock='latest')
+    #
+    # i = 0
+    # while (auth.concise_contract.statusOfAccessRequest(request_id) == 1) is False and i < 100:
+    #     i += 1
+    #     time.sleep(0.1)
+    #
+    # assert auth.concise_contract.statusOfAccessRequest(request_id) == 1

@@ -1,4 +1,4 @@
-from squid_py.metadata import Metadata
+from squid_py.ocean import Ocean
 
 json_dict = {"publisherId": "0x1",
              "base": {
@@ -37,7 +37,7 @@ json_dict = {"publisherId": "0x1",
 
 
 def test_ocean_provider():
-    ocean_provider = Metadata('http://0.0.0.0:5000')
-    asset = ocean_provider.register_asset(json_dict)
-    assert ocean_provider.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-    ocean_provider.retire_asset(asset['assetId'])
+    ocean_provider = Ocean(host='http://0.0.0.0', port=8545, config_path='config_local.ini')
+    asset = ocean_provider.metadata.register_asset(json_dict)
+    assert ocean_provider.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
+    ocean_provider.metadata.retire_asset(asset['assetId'])
