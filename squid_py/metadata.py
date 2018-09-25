@@ -12,8 +12,8 @@ class Metadata(object):
     def get_assets(self):
         return json.loads(requests.get(self.base_url).content)
 
-    def get_asset_metadata(self, asset_id):
-        return json.loads(requests.get(self.base_url + '/metadata/%s' % asset_id).content)
+    def get_asset_ddo(self, asset_did):
+        return json.loads(requests.get(self.base_url + '/metadata/%s' % asset_did).content)
 
     def get_assets_metadata(self):
         return json.loads(requests.get(self.base_url + '/metadata').content)

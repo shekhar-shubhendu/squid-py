@@ -5,12 +5,12 @@ from web3 import Web3, HTTPProvider
 
 from squid_py.config_parser import load_config_section, get_value
 from squid_py.constants import KEEPER_CONTRACTS
-from squid_py.utils.web3_helper import Web3Helper
-from squid_py.keeper.market import Market
 from squid_py.keeper.auth import Auth
+from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
-from squid_py.metadata import Metadata
 from squid_py.log import setup_logging
+from squid_py.metadata import Metadata
+from squid_py.utils.web3_helper import Web3Helper
 
 setup_logging()
 
@@ -28,8 +28,6 @@ class Ocean(object):
             logging.error('OceanContracts could not initiate. You can specify the path in $CONFIG_FILE environment '
                           'variable.')
             raise Exception('You should provide a valid config file.')
-
-        # self.web3provider =
         self.node_uri = "%s:%s" % (self.host, self.port)
         self.default_gas = get_value(self.config, 'gas.limit', 'GAS_LIMIT', 300000)
         self.helper = Web3Helper(self.web3, self.config)
@@ -44,3 +42,6 @@ class Ocean(object):
     def connect_web3(host, port='8545'):
         """Establish a connexion using Web3 with the client."""
         return Web3(HTTPProvider("%s:%s" % (host, port)))
+
+    def generate_did(self, content):
+        return 'did:ocn:' + self.market.contract_concise.generateId(content)

@@ -1,3 +1,5 @@
+import logging
+
 from squid_py.constants import OCEAN_TOKEN_CONTRACT
 from squid_py.utils.web3_helper import Web3Helper
 
@@ -19,4 +21,8 @@ class Token(object):
                                              transact={'from': account_address})
 
     def get_eth_balance(self, account):
-        return self.web3.eth.getBalance(account, 'latest')
+        try:
+            return Web3Helper.web3.eth.getBalance(account, 'latest')
+        except Exception as e:
+            logging.error(e)
+            raise e
