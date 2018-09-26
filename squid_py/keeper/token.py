@@ -16,9 +16,7 @@ class Token(object):
         return self.contract_concise.balanceOf(account_address)
 
     def token_approve(self, market_address, price, account_address):
-        return self.contract_concise.approve(Web3Helper.to_checksum_address(market_address),
-                                             price,
-                                             transact={'from': account_address})
+        return self.contract_concise.approve(Web3Helper.to_checksum_address(market_address), price, transact={'from': account_address})
 
     def get_eth_balance(self, account):
         try:
