@@ -16,6 +16,7 @@ class Token(object):
         return self.contract_concise.balanceOf(account_address)
 
     def token_approve(self, market_address, price, account_address):
+        """Approve the passed address to spend the specified amount of tokens."""
         return self.contract_concise.approve(self.helper.to_checksum_address(market_address),
                                              price,
                                              transact={'from': account_address})
