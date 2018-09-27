@@ -1,3 +1,5 @@
+import os
+
 from squid_py.consumer import register
 from squid_py.ocean_contracts import OceanContracts
 import requests
@@ -20,6 +22,7 @@ json_request_consume = {
 
 
 def test_register_consume():
+    os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = OceanContracts(host='http://0.0.0.0', port=8545)
     resouce_id = register(publisher_account=ocean.web3.eth.accounts[1],
                           provider_account=ocean.web3.eth.accounts[0],

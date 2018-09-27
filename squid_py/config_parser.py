@@ -33,11 +33,14 @@ def parse_config(file_path, section):
 
 
 def get_contracts_path(conf):
+    print(site.PREFIXES)
     try:
         if conf is not None and 'contracts.folder' in conf:
             return conf['contracts.folder']
         elif os.getenv('VIRTUAL_ENV') is not None:
             return "%s/contracts" % (os.getenv('VIRTUAL_ENV'))
+        elif os.getenv('KEEPER_CONTRACTS') is not None:
+            return os.getenv('KEEPER_CONTRACTS')
         else:
             return "%s/contracts" % (site.PREFIXES[0])
     except Exception as e:

@@ -54,6 +54,7 @@ class OceanContracts(object):
         """Initialize the contracts connection."""
         contracts_abis_path = contracts_folder if contracts_folder else self.contracts_abis_path
         contract_address_map = contracts_addresses if contracts_addresses else self.default_contract_address_map
+        print(contract_address_map)
         for contract_name, address in contract_address_map.items():
             contract_abi_file = os.path.join(contracts_abis_path, contract_name + '.json')
             self.contracts[contract_name] = self.get_contract_instances(contract_abi_file, address)
