@@ -25,6 +25,7 @@ from Crypto.Hash import (
    SHA256
 )
 
+
 from base64 import (
     b64decode,
     b64encode
@@ -40,6 +41,9 @@ class OceanDDO(object):
         self.clear()
         self._did = did
 
+
+
+
     def clear(self):
         self._public_keys = []
         self._authentications = []
@@ -48,6 +52,7 @@ class OceanDDO(object):
         self._created = None
 
     def add_signature(self):
+
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
         public_key = key_pair.publickey()
         public_key_pem = public_key.exportKey("PEM")
@@ -60,7 +65,7 @@ class OceanDDO(object):
             'id': key_id,
             'type': key_type,
             'owner': self._did,
-            'publicKeyPem': str(public_key_pem),
+            'publicKeyPem': public_key_pem.decode(),
         }
         self._public_keys.append(row)
         row = {
@@ -78,7 +83,7 @@ class OceanDDO(object):
         }
         self._services.append(row)
 
-    def as_text(self):
+    def as_text(self, is_proof = True):
         if self._created == None:
             self._created = self._get_timestamp()
 
@@ -93,25 +98,48 @@ class OceanDDO(object):
             data['authentication'] = self._authentications
         if len(self._services) > 0:
             data['service'] = self._services
-        if self._proof:
+        if self._proof and is_proof == True:
             data['proof'] = self._proof
 
         return json.dumps(data)
 
     def add_proof(self, index, private_key_pem):
         # add a static proof to the DDO, based on one of the public keys
-        signer = PKCS1_v1_5.new(RSA.import_key(private_key_pem))
         sign_key = self._public_keys[index]
-#        hash_ddo = Web3.toBytes(Web3.sha3(text=self.as_text()))
         self._proof = None
-        ddo_hash = SHA256.new(self.as_text().encode())
-        signature = signer.sign(ddo_hash)
+        signature = OceanDDO.sign_text(self.as_text(), private_key_pem)
+
         self._proof = {
             'type': sign_key['type'],
             'created': self._get_timestamp(),
             'creator': sign_key['id'],
             'signatureValue': str(b64encode(signature))
         }
+
+
+    def validate_proof(self, signature_text = None):
+        if not signature_text:
+            signature_text = self.as_text(is_proof = False)
+        if self._proof == None:
+            return false
+        return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
+
+    def is_proof_defined(self):
+        return not self._proof == None
+
+
+    def validate_from_key(self, key_id, signature_text, signature_value):
+        public_key = self.get_public_key(key_id)
+        if public_key:
+            return OceanDDO.validate_signature(signature_text, public_key['publicKeyPem'].encode(), signature_value)
+        return False
+
+    def get_public_key(self, key_id):
+        for item in self._public_keys:
+            if item['id'] == key_id:
+                return item
+        return None
+
 
     @property
     def public_keys(self):
@@ -125,5 +153,21 @@ class OceanDDO(object):
     def services(self):
         return self._services
 
+    @staticmethod
+    def sign_text(text, key_pem):
+        signer = PKCS1_v1_5.new(RSA.import_key(key_pem))
+        text_hash = SHA256.new(text.encode())
+        return signer.sign(text_hash)
+
+    @staticmethod
+    def validate_signature(text, key, signature):
+        try:
+            rsa_key = RSA.import_key(key)
+            validater = PKCS1_v1_5.new(rsa_key)
+            text_hash = SHA256.new(text.encode())
+            validater.verify(text_hash, signature)
+            return True
+        except (ValueError, TypeError):
+            return False
     def _get_timestamp(self):
         return str(datetime.datetime.now())

@@ -25,8 +25,10 @@ def test_creating_ddo():
     assert len(ddo.authentications) == 1
     assert len(ddo.services) == 1
 
-    ddo_text = ddo.as_text()
-    assert ddo_text
+    ddo_text_no_proof = ddo.as_text()
+    assert ddo_text_no_proof
     ddo.add_proof(0, private_key)
-    ddo_text = ddo.as_text()
-    print(ddo_text)
+    ddo_text_proof = ddo.as_text()
+
+    assert ddo.validate_proof()
+    print(ddo_text_proof)
