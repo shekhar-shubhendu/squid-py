@@ -27,6 +27,6 @@ def test_creating_ddo():
 
     ddo_text = ddo.as_text()
     assert ddo_text
+    ddo.add_proof(0, private_key)
+    ddo_text = ddo.as_text()
     print(ddo_text)
-
-    
