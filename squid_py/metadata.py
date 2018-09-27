@@ -19,12 +19,10 @@ class Metadata(object):
         return json.loads(requests.get(self.base_url + '/metadata').content)
 
     def register_asset(self, data):
-        data = json.dumps(data)
-        return json.loads(requests.post(self.base_url + '/metadata', data=data, headers=self.headers).content)
+        return json.loads(requests.post(self.base_url + '/metadata', data=json.dumps(data), headers=self.headers).content)
 
     def update_asset(self, data):
-        data = json.dumps(data)
-        return json.loads(requests.put(self.base_url + '/metadata', data=data, headers=self.headers).content)
+        return json.loads(requests.put(self.base_url + '/metadata', data=json.dumps(data), headers=self.headers).content)
 
     def retire_asset(self, asset_id):
         return requests.delete(self.base_url + '/metadata/%s' % asset_id, headers=self.headers)
