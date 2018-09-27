@@ -58,7 +58,7 @@ class Market(object):
         })
 
     def get_message_hash(self, message):
-        pass
+        return self.contract_concise.generateId(message)
 
     def generate_did(self, content):
         pass
