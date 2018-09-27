@@ -2,6 +2,7 @@ import time
 
 import squid_py.acl as acl
 from squid_py.ocean import Ocean
+from squid_py.utils.web3_helper import convert_to_string
 
 json_dict = {"publisherId": "0x1",
              "base": {
@@ -123,6 +124,8 @@ def test_keeper():
 
     print('buyer balance = ', token.get_token_balance(consumer_account))
     print('seller balance = ', token.get_token_balance(provider_account))
+    ocean.metadata.retire_asset(convert_to_string(asset_id))
+
 
     # events = get_events(filter_token_published)
     # assert events
