@@ -43,5 +43,11 @@ class Ocean(object):
         """Establish a connexion using Web3 with the client."""
         return Web3(HTTPProvider("%s:%s" % (host, port)))
 
+    def get_message_hash(self, message):
+        return self.web3.sha3(message)
+
     def generate_did(self, content):
         return 'did:ocn:' + self.market.contract_concise.generateId(content)
+
+    def resolve_did(self, did):
+        pass
