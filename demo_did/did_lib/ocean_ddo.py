@@ -131,11 +131,16 @@ class OceanDDO(object):
 
 
     def validate_proof(self, signature_text = None):
+
         if not signature_text:
             signature_text = self.as_text(is_proof = False)
         if self._proof == None:
             return False
-        return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
+        if not isinstance(self._proof, dict):
+            return False
+        if 'type' in self._proof and 'creator' in self._proof and 'signatureValue' in self._proof:
+            return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
+        return False
 
     def is_proof_defined(self):
         return not self._proof == None
@@ -153,13 +158,34 @@ class OceanDDO(object):
                 return item
         return None
 
+    def validate_public_key(self, public_key):
+        if isinstance(public_key, dict):
+            return 'id' in public_key and 'type' in public_key
+        return False
+
+    def validate_authentication(self, authentication):
+        if isinstance(authentication, dict):
+            return 'id' in authentication and 'publicKey' in authentication
+        return False
+
+    def validate_service(self, service):
+        if isinstance(service, dict):
+            return 'type' in service and 'serviceEndpoint' in service
+        return False
+
     # validate the ddo data structure
     def validate(self):
         if self._public_keys and self._authentications:
-            for item in self._authentications:
-                key_id = item['id']
+            for authentication in self._authentications:
+                if not self.validate_authentication(authentication):
+                    return False
+                key_id = authentication['id']
                 public_key = self.get_public_key(key_id)
-                if public_key == None:
+                if not self.validate_public_key(public_key):
+                    return False
+        if self._services:
+            for service in self._services:
+                if not self.validate_service(service):
                     return False
         return True
 
