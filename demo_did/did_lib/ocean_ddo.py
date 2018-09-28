@@ -283,5 +283,6 @@ class OceanDDO(object):
             return True
         except (ValueError, TypeError):
             return False
+            
     def _get_timestamp(self):
         return str(datetime.datetime.now())
