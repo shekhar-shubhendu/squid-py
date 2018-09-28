@@ -37,12 +37,11 @@ from did_lib.constants import (
 
 class OceanDDO(object):
 
-    def __init__(self, did):
+    def __init__(self, did = None, ddo_text = None):
         self.clear()
         self._did = did
-
-
-
+        if ddo_text:
+            self.read_json(ddo_text)
 
     def clear(self):
         self._public_keys = []
@@ -50,6 +49,7 @@ class OceanDDO(object):
         self._services = []
         self._proof = None
         self._created = None
+
 
     def add_signature(self):
 
@@ -103,6 +103,19 @@ class OceanDDO(object):
 
         return json.dumps(data)
 
+    def read_json(self, ddo_json):
+        values = json.loads(ddo_json)
+        self._id = values['id']
+        self._created = values.get('created', None)
+        if 'publicKey' in values:
+            self._public_keys = values['publicKey']
+        if 'authentication' in values:
+            self._authentications = values['authentication']
+        if 'service' in values:
+            self._service = values['service']
+        if 'proof' in values:
+            self._proof = values['proof']
+
     def add_proof(self, index, private_key_pem):
         # add a static proof to the DDO, based on one of the public keys
         sign_key = self._public_keys[index]
@@ -121,7 +134,7 @@ class OceanDDO(object):
         if not signature_text:
             signature_text = self.as_text(is_proof = False)
         if self._proof == None:
-            return false
+            return False
         return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
 
     def is_proof_defined(self):
@@ -140,6 +153,15 @@ class OceanDDO(object):
                 return item
         return None
 
+    # validate the ddo data structure
+    def validate(self):
+        if self._public_keys and self._authentications:
+            for item in self._authentications:
+                key_id = item['id']
+                public_key = self.get_public_key(key_id)
+                if public_key == None:
+                    return False
+        return True
 
     @property
     def public_keys(self):

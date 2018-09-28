@@ -32,3 +32,14 @@ def test_creating_ddo():
 
     assert ddo.validate_proof()
     print(ddo_text_proof)
+
+    ddo = OceanDDO(ddo_text = ddo_text_proof)
+    assert ddo.validate()
+    assert ddo.is_proof_defined()
+    assert ddo.validate_proof()
+
+    ddo = OceanDDO(ddo_text = ddo_text_no_proof)
+    assert ddo.validate()
+    # valid proof should be false since no static proof profided
+    assert not ddo.is_proof_defined()
+    assert not ddo.validate_proof()
