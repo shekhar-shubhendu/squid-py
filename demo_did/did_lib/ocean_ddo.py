@@ -63,7 +63,6 @@ class OceanDDO(object):
 
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
         public_key = key_pair.publickey()
-#        public_key_pem = public_key.exportKey("PEM")
         private_key_pem = key_pair.exportKey("PEM")
         key_type = 'RsaVerificationKey2018'
         index = len(self._public_keys) + 1
@@ -81,8 +80,10 @@ class OceanDDO(object):
             row[PUBLIC_KEY_TYPE_BASE64] = b64encode(public_key.exportKey("DER")).decode()
         elif public_key_type == PUBLIC_KEY_TYPE_JWK:
             raise NotImplementedError
-        else:
+        elif public_key_type == PUBLIC_KEY_TYPE_PEM:
             row[PUBLIC_KEY_TYPE_PEM] = public_key.exportKey("PEM").decode()
+        else:
+            raise TypeError
 
         self._public_keys.append(row)
         row = {
