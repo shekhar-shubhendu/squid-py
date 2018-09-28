@@ -40,6 +40,7 @@ def test_creating_ddo():
 
     ddo_text_no_proof = ddo.as_text()
     assert ddo_text_no_proof
+    ddo_text_no_proof_hash = ddo.calculate_hash()
 
     # test getting public keys in the DDO record
     for index, private_key in enumerate(private_keys):
@@ -52,16 +53,18 @@ def test_creating_ddo():
         ddo.add_proof(index, private_key)
         ddo_text_proof = ddo.as_text()
         assert ddo.validate_proof()
-
+        ddo_text_proof_hash = ddo.calculate_hash()
 
 
     ddo = OceanDDO(ddo_text = ddo_text_proof)
     assert ddo.validate()
     assert ddo.is_proof_defined()
     assert ddo.validate_proof()
+    assert ddo.calculate_hash() == ddo_text_proof_hash
 
     ddo = OceanDDO(ddo_text = ddo_text_no_proof)
     assert ddo.validate()
-    # valid proof should be false since no static proof profided
+    # valid proof should be false since no static proof provided
     assert not ddo.is_proof_defined()
     assert not ddo.validate_proof()
+    assert ddo.calculate_hash() == ddo_text_no_proof_hash

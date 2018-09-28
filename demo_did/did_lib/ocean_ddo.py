@@ -45,6 +45,8 @@ class OceanDDO(object):
     def __init__(self, did = None, ddo_text = None):
         self.clear()
         self._did = did
+        self._created = self._get_timestamp()
+
         if ddo_text:
             self.read_json(ddo_text)
 
@@ -130,7 +132,7 @@ class OceanDDO(object):
         if 'authentication' in values:
             self._authentications = values['authentication']
         if 'service' in values:
-            self._service = values['service']
+            self._services = values['service']
         if 'proof' in values:
             self._proof = values['proof']
 
@@ -186,7 +188,7 @@ class OceanDDO(object):
     def get_public_key(self, key_id):
         if isinstance(key_id, int):
             return self._public_keys[key_id]
-            
+
         for item in self._public_keys:
             if item['id'] == key_id:
                 return item
@@ -222,6 +224,36 @@ class OceanDDO(object):
                 if not self.validate_service(service):
                     return False
         return True
+
+    # return a sha3 hash of important bits of the DDO, excluding any DID portion,
+    # as this hash can be used to generate the DID
+    def calculate_hash(self):
+        hash_text = []
+        public_key_types = [
+            PUBLIC_KEY_TYPE_PEM,
+            PUBLIC_KEY_TYPE_JWK,
+            PUBLIC_KEY_TYPE_HEX,
+            PUBLIC_KEY_TYPE_BASE64,
+        ]
+        if self._created:
+            hash_text.append(self._created)
+
+        if self._public_keys:
+            for public_key in self._public_keys:
+                hash_text.append(public_key['type'])
+                for public_key_type in public_key_types:
+                    if public_key_type in public_key:
+                        hash_text.append(public_key[public_key_type])
+
+        if self._services:
+            for service in self._services:
+                hash_text.append(service['type'])
+                hash_text.append(service['serviceEndpoint'])
+
+        # if no data can be found to hash then raise an error
+        if len(hash_text) == 0:
+            raise ValueError
+        return Web3.sha3(text="".join(hash_text))
 
     @property
     def public_keys(self):
