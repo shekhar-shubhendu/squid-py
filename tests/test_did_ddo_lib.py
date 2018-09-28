@@ -5,7 +5,7 @@ import logging
 import os
 import secrets
 
-from did_lib import (
+from did_ddo_lib.did_lib import (
     generate_did,
     OceanDDO,
     PUBLIC_KEY_TYPE_PEM,
