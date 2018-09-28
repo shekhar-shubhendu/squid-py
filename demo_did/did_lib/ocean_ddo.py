@@ -136,9 +136,9 @@ class OceanDDO(object):
 
     def add_proof(self, index, private_key):
         # add a static proof to the DDO, based on one of the public keys
-        sign_key = self._public_keys[index]
+        sign_key = self.get_public_key(index)
         if sign_key == None:
-            raise NameError
+            raise IndexError
         self._proof = None
         signature = OceanDDO.sign_text(self.as_text(), private_key)
 
@@ -182,7 +182,11 @@ class OceanDDO(object):
                 return OceanDDO.validate_signature(signature_text, key_value, signature_value)
         return False
 
+    # key_id can be a string, or int. If int then the index in the list of keys
     def get_public_key(self, key_id):
+        if isinstance(key_id, int):
+            return self._public_keys[key_id]
+            
         for item in self._public_keys:
             if item['id'] == key_id:
                 return item

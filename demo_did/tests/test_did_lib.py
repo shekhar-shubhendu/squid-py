@@ -29,7 +29,7 @@ def test_creating_ddo():
     assert ddo
     private_keys = []
     for public_key_type in public_key_types:
-        private_keys.append( ddo.add_signature(public_key_type))
+        private_keys.append(ddo.add_signature(public_key_type))
 
     assert len(private_keys) == len(public_key_types)
     ddo.add_service('ocean-meta-storage', 'http://localhost:8005')
@@ -41,12 +41,19 @@ def test_creating_ddo():
     ddo_text_no_proof = ddo.as_text()
     assert ddo_text_no_proof
 
-
+    # test getting public keys in the DDO record
     for index, private_key in enumerate(private_keys):
-        ddo.add_proof(index - 1, private_key)
-        ddo_text_proof = ddo.as_text()
+        assert ddo.get_public_key(index)
+        signature_key_id = '{0}#keys={1}'.format(did, index + 1)
+        assert ddo.get_public_key(signature_key_id)
 
+   # test validating static proofs
+    for index, private_key in enumerate(private_keys):
+        ddo.add_proof(index, private_key)
+        ddo_text_proof = ddo.as_text()
         assert ddo.validate_proof()
+
+
 
     ddo = OceanDDO(ddo_text = ddo_text_proof)
     assert ddo.validate()
