@@ -30,7 +30,7 @@ from base64 import (
     b64decode,
     b64encode
 )
-from did_lib.constants import (
+from .constants import (
     KEY_PAIR_MODULUS_BIT,
     DID_DDO_CONTEXT_URL,
 )
@@ -283,6 +283,6 @@ class OceanDDO(object):
             return True
         except (ValueError, TypeError):
             return False
-            
+
     def _get_timestamp(self):
         return str(datetime.datetime.now())
