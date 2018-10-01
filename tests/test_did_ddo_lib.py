@@ -24,9 +24,18 @@ public_key_store_types = [
 def test_did():
 
     test_id = secrets.token_hex(32)
-    test_path = 'TestPath__1234'
-    valid_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
-    assert did_generate(test_id, test_path) == valid_did
+    test_path = 'test_path'
+    test_fragment = 'test_fragment'
+    valid_did = 'did:ocean:{0}'.format(test_id)
+    assert did_generate(test_id) == valid_did
+    valid_path_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
+    assert did_generate(test_id, test_path) == valid_path_did
+    valid_path_fragment_did = 'did:ocean:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
+    assert did_generate(test_id, test_path, test_fragment) == valid_path_fragment_did
+    valid_fragment_did = 'did:ocean:{0}#{1}'.format(test_id, test_fragment)
+    assert did_generate(test_id, fragment=test_fragment) == valid_fragment_did
+
+
 
 def test_creating_ddo():
     id = secrets.token_hex(32)

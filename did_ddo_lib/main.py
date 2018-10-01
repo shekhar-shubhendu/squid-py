@@ -8,13 +8,13 @@ from web3 import (
 )
 
 
-def did_generate(id, did_path = None, did_fragment = None, did_method = 'ocean'):
+def did_generate(id, path = None, fragment = None, method = 'ocean'):
 
-    did = ['did:', did_method, ':', id]
-    if did_path:
+    did = ['did:', method, ':', id]
+    if path:
         did.append('/')
-        did.append(did_path)
-    if did_fragment:
+        did.append(path)
+    if fragment:
         did.append('#')
-        did.append(did_fragment)
+        did.append(fragment)
     return "".join(did)
