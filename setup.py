@@ -35,7 +35,7 @@ setup(
     include_package_data=True,
     keywords='squid-py',
     name='squid-py',
-    packages=find_packages(include=['squid_py']),
+    packages=find_packages(include=['squid_py','squid_py.keeper','squid_py.utils']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
