@@ -10,7 +10,7 @@ from web3 import (
 
 def did_generate(id, path = None, fragment = None, method = 'ocean'):
 
-    did = ['did:', method, ':', id]
+    did = ['did:', method.lower(), ':', id]
     if path:
         did.append('/')
         did.append(path)
