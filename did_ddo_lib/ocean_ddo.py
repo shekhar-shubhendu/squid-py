@@ -267,7 +267,11 @@ class OceanDDO(object):
                 for public_key_store_type in public_key_store_types:
                     if public_key_store_type in public_key:
                         hash_text.append(public_key[public_key_store_type])
-                     
+
+        if self._authentications:
+            for authentication in self._authentications:
+                hash_text.append(authentication['type'])
+
         if self._services:
             for service in self._services:
                 hash_text.append(service['type'])
