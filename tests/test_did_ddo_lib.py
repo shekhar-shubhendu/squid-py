@@ -8,17 +8,17 @@ import secrets
 from did_ddo_lib import (
     generate_did,
     OceanDDO,
-    PUBLIC_KEY_TYPE_PEM,
-    PUBLIC_KEY_TYPE_JWK,
-    PUBLIC_KEY_TYPE_HEX,
-    PUBLIC_KEY_TYPE_BASE64,
+    PUBLIC_KEY_STORE_TYPE_PEM,
+    PUBLIC_KEY_STORE_TYPE_JWK,
+    PUBLIC_KEY_STORE_TYPE_HEX,
+    PUBLIC_KEY_STORE_TYPE_BASE64,
 
 )
 
-public_key_types = [
-    PUBLIC_KEY_TYPE_PEM,
-    PUBLIC_KEY_TYPE_HEX,
-    PUBLIC_KEY_TYPE_BASE64,
+public_key_store_types = [
+    PUBLIC_KEY_STORE_TYPE_PEM,
+    PUBLIC_KEY_STORE_TYPE_HEX,
+    PUBLIC_KEY_STORE_TYPE_BASE64,
 ]
 
 def test_creating_ddo():
@@ -28,14 +28,14 @@ def test_creating_ddo():
     ddo = OceanDDO(did)
     assert ddo
     private_keys = []
-    for public_key_type in public_key_types:
-        private_keys.append(ddo.add_signature(public_key_type))
+    for public_key_store_type in public_key_store_types:
+        private_keys.append(ddo.add_signature(public_key_store_type))
 
-    assert len(private_keys) == len(public_key_types)
+    assert len(private_keys) == len(public_key_store_types)
     ddo.add_service('ocean-meta-storage', 'http://localhost:8005')
 
-    assert len(ddo.public_keys) == len(public_key_types)
-    assert len(ddo.authentications) == len(public_key_types)
+    assert len(ddo.public_keys) == len(public_key_store_types)
+    assert len(ddo.authentications) == len(public_key_store_types)
     assert len(ddo.services) == 1
 
     ddo_text_no_proof = ddo.as_text()

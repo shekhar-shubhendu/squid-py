@@ -17,8 +17,8 @@ from did_ddo_lib.main import (
 
 from did_ddo_lib.ocean_ddo import (
     OceanDDO,
-    PUBLIC_KEY_TYPE_PEM,
-    PUBLIC_KEY_TYPE_JWK,
-    PUBLIC_KEY_TYPE_HEX,
-    PUBLIC_KEY_TYPE_BASE64,
+    PUBLIC_KEY_STORE_TYPE_PEM,
+    PUBLIC_KEY_STORE_TYPE_JWK,
+    PUBLIC_KEY_STORE_TYPE_HEX,
+    PUBLIC_KEY_STORE_TYPE_BASE64,
 )
