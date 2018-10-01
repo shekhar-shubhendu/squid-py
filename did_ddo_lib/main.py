@@ -8,8 +8,13 @@ from web3 import (
 )
 
 
-def generate_did(id, fragment = None):
-    did = 'did:ocean:{}'.format(id)
-    if fragment:
-        did = '{0}/{1}'.format(did, fragment)
-    return did
+def generate_did(id, did_path = None, did_fragment = None, did_method = 'ocean'):
+
+    did = ['did:', did_method, ':', id]
+    if did_path:
+        did.append('/')
+        did.append(did_path)
+    if did_fragment:
+        did.append('#')
+        did.append(did_fragment)
+    return "".join(did)

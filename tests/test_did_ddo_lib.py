@@ -21,6 +21,13 @@ public_key_store_types = [
     PUBLIC_KEY_STORE_TYPE_BASE64,
 ]
 
+def test_did():
+
+    test_id = secrets.token_hex(32)
+    test_path = 'TestPath__1234'
+    valid_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
+    assert generate_did(test_id, test_path) == valid_did
+
 def test_creating_ddo():
     id = secrets.token_hex(32)
     did = generate_did(id)
