@@ -13,6 +13,7 @@ __version__ = '0.0.1'
 
 from did_ddo_lib.main import (
 	did_generate,
+	did_split,
 )
 
 from did_ddo_lib.ocean_ddo import (

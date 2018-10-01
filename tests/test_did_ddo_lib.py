@@ -7,6 +7,7 @@ import secrets
 
 from did_ddo_lib import (
     did_generate,
+    did_split,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
     PUBLIC_KEY_STORE_TYPE_JWK,
@@ -31,10 +32,14 @@ def test_did():
     valid_did = 'did:ocean:{0}'.format(test_id)
 
     assert did_generate(test_id) == valid_did
+    assert did_split(valid_did)['id'] == test_id
 
     # all valid method values are supported
     valid_method_did = 'did:{0}:{1}'.format(test_method, test_id)
     assert did_generate(test_id, method=test_method) == valid_method_did
+
+    # split method
+    assert did_split(valid_method_did)['method'] == test_method
 
     # invalid method chars are removed
     assert did_generate(test_id, method=test_method + '!@#$%^&') == valid_method_did
@@ -43,6 +48,10 @@ def test_did():
     valid_id_method_did = 'did:{0}:{1}'.format(test_method, all_id)
     assert did_generate(all_id, method=test_method) == valid_id_method_did
 
+    # split id and method
+    assert did_split(valid_id_method_did)['method'] == test_method
+    assert did_split(valid_id_method_did)['id'] == all_id
+
     # invalid id values are masked out
     assert did_generate(all_id + '%^&*()_+=', method=test_method) == valid_id_method_did
 
@@ -50,14 +59,22 @@ def test_did():
     valid_path_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
     assert did_generate(test_id, test_path) == valid_path_did
 
+    assert did_split(valid_path_did)['path'] == test_path
+
     # append path and fragment
     valid_path_fragment_did = 'did:ocean:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
     assert did_generate(test_id, test_path, test_fragment) == valid_path_fragment_did
+
+    # assert split of path and fragment
+    assert did_split(valid_path_fragment_did)['path'] == test_path
+    assert did_split(valid_path_fragment_did)['fragment'] == test_fragment
 
     # append fragment
     valid_fragment_did = 'did:ocean:{0}#{1}'.format(test_id, test_fragment)
     assert did_generate(test_id, fragment=test_fragment) == valid_fragment_did
 
+    # assert split offragment
+    assert did_split(valid_fragment_did)['fragment'] == test_fragment
 
 
 def test_creating_ddo():
