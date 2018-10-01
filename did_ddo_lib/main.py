@@ -8,7 +8,7 @@ from web3 import (
 )
 
 
-def generate_did(id, did_path = None, did_fragment = None, did_method = 'ocean'):
+def did_generate(id, did_path = None, did_fragment = None, did_method = 'ocean'):
 
     did = ['did:', did_method, ':', id]
     if did_path:
