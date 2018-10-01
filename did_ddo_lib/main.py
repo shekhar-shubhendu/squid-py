@@ -3,6 +3,8 @@
 
 """
 
+import re
+
 from web3 import (
     Web3
 )
@@ -10,7 +12,9 @@ from web3 import (
 
 def did_generate(id, path = None, fragment = None, method = 'ocean'):
 
-    did = ['did:', method.lower(), ':', id]
+    method = re.sub('[^a-z0-9]', '', method.lower())
+    id = re.sub('[^a-zA-Z0-9\-\.]', '', id)
+    did = ['did:', method, ':', id]
     if path:
         did.append('/')
         did.append(path)
