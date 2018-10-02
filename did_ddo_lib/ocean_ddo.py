@@ -281,7 +281,7 @@ class OceanDDO(object):
 
         if self._public_keys:
             for public_key in self._public_keys:
-                hash_text.append(public_key.get_store_type())
+                hash_text.append(public_key.get_type())
                 hash_text.append(public_key.as_text())
 
         if self._services:
