@@ -24,10 +24,7 @@ class Authentication(object):
 
     def get_type(self):
         return self._type
-        
-    def set_type(self, value):
-        self._type = value
-        
+                
     def get_public_key_id(self):
         if self._public_key_id:
             return self._public_key_id

@@ -84,6 +84,7 @@ class OceanDDO(object):
     # add a authentication public key id and type to the list of authentications
     def add_authentication(self, key_id, authentication_type = None):
         if isinstance(key_id, Authentication):
+            # adding an authentication object
             authentication = key_id
         elif isinstance(key_id, PublicKeyBase):
             public_key = key_id

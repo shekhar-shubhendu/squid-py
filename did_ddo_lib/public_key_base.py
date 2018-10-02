@@ -30,26 +30,26 @@ class PublicKeyBase(object):
     def get_id(self):
         return self._id
             
-    def set_id(self, value):
-        self._id = value
+    # def set_id(self, value):
+        # self._id = value
             
     def get_owner(self):
         return self._owner
         
-    def set_owner(self, value):
-        self._owner = value
+    # def set_owner(self, value):
+        # self._owner = value
         
     def get_type(self):
         return self._type
 
-    def set_type(self, value):
-        self._type = value
+    # def set_type(self, value):
+        # self._type = value
         
     def get_store_type(self):
         return self._store_type
     
-    def set_store_type(self, value):
-        self._store_type = value
+    # def set_store_type(self, value):
+        # self._store_type = value
                
     def set_key_value(self, value, store_type = PUBLIC_KEY_STORE_TYPE_BASE64):
         if isinstance(value, dict):
@@ -93,8 +93,8 @@ class PublicKeyBase(object):
     def get_value(self):
         return self._value
 
-    def set_value(self, value):
-        self._value = value
+    # def set_value(self, value):
+        # self._value = value
     
     def as_text(self):
         values = {
