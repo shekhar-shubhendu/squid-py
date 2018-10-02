@@ -43,7 +43,10 @@ from .public_key_rsa import (
     PublicKeyRSA,
     AUTHENTICATION_TYPE_RSA,
     PUBLIC_KEY_TYPE_RSA,
+)
 
+from .authentication import (
+    Authentication,
 )
 
 from .constants import (
@@ -70,53 +73,51 @@ class OceanDDO(object):
         self._created = None
 
 
-    # create a public key object based on the values from the JSON record
-    def create_public_key(self, values):
-        # currently we only support RSA public keys
-        public_key = PublicKeyRSA(values['id'], owner = values.get('owner', None))
-        public_key.set_key_value(values)
-        return public_key
-
     # add a public key object to the list of public keys
     def add_public_key(self, public_key):        
         self._public_keys.append(public_key)
 
     # add a authentication public key id and type to the list of authentications
     def add_authentication(self, key_id, authentication_type = None):
-        if isinstance(key_id, PublicKeyBase) and authentication_type == None:
+        if isinstance(key_id, Authentication):
+            authentication = key_id
+        elif isinstance(key_id, PublicKeyBase):
             public_key = key_id
-            row = {
-                'publicKey' : public_key.get_id(),
-                'type' : public_key.get_authentication_type()
-            }
+            # this is going to be a embedded public key
+            authentication = Authentication(public_key, public_key.get_authentication_type())
         else:
+            # with key_id as a string, we also need to provide the authentication type
             if authentication_type == None:
                 raise ValueError
-            row = {
-                'type' : authentication_type,
-                'publicKey' : key_id,
-            }
-        self._authentications.append(row)
+            authentication = Authentication(key_id, authentication_type)
+            
+        self._authentications.append(authentication)
 
     # add a signature with a public key and authentication entry for validating this DDO
     # returns the private key as part of the private/public key pair
-    def add_signature(self, public_key_store_type = PUBLIC_KEY_STORE_TYPE_PEM):
+    def add_signature(self, public_key_store_type = PUBLIC_KEY_STORE_TYPE_PEM, is_embedded = False):
 
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
         public_key_raw = key_pair.publickey()
         private_key_pem = key_pair.exportKey("PEM")
-        index = len(self._public_keys) + 1
-        key_id = '{0}#keys={1}'.format(self._did, index)
+        
+        # find the current public key count
+        next_index = self.get_public_key_count() + 1
+        key_id = '{0}#keys={1}'.format(self._did, next_index)
         
         public_key = PublicKeyRSA(key_id, owner = key_id)
         
         public_key.set_encode_key_value(public_key_raw, public_key_store_type)
-                
-        # add the public key to the DDO list of public keys
-        self.add_public_key(public_key)
         
-        # also add the authentication id for this key
-        self.add_authentication(public_key)
+        if is_embedded:
+            # also add the authentication key as embedded key with the authentication
+            self.add_authentication(public_key)
+        else:
+            # add the public key to the DDO list of public keys
+            self.add_public_key(public_key)
+            
+            # add the public key id and type for this key to the authentication
+            self.add_authentication(public_key.get_id(), public_key.get_authentication_type())
 
         return private_key_pem
 
@@ -145,7 +146,10 @@ class OceanDDO(object):
                 values.append(public_key.as_text())
             data['publicKey'] = values
         if len(self._authentications) > 0:
-            data['authentication'] = self._authentications
+            values = []
+            for authentication in self._authentications:
+                values.append(authentication.as_text())
+            data['authentication'] = values
         if len(self._services) > 0:
             data['service'] = self._services
         if self._proof and is_proof == True:
@@ -161,19 +165,28 @@ class OceanDDO(object):
         if 'publicKey' in values:
             self._public_keys = []
             for value in values['publicKey']:
-                self._public_keys.append(self.create_public_key(json.loads(value)))
+                self._public_keys.append(OceanDDO.create_public_key_from_json(json.loads(value)))
         if 'authentication' in values:
-            self._authentications = values['authentication']
+            self._authentications = []
+            for value in values['authentication']:
+                self._authentications.append(OceanDDO.create_authentication_from_json(json.loads(value)))
         if 'service' in values:
             self._services = values['service']
         if 'proof' in values:
             self._proof = values['proof']
 
     # add a proof to the DDO, based on the public_key id/index and signed with the private key
-    def add_proof(self, index, private_key):
+    def add_proof(self, authorisation_index, private_key):
         # add a static proof to the DDO, based on one of the public keys
         # find the key using an index, or key name
-        sign_key = self.get_public_key(index)
+        authentication = self._authentications[authorisation_index]
+        if not authentication:
+            raise IndexError
+        if authentication.is_public_key():
+            sign_key = authentication.get_public_key()
+        else:
+            sign_key = self.get_public_key(authentication.get_public_key_id())
+            
         if sign_key == None:
             raise IndexError
         # just incase clear out the current static proof property
@@ -209,7 +222,8 @@ class OceanDDO(object):
 
     # validate a signature based on a given public_key key_id/name
     def validate_from_key(self, key_id, signature_text, signature_value):
-        public_key = self.get_public_key(key_id)
+        
+        public_key = self.get_public_key(key_id, True)
         if public_key == None:
             return False
             
@@ -224,31 +238,37 @@ class OceanDDO(object):
         # if public_key.get_store_type() != PUBLIC_KEY_STORE_TYPE_PEM:
             # key_value = key_value.decode()
             
-        return OceanDDO.validate_signature(signature_text, key_value, signature_value, authentication['type'])
+        return OceanDDO.validate_signature(signature_text, key_value, signature_value, authentication.get_type())
 
     # key_id can be a string, or int. If int then the index in the list of keys
-    def get_public_key(self, id):
-        if isinstance(id, int):
-            return self._public_keys[id]
+    def get_public_key(self, key_id, is_search_embedded = False):
+        if isinstance(key_id, int):
+            return self._public_keys[key_id]
 
         for item in self._public_keys:
-            if item.get_id() == id:
+            if item.get_id() == key_id:
                 return item
+                
+        if is_search_embedded:
+            for authentication in self._authentications:
+                if authentication.get_public_key_id() == key_id:
+                    return authentication.get_public_key()
         return None
 
+    # return the count of public keys in the list and embedded
+    def get_public_key_count(self):
+        index = len(self._public_keys)
+        for authentication in self._authentications:
+            if authentication.is_public_key():
+                index += 1
+        return index
+        
     # return the authentication based on it's id
-    def get_authentication_from_public_key_id(self, id):
-
-        for item in self._authentications:
-            if item['publicKey'] == id:
-                return item
+    def get_authentication_from_public_key_id(self, key_id):
+        for authentication in self._authentications:
+            if authentication.is_key_id(key_id):
+                return authentication
         return None
-
-    # return true if the authentication has the correct field data
-    def validate_authentication(self, authentication):
-        if isinstance(authentication, dict):
-            return 'type' in authentication and 'publicKey' in authentication
-        return False
 
     # return true if a service has the correct field data.
     def validate_service(self, service):
@@ -260,10 +280,13 @@ class OceanDDO(object):
     def validate(self):
         if self._public_keys and self._authentications:
             for authentication in self._authentications:
-                if not self.validate_authentication(authentication):
+                if not authentication.is_valid():
                     return False
-                key_id = authentication['publicKey']
-                public_key = self.get_public_key(key_id)
+                if authentication.is_public_key():
+                    public_key = authentication.get_public_key()
+                else:
+                    key_id = authentication.get_public_key_id()
+                    public_key = self.get_public_key(key_id)
                 if not public_key.is_valid():
                     return False
         if self._services:
@@ -284,6 +307,13 @@ class OceanDDO(object):
                 hash_text.append(public_key.get_type())
                 hash_text.append(public_key.as_text())
 
+        if self._authentications:
+            for authentication in self._authentications:
+                if authentication.is_public_key():
+                    public_key = authentication.get_public_key()
+                    hash_text.append(public_key.get_type())
+                    hash_text.append(public_key.as_text())
+                    
         if self._services:
             for service in self._services:
                 hash_text.append(service['type'])
@@ -319,17 +349,39 @@ class OceanDDO(object):
 
     @staticmethod
     def validate_signature(text, key, signature, sign_type = AUTHENTICATION_TYPE_RSA):
-#        try:
-        if sign_type == AUTHENTICATION_TYPE_RSA:
-            rsa_key = RSA.import_key(key)
-            validater = PKCS1_v1_5.new(rsa_key)
-            text_hash = SHA256.new(text.encode())
-            validater.verify(text_hash, signature)
-            return True
+        try:
+            if sign_type == AUTHENTICATION_TYPE_RSA:
+                rsa_key = RSA.import_key(key)
+                validater = PKCS1_v1_5.new(rsa_key)
+                text_hash = SHA256.new(text.encode())
+                validater.verify(text_hash, signature)
+                return True
+            else:
+                raise NotImplementedError
+        except (ValueError, TypeError):
+            return False
+
+    # create a public key object based on the values from the JSON record
+    @staticmethod
+    def create_public_key_from_json(values):
+        # currently we only support RSA public keys
+        public_key = PublicKeyRSA(values['id'], owner = values.get('owner', None))
+        public_key.set_key_value(values)
+        return public_key
+        
+
+    @staticmethod
+    def create_authentication_from_json(values):
+        key_id = values['publicKey']
+        authentication_type = values['type']
+        if isinstance(key_id, dict):
+            public_key = OceanDDO.create_public_key_from_json(key_id)
+            authentication = Authentication(public_key, public_key.get_authentication_type())
         else:
-            raise NotImplementedError
-#        except (ValueError, TypeError):
-#            return False
+            authentication = Authentication(key_id, authentication_type)
+            
+        return authentication
+
 
     def _get_timestamp(self):
         return str(datetime.datetime.now())

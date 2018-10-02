@@ -123,3 +123,22 @@ def test_creating_ddo():
     assert not ddo.is_proof_defined()
     assert not ddo.validate_proof()
     assert ddo.calculate_hash() == ddo_text_no_proof_hash
+
+def test_creating_ddo_embedded_public_key():
+    id = secrets.token_hex(32)
+    did = did_generate(id)
+    assert did
+    ddo = OceanDDO(did)
+    assert ddo
+    private_keys = []
+    for public_key_store_type in public_key_store_types:
+        private_keys.append(ddo.add_signature(public_key_store_type, is_embedded = True))
+
+    assert len(private_keys) == len(public_key_store_types)
+    ddo.add_service('ocean-meta-storage', 'http://localhost:8005')
+   # test validating static proofs
+    for index, private_key in enumerate(private_keys):
+        ddo.add_proof(index, private_key)
+        ddo_text_proof = ddo.as_text()
+        assert ddo.validate_proof()
+        ddo_text_proof_hash = ddo.calculate_hash()
