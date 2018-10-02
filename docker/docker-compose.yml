@@ -12,7 +12,7 @@ services:
     - backend
  
   keeper-contracts:
-    image: oceanprotocol/keeper-contracts:develop
+    image: oceanprotocol/keeper-contracts:defect_fix-migrate-contracts
     ports:
     - 8545:8545
     networks:
