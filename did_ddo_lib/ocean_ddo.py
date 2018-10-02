@@ -5,6 +5,7 @@
 import json
 import datetime
 
+
 from web3 import (
     Web3
 )
@@ -25,24 +26,30 @@ from Crypto.Hash import (
    SHA256
 )
 
-
 from base64 import (
     b64decode,
     b64encode
 )
+
+from .public_key_base import (
+    PublicKeyBase,
+    PUBLIC_KEY_STORE_TYPE_PEM,
+    PUBLIC_KEY_STORE_TYPE_JWK,
+    PUBLIC_KEY_STORE_TYPE_HEX,
+    PUBLIC_KEY_STORE_TYPE_BASE64,
+)
+
+from .public_key_rsa import (
+    PublicKeyRSA,
+    AUTHENTICATION_TYPE_RSA,
+    PUBLIC_KEY_TYPE_RSA,
+
+)
+
 from .constants import (
     KEY_PAIR_MODULUS_BIT,
     DID_DDO_CONTEXT_URL,
 )
-
-PUBLIC_KEY_STORE_TYPE_PEM = 'publicKeyPem'
-PUBLIC_KEY_STORE_TYPE_JWK = 'publicKeyJwk'
-PUBLIC_KEY_STORE_TYPE_HEX = 'publicKeyHex'
-PUBLIC_KEY_STORE_TYPE_BASE64 = 'publicKeyBase64'
-
-
-AUTHENTICATION_TYPE_RSA = 'RsaVerificationKey2018'
-PUBLIC_KEY_SIGN_TYPE_RSA = 'RsaSignatureAuthentication2018'
 
 class OceanDDO(object):
 
@@ -54,6 +61,7 @@ class OceanDDO(object):
         if ddo_text:
             self.read_json(ddo_text)
 
+    # clear the DDO data values
     def clear(self):
         self._public_keys = []
         self._authentications = []
@@ -62,50 +70,57 @@ class OceanDDO(object):
         self._created = None
 
 
-    def convert_public_key_as(self):
-        publicKeyPem, publicKeyJwk, publicKeyHex, publicKeyBase64
+    # create a public key object based on the values from the JSON record
+    def create_public_key(self, values):
+        # currently we only support RSA public keys
+        public_key = PublicKeyRSA(values['id'], owner = values.get('owner', None))
+        public_key.set_key_value(values)
+        return public_key
 
-    def add_signature(self, public_key_type = PUBLIC_KEY_STORE_TYPE_PEM):
+    # add a public key object to the list of public keys
+    def add_public_key(self, public_key):        
+        self._public_keys.append(public_key)
+
+    # add a authentication public key id and type to the list of authentications
+    def add_authentication(self, key_id, authentication_type = None):
+        if isinstance(key_id, PublicKeyBase) and authentication_type == None:
+            public_key = key_id
+            row = {
+                'publicKey' : public_key.get_id(),
+                'type' : public_key.get_authentication_type()
+            }
+        else:
+            if authentication_type == None:
+                raise ValueError
+            row = {
+                'type' : authentication_type,
+                'publicKey' : key_id,
+            }
+        self._authentications.append(row)
+
+    # add a signature with a public key and authentication entry for validating this DDO
+    # returns the private key as part of the private/public key pair
+    def add_signature(self, public_key_store_type = PUBLIC_KEY_STORE_TYPE_PEM):
 
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
-        public_key = key_pair.publickey()
+        public_key_raw = key_pair.publickey()
         private_key_pem = key_pair.exportKey("PEM")
-        key_type = PUBLIC_KEY_SIGN_TYPE_RSA
         index = len(self._public_keys) + 1
         key_id = '{0}#keys={1}'.format(self._did, index)
+        
+        public_key = PublicKeyRSA(key_id, owner = key_id)
+        
+        public_key.set_encode_key_value(public_key_raw, public_key_store_type)
+                
+        # add the public key to the DDO list of public keys
+        self.add_public_key(public_key)
+        
+        # also add the authentication id for this key
+        self.add_authentication(public_key)
 
-        row = {
-            'id': key_id,
-            'type': key_type,
-            'owner': self._did,
-        }
-
-        if public_key_type == PUBLIC_KEY_STORE_TYPE_HEX:
-            row[PUBLIC_KEY_STORE_TYPE_HEX] = public_key.exportKey("DER").hex()
-        elif public_key_type == PUBLIC_KEY_STORE_TYPE_BASE64:
-            row[PUBLIC_KEY_STORE_TYPE_BASE64] = b64encode(public_key.exportKey("DER")).decode()
-        elif public_key_type == PUBLIC_KEY_STORE_TYPE_JWK:
-            # TODO: need to decide on which jwk library to import?
-            raise NotImplementedError
-        elif public_key_type == PUBLIC_KEY_STORE_TYPE_PEM:
-            row[PUBLIC_KEY_STORE_TYPE_PEM] = public_key.exportKey("PEM").decode()
-        else:
-            raise TypeError
-
-        self._public_keys.append(row)
-        if key_type == PUBLIC_KEY_SIGN_TYPE_RSA:
-            authentication_type = AUTHENTICATION_TYPE_RSA
-        else:
-            raise NotImplementedError
-
-        row = {
-            'type' : authentication_type,
-            'publicKey' : key_id,
-        }
-        self._authentications.append(row)
         return private_key_pem
 
-
+    # add a service to the list of services on the DDO
     def add_service(self, service_type, service_endpoint):
         row = {
             'type' : service_type,
@@ -113,6 +128,8 @@ class OceanDDO(object):
         }
         self._services.append(row)
 
+    # return the DDO as a JSON text
+    # if is_proof == False then do not include the 'proof' element
     def as_text(self, is_proof = True):
         if self._created == None:
             self._created = self._get_timestamp()
@@ -123,7 +140,10 @@ class OceanDDO(object):
           'created': self._created,
         }
         if len(self._public_keys) > 0:
-            data['publicKey'] = self._public_keys
+            values = []
+            for public_key in self._public_keys:
+                values.append(public_key.as_text())
+            data['publicKey'] = values
         if len(self._authentications) > 0:
             data['authentication'] = self._authentications
         if len(self._services) > 0:
@@ -133,12 +153,15 @@ class OceanDDO(object):
 
         return json.dumps(data)
 
+    # import a JSON text into this DDO
     def read_json(self, ddo_json):
         values = json.loads(ddo_json)
         self._id = values['id']
         self._created = values.get('created', None)
         if 'publicKey' in values:
-            self._public_keys = values['publicKey']
+            self._public_keys = []
+            for value in values['publicKey']:
+                self._public_keys.append(self.create_public_key(json.loads(value)))
         if 'authentication' in values:
             self._authentications = values['authentication']
         if 'service' in values:
@@ -146,6 +169,7 @@ class OceanDDO(object):
         if 'proof' in values:
             self._proof = values['proof']
 
+    # add a proof to the DDO, based on the public_key id/index and signed with the private key
     def add_proof(self, index, private_key):
         # add a static proof to the DDO, based on one of the public keys
         # find the key using an index, or key name
@@ -155,16 +179,18 @@ class OceanDDO(object):
         # just incase clear out the current static proof property
         self._proof = None
         # get the complete DDO as jSON text without the static proof field
-        signature = OceanDDO.sign_text(self.as_text(False), private_key, sign_key['type'])
+        signature = OceanDDO.sign_text(self.as_text(False), private_key, sign_key.get_type())
 
         self._proof = {
-            'type': sign_key['type'],
+            'type': sign_key.get_type(),
             'created': self._get_timestamp(),
-            'creator': sign_key['id'],
+            'creator': sign_key.get_id(),
             'signatureValue': str(b64encode(signature))
         }
 
 
+    # validate the static proof created with this DDO, return True if valid
+    # if no static proof exists then return False
     def validate_proof(self, signature_text = None):
 
         if not signature_text:
@@ -177,27 +203,28 @@ class OceanDDO(object):
             return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
         return False
 
+    # return true if a static proof exists in this DDO
     def is_proof_defined(self):
         return not self._proof == None
 
-
+    # validate a signature based on a given public_key key_id/name
     def validate_from_key(self, key_id, signature_text, signature_value):
         public_key = self.get_public_key(key_id)
-        if public_key:
-            key_value = None
-            if PUBLIC_KEY_STORE_TYPE_HEX in public_key:
-                key_value = bytes.fromhex(public_key[PUBLIC_KEY_STORE_TYPE_HEX])
-            elif PUBLIC_KEY_STORE_TYPE_BASE64 in public_key:
-                key_value = b64decode(public_key[PUBLIC_KEY_STORE_TYPE_BASE64])
-            elif PUBLIC_KEY_STORE_TYPE_JWK in public_key:
-                raise NotImplementedError
-            else:
-                key_value = public_key[PUBLIC_KEY_STORE_TYPE_PEM].encode()
-            if key_value:
-                authentication = self.get_authentication_from_public_key_id(public_key['id'])
-                if authentication:
-                    return OceanDDO.validate_signature(signature_text, key_value, signature_value, authentication['type'])
-        return False
+        if public_key == None:
+            return False
+            
+        key_value = public_key.get_decode_value()
+        if key_value == None:
+            return False
+            
+        authentication = self.get_authentication_from_public_key_id(public_key.get_id())
+        if authentication == None:
+            return False
+            
+        # if public_key.get_store_type() != PUBLIC_KEY_STORE_TYPE_PEM:
+            # key_value = key_value.decode()
+            
+        return OceanDDO.validate_signature(signature_text, key_value, signature_value, authentication['type'])
 
     # key_id can be a string, or int. If int then the index in the list of keys
     def get_public_key(self, id):
@@ -205,7 +232,7 @@ class OceanDDO(object):
             return self._public_keys[id]
 
         for item in self._public_keys:
-            if item['id'] == id:
+            if item.get_id() == id:
                 return item
         return None
 
@@ -217,16 +244,13 @@ class OceanDDO(object):
                 return item
         return None
 
-    def validate_public_key(self, public_key):
-        if isinstance(public_key, dict):
-            return 'id' in public_key and 'type' in public_key
-        return False
-
+    # return true if the authentication has the correct field data
     def validate_authentication(self, authentication):
         if isinstance(authentication, dict):
             return 'type' in authentication and 'publicKey' in authentication
         return False
 
+    # return true if a service has the correct field data.
     def validate_service(self, service):
         if isinstance(service, dict):
             return 'type' in service and 'serviceEndpoint' in service
@@ -240,7 +264,7 @@ class OceanDDO(object):
                     return False
                 key_id = authentication['publicKey']
                 public_key = self.get_public_key(key_id)
-                if not self.validate_public_key(public_key):
+                if not public_key.is_valid():
                     return False
         if self._services:
             for service in self._services:
@@ -252,25 +276,13 @@ class OceanDDO(object):
     # as this hash can be used to generate the DID
     def calculate_hash(self):
         hash_text = []
-        public_key_store_types = [
-            PUBLIC_KEY_STORE_TYPE_PEM,
-            PUBLIC_KEY_STORE_TYPE_JWK,
-            PUBLIC_KEY_STORE_TYPE_HEX,
-            PUBLIC_KEY_STORE_TYPE_BASE64,
-        ]
         if self._created:
             hash_text.append(self._created)
 
         if self._public_keys:
             for public_key in self._public_keys:
-                hash_text.append(public_key['type'])
-                for public_key_store_type in public_key_store_types:
-                    if public_key_store_type in public_key:
-                        hash_text.append(public_key[public_key_store_type])
-
-        if self._authentications:
-            for authentication in self._authentications:
-                hash_text.append(authentication['type'])
+                hash_text.append(public_key.get_store_type())
+                hash_text.append(public_key.as_text())
 
         if self._services:
             for service in self._services:
@@ -295,9 +307,9 @@ class OceanDDO(object):
         return self._services
 
     @staticmethod
-    def sign_text(text, private_key, sign_type = PUBLIC_KEY_SIGN_TYPE_RSA):
+    def sign_text(text, private_key, sign_type = PUBLIC_KEY_TYPE_RSA):
         signed_text = None
-        if sign_type == PUBLIC_KEY_SIGN_TYPE_RSA:
+        if sign_type == PUBLIC_KEY_TYPE_RSA:
             signer = PKCS1_v1_5.new(RSA.import_key(private_key))
             text_hash = SHA256.new(text.encode())
             signed_text = signer.sign(text_hash)
@@ -307,17 +319,17 @@ class OceanDDO(object):
 
     @staticmethod
     def validate_signature(text, key, signature, sign_type = AUTHENTICATION_TYPE_RSA):
-        try:
-            if sign_type == AUTHENTICATION_TYPE_RSA:
-                rsa_key = RSA.import_key(key)
-                validater = PKCS1_v1_5.new(rsa_key)
-                text_hash = SHA256.new(text.encode())
-                validater.verify(text_hash, signature)
-                return True
-            else:
-                raise NotImplementedError
-        except (ValueError, TypeError):
-            return False
+#        try:
+        if sign_type == AUTHENTICATION_TYPE_RSA:
+            rsa_key = RSA.import_key(key)
+            validater = PKCS1_v1_5.new(rsa_key)
+            text_hash = SHA256.new(text.encode())
+            validater.verify(text_hash, signature)
+            return True
+        else:
+            raise NotImplementedError
+#        except (ValueError, TypeError):
+#            return False
 
     def _get_timestamp(self):
         return str(datetime.datetime.now())

@@ -13,7 +13,6 @@ from did_ddo_lib import (
     PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
-
 )
 
 public_key_store_types = [
