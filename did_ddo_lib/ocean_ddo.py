@@ -49,6 +49,10 @@ from .authentication import (
     Authentication,
 )
 
+from .service import (
+    Service,
+)
+
 from .constants import (
     KEY_PAIR_MODULUS_BIT,
     DID_DDO_CONTEXT_URL,
@@ -122,12 +126,14 @@ class OceanDDO(object):
         return private_key_pem
 
     # add a service to the list of services on the DDO
-    def add_service(self, service_type, service_endpoint):
-        row = {
-            'type' : service_type,
-            'serviceEndpoint': service_endpoint,
-        }
-        self._services.append(row)
+    def add_service(self, service_type, service_endpoint = None, service_id = None):
+        if isinstance(service_type, Service):
+            service = service_type
+        else:
+            if service_id == None:
+                service_id = self._did
+            service = Service(service_id, service_endpoint, service_type)
+        self._services.append(service)
 
     # return the DDO as a JSON text
     # if is_proof == False then do not include the 'proof' element
@@ -151,7 +157,10 @@ class OceanDDO(object):
                 values.append(authentication.as_text())
             data['authentication'] = values
         if len(self._services) > 0:
-            data['service'] = self._services
+            values = []
+            for service in self._services:
+                values.append(service.as_text())
+            data['service'] = values
         if self._proof and is_proof == True:
             data['proof'] = self._proof
 
@@ -171,7 +180,9 @@ class OceanDDO(object):
             for value in values['authentication']:
                 self._authentications.append(OceanDDO.create_authentication_from_json(json.loads(value)))
         if 'service' in values:
-            self._services = values['service']
+            self._services = []
+            for value in values['service']:
+                self.services.append(OceanDDO.create_service_from_json(json.loads(value)))
         if 'proof' in values:
             self._proof = values['proof']
 
@@ -270,11 +281,6 @@ class OceanDDO(object):
                 return authentication
         return None
 
-    # return true if a service has the correct field data.
-    def validate_service(self, service):
-        if isinstance(service, dict):
-            return 'type' in service and 'serviceEndpoint' in service
-        return False
 
     # validate the ddo data structure
     def validate(self):
@@ -291,7 +297,7 @@ class OceanDDO(object):
                     return False
         if self._services:
             for service in self._services:
-                if not self.validate_service(service):
+                if not service.is_valid():
                     return False
         return True
 
@@ -316,8 +322,8 @@ class OceanDDO(object):
                     
         if self._services:
             for service in self._services:
-                hash_text.append(service['type'])
-                hash_text.append(service['serviceEndpoint'])
+                hash_text.append(service.get_type())
+                hash_text.append(service.get_endpoint())
 
         # if no data can be found to hash then raise an error
         if len(hash_text) == 0:
@@ -382,6 +388,16 @@ class OceanDDO(object):
             
         return authentication
 
+    @staticmethod
+    def create_service_from_json(values):
+        if not 'id' in values:
+            raise IndexError            
+        if not 'serviceEndpoint' in values:
+            raise IndexError
+        if not 'type' in values:
+            raise IndexError            
+        service = Service(values['id'], values['serviceEndpoint'], values['type'])
+        return service
 
     def _get_timestamp(self):
         return str(datetime.datetime.now())
