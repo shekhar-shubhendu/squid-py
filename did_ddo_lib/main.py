@@ -29,7 +29,7 @@ def did_generate(id, path = None, fragment = None, method = 'ocean'):
     return "".join(did)
 
 # split a DID into it's parts
-def did_split(did):
+def did_parse(did):
     result = None
     match = re.match('^did:([a-z0-9]+):([a-zA-Z0-9-.]+)(.*)', did)
     if match:

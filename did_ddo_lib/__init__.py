@@ -8,12 +8,12 @@ Ocean Protocol DID/DDO Python Library
 
 
 """
-__author__ = """OceanProtocol"""
+__author__ = """Ocean Protocol Foundation"""
 __version__ = '0.0.1'
 
 from did_ddo_lib.main import (
 	did_generate,
-	did_split,
+	did_parse,
 )
 
 from did_ddo_lib.ocean_ddo import (
