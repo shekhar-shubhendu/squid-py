@@ -25,4 +25,5 @@ from did_ddo_lib.public_key_base import (
     PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
+    PUBLIC_KEY_STORE_TYPE_BASE85,
 )
