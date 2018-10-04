@@ -12,8 +12,10 @@ __author__ = """Ocean Protocol Foundation"""
 __version__ = '0.0.1'
 
 from did_ddo_lib.main import (
-	did_generate,
-	did_parse,
+    did_generate,
+    did_generate_from_ddo,
+    did_validate,
+    did_parse,
 )
 
 from did_ddo_lib.ocean_ddo import (

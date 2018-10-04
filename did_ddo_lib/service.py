@@ -5,6 +5,7 @@
 """
 
 import json
+import re
 
 
 class Service(object):
@@ -16,6 +17,10 @@ class Service(object):
 
     def get_id(self):
         return self._id
+        
+    def assign_did(self, did):
+        if re.match('^#.*', self._id):
+            self._id = did + self._id
         
     def get_type(self):
         return self._type

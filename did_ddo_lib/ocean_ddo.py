@@ -4,6 +4,7 @@
 """
 import json
 import datetime
+import re
 
 
 from web3 import (
@@ -60,16 +61,20 @@ from .constants import (
 
 class OceanDDO(object):
 
-    def __init__(self, did = None, ddo_text = None):
+    def __init__(self, did = '', ddo_text = None , created = None):
         self.clear()
         self._did = did
-        self._created = self._get_timestamp()
+        if created == None:
+            self._created = self._get_timestamp()
+        else:
+            self._created = created
 
         if ddo_text:
             self.read_json(ddo_text)
 
     # clear the DDO data values
     def clear(self):
+        self._did = ''
         self._public_keys = []
         self._authentications = []
         self._services = []
@@ -188,9 +193,16 @@ class OceanDDO(object):
             self._proof = values['proof']
 
     # add a proof to the DDO, based on the public_key id/index and signed with the private key
-    def add_proof(self, authorisation_index, private_key):
+    def add_proof(self, authorisation_index, private_key = None):
         # add a static proof to the DDO, based on one of the public keys
         # find the key using an index, or key name
+        if isinstance(authorisation_index, dict):
+            self._proof = authorisation_index
+            return
+            
+        if private_key == None:
+            raise ValueError
+            
         authentication = self._authentications[authorisation_index]
         if not authentication:
             raise IndexError
@@ -311,15 +323,16 @@ class OceanDDO(object):
 
         if self._public_keys:
             for public_key in self._public_keys:
+                pass
                 hash_text.append(public_key.get_type())
-                hash_text.append(public_key.as_text())
+                hash_text.append(public_key.get_value())
 
         if self._authentications:
             for authentication in self._authentications:
                 if authentication.is_public_key():
                     public_key = authentication.get_public_key()
                     hash_text.append(public_key.get_type())
-                    hash_text.append(public_key.as_text())
+                    hash_text.append(public_key.get_value())
                     
         if self._services:
             for service in self._services:
@@ -331,6 +344,48 @@ class OceanDDO(object):
             raise ValueError
         return Web3.sha3(text="".join(hash_text))
 
+    def is_empty(self):
+        return self._did == ''                          \
+                and len(self._public_keys) == 0         \
+                and len(self._authentications) == 0     \
+                and len(self._services) == 0            \
+                and self._proof == None                 \
+                and self._created == None
+    
+    def is_did_assigend(self):
+        return self._did != ''
+    
+    def get_created_time(self):
+        return self._created
+
+    # method to copy a DDO and assign a new did to all of the keys to an empty/non DID assigned DDO.
+    # we assume that this ddo has been created as empty ( no did )
+    def create_new(self, did):
+        
+        if self.is_did_assigend():
+            raise Exception('Cannot assign a DID to a completed DDO object')
+        ddo = OceanDDO(did, created = self._created)
+        for public_key in self._public_keys:
+            public_key.assign_did(did)
+            ddo.add_public_key(public_key)
+            
+        for authentication in self._authentications:
+            authentication.assign_did(did)
+            ddo.add_authentication(authentication)
+            
+        for service in self._services:
+            service.assign_did(did)
+            ddo.add_service(service)
+            
+        
+        if self.is_proof_defined():
+            if re.match('^#.*', self._proof['creator']):
+                proof = self._proof
+                proof['creator'] = did + proof['creator']
+            ddo.add_proof(proof)
+            
+        return ddo
+            
     @property
     def public_keys(self):
         return self._public_keys
@@ -343,6 +398,10 @@ class OceanDDO(object):
     def services(self):
         return self._services
 
+    @property
+    def proof(self):
+        return self._proof
+        
     @staticmethod
     def sign_text(text, private_key, sign_type = PUBLIC_KEY_TYPE_RSA):
         signed_text = None

@@ -6,6 +6,7 @@
 """
 
 import json
+import re
 
 from .public_key_base import (
     PublicKeyBase,
@@ -22,6 +23,13 @@ class Authentication(object):
             self._public_key_id = key_id
         self._type = authentication_type
 
+    def assign_did(self, did):
+        if self._public_key_id:
+            if re.match('^#.*', self._public_key_id):
+                self._public_key_id = did + self._public_key_id
+        if self._public_key:
+            self._public_key.assign_did(did)
+            
     def get_type(self):
         return self._type
                 
