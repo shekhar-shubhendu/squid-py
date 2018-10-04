@@ -63,7 +63,6 @@ If you do not pass the config_path you can pass using **$CONFIG_FILE** environme
 It is possible do not pass the config file, but you should be sure of provide the host, port and addresses.
 If you opt for this you can pass the addresses using the following environment variables:
 
-
 - **MARKET_ADDRESS**  Address of your market contract deployed in the network
 - **AUTH_ADDRESS**    Address of your auth contract deployed in the network.
 - **TOKEN_ADDRESS**   Address of your token contract deployed in the network.
