@@ -130,8 +130,8 @@ def test_creating_ddo():
     assert ddo.calculate_hash() == ddo_text_no_proof_hash
 
 def test_creating_ddo_embedded_public_key():
-    id = secrets.token_hex(32)
-    did = did_generate(id)
+    test_id = secrets.token_hex(32)
+    did = did_generate(test_id)
     assert did
     ddo = OceanDDO(did)
     assert ddo
@@ -151,7 +151,7 @@ def test_creating_ddo_embedded_public_key():
 
 def test_creating_did_using_ddo():
     # create an empty ddo
-    did_id = secrets.token_hex(32)
+    test_id = secrets.token_hex(32)
     ddo = OceanDDO()
     assert ddo
     private_keys = []
@@ -165,13 +165,13 @@ def test_creating_did_using_ddo():
     assert ddo.validate_proof()
 
     ddo_text_proof_hash = ddo.calculate_hash()
-    did, assigned_ddo = did_generate_from_ddo(did_id, ddo)
+    did, assigned_ddo = did_generate_from_ddo(test_id, ddo)
 
     assert(ddo.calculate_hash() == assigned_ddo.calculate_hash())
     assert assigned_ddo.validate_proof()
 
     # check to see if did is valid against the new ddo
-    assert did_validate(did, did_id, assigned_ddo)
+    assert did_validate(did, test_id, assigned_ddo)
 
     # check to see if did is valid against the old ddo
-    assert did_validate(did, did_id, ddo)
+    assert did_validate(did, test_id, ddo)

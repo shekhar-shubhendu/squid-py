@@ -24,14 +24,12 @@ from Crypto.Hash import (
 )
 
 from base64 import (
-    b64decode,
     b64encode
 )
 
 from .public_key_base import (
     PublicKeyBase,
     PUBLIC_KEY_STORE_TYPE_PEM,
-#    PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
 )
@@ -61,7 +59,7 @@ class OceanDDO(object):
         self.clear()
         self._did = did
         if created == None:
-            self._created = self.get_timestamp()
+            self._created = OceanDDO.get_timestamp()
         else:
             self._created = created
 
@@ -141,7 +139,7 @@ class OceanDDO(object):
     # if is_proof == False then do not include the 'proof' element
     def as_text(self, is_proof = True):
         if self._created == None:
-            self._created = self.get_timestamp()
+            self._created = OceanDDO.get_timestamp()
 
         data = {
           "@context": DID_DDO_CONTEXT_URL,
@@ -216,7 +214,7 @@ class OceanDDO(object):
 
         self._proof = {
             'type': sign_key.get_type(),
-            'created': self.get_timestamp(),
+            'created': OceanDDO.get_timestamp(),
             'creator': sign_key.get_id(),
             'signatureValue': str(b64encode(signature))
         }
@@ -454,5 +452,6 @@ class OceanDDO(object):
         service = Service(values['id'], values['serviceEndpoint'], values['type'])
         return service
 
-    def get_timestamp(self):
+    @staticmethod
+    def get_timestamp():
         return str(datetime.datetime.now())
