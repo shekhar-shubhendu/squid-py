@@ -39,7 +39,7 @@ class PublicKeyBase(object):
             self._id = did + self._id
         if re.match('^#.*', self._owner):
             self._owner = did + self._owner
-        
+
     def get_owner(self):
         return self._owner
 
@@ -114,4 +114,4 @@ class PublicKeyBase(object):
         return self._id and self._type
 
     def get_authentication_type(self):
-        raise NotImplemented
+        raise NotImplementedError

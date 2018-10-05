@@ -1,8 +1,6 @@
 """
     Test did_lib
 """
-import logging
-import os
 import secrets
 
 from did_ddo_lib import (
@@ -12,7 +10,7 @@ from did_ddo_lib import (
     did_validate,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
-    PUBLIC_KEY_STORE_TYPE_JWK,
+#    PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
     PUBLIC_KEY_STORE_TYPE_BASE85,
@@ -84,8 +82,8 @@ def test_did():
 
 
 def test_creating_ddo():
-    id = secrets.token_hex(32)
-    did = did_generate(id)
+    did_id = secrets.token_hex(32)
+    did = did_generate(did_id)
     assert did
     ddo = OceanDDO(did)
     assert ddo
@@ -149,10 +147,11 @@ def test_creating_ddo_embedded_public_key():
         ddo_text_proof = ddo.as_text()
         assert ddo.validate_proof()
         ddo_text_proof_hash = ddo.calculate_hash()
+        assert ddo_text_proof_hash
 
 def test_creating_did_using_ddo():
     # create an empty ddo
-    id = secrets.token_hex(32)    
+    did_id = secrets.token_hex(32)
     ddo = OceanDDO()
     assert ddo
     private_keys = []
@@ -164,15 +163,15 @@ def test_creating_did_using_ddo():
     ddo.add_proof(0, private_keys[0])
     ddo_text_proof = ddo.as_text()
     assert ddo.validate_proof()
-    
+
     ddo_text_proof_hash = ddo.calculate_hash()
-    did, assigned_ddo = did_generate_from_ddo(id, ddo)
+    did, assigned_ddo = did_generate_from_ddo(did_id, ddo)
 
     assert(ddo.calculate_hash() == assigned_ddo.calculate_hash())
     assert assigned_ddo.validate_proof()
-    
+
     # check to see if did is valid against the new ddo
-    assert did_validate(did, id, assigned_ddo)
+    assert did_validate(did, did_id, assigned_ddo)
 
     # check to see if did is valid against the old ddo
-    assert did_validate(did, id, ddo)
+    assert did_validate(did, did_id, ddo)

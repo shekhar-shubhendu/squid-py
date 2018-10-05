@@ -2,7 +2,7 @@
 
     Authentication Class
     To handle embedded public keys
-    
+
 """
 
 import json
@@ -29,20 +29,20 @@ class Authentication(object):
                 self._public_key_id = did + self._public_key_id
         if self._public_key:
             self._public_key.assign_did(did)
-            
+
     def get_type(self):
         return self._type
-                
+
     def get_public_key_id(self):
         if self._public_key_id:
             return self._public_key_id
         if self._public_key:
             return self._public_key.get_id()
         return None
-        
+
     def get_public_key(self):
         return self._public_key
-        
+
     def as_text(self):
         values = {
             'type': self._type
@@ -52,14 +52,14 @@ class Authentication(object):
         elif self._public_key_id:
             values['publicKey'] = self._public_key_id
         return json.dumps(values)
-            
+
 
     def is_valid(self):
         return self.get_public_key_id() != None and self._type != None
-        
+
     def is_public_key(self):
         return self._public_key != None
-        
+
     def is_key_id(self, key_id):
         if self.get_public_key_id() and self.get_public_key_id() == key_id:
             return True

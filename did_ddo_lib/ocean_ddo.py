@@ -15,10 +15,6 @@ from Crypto.PublicKey import (
  	RSA,
 )
 
-from Crypto.Cipher import (
-	PKCS1_OAEP,
-)
-
 from Crypto.Signature import (
     PKCS1_v1_5
 )
@@ -35,7 +31,7 @@ from base64 import (
 from .public_key_base import (
     PublicKeyBase,
     PUBLIC_KEY_STORE_TYPE_PEM,
-    PUBLIC_KEY_STORE_TYPE_JWK,
+#    PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
 )
@@ -65,7 +61,7 @@ class OceanDDO(object):
         self.clear()
         self._did = did
         if created == None:
-            self._created = self._get_timestamp()
+            self._created = self.get_timestamp()
         else:
             self._created = created
 
@@ -83,7 +79,7 @@ class OceanDDO(object):
 
 
     # add a public key object to the list of public keys
-    def add_public_key(self, public_key):        
+    def add_public_key(self, public_key):
         self._public_keys.append(public_key)
 
     # add a authentication public key id and type to the list of authentications
@@ -100,7 +96,7 @@ class OceanDDO(object):
             if authentication_type == None:
                 raise ValueError
             authentication = Authentication(key_id, authentication_type)
-            
+
         self._authentications.append(authentication)
 
     # add a signature with a public key and authentication entry for validating this DDO
@@ -110,22 +106,22 @@ class OceanDDO(object):
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
         public_key_raw = key_pair.publickey()
         private_key_pem = key_pair.exportKey("PEM")
-        
+
         # find the current public key count
         next_index = self.get_public_key_count() + 1
         key_id = '{0}#keys={1}'.format(self._did, next_index)
-        
+
         public_key = PublicKeyRSA(key_id, owner = key_id)
-        
+
         public_key.set_encode_key_value(public_key_raw, public_key_store_type)
-        
+
         if is_embedded:
             # also add the authentication key as embedded key with the authentication
             self.add_authentication(public_key)
         else:
             # add the public key to the DDO list of public keys
             self.add_public_key(public_key)
-            
+
             # add the public key id and type for this key to the authentication
             self.add_authentication(public_key.get_id(), public_key.get_authentication_type())
 
@@ -145,7 +141,7 @@ class OceanDDO(object):
     # if is_proof == False then do not include the 'proof' element
     def as_text(self, is_proof = True):
         if self._created == None:
-            self._created = self._get_timestamp()
+            self._created = self.get_timestamp()
 
         data = {
           "@context": DID_DDO_CONTEXT_URL,
@@ -199,10 +195,10 @@ class OceanDDO(object):
         if isinstance(authorisation_index, dict):
             self._proof = authorisation_index
             return
-            
+
         if private_key == None:
             raise ValueError
-            
+
         authentication = self._authentications[authorisation_index]
         if not authentication:
             raise IndexError
@@ -210,7 +206,7 @@ class OceanDDO(object):
             sign_key = authentication.get_public_key()
         else:
             sign_key = self.get_public_key(authentication.get_public_key_id())
-            
+
         if sign_key == None:
             raise IndexError
         # just incase clear out the current static proof property
@@ -220,7 +216,7 @@ class OceanDDO(object):
 
         self._proof = {
             'type': sign_key.get_type(),
-            'created': self._get_timestamp(),
+            'created': self.get_timestamp(),
             'creator': sign_key.get_id(),
             'signatureValue': str(b64encode(signature))
         }
@@ -246,22 +242,22 @@ class OceanDDO(object):
 
     # validate a signature based on a given public_key key_id/name
     def validate_from_key(self, key_id, signature_text, signature_value):
-        
+
         public_key = self.get_public_key(key_id, True)
         if public_key == None:
             return False
-            
+
         key_value = public_key.get_decode_value()
         if key_value == None:
             return False
-            
+
         authentication = self.get_authentication_from_public_key_id(public_key.get_id())
         if authentication == None:
             return False
-            
+
         # if public_key.get_store_type() != PUBLIC_KEY_STORE_TYPE_PEM:
             # key_value = key_value.decode()
-            
+
         return OceanDDO.validate_signature(signature_text, key_value, signature_value, authentication.get_type())
 
     # key_id can be a string, or int. If int then the index in the list of keys
@@ -272,7 +268,7 @@ class OceanDDO(object):
         for item in self._public_keys:
             if item.get_id() == key_id:
                 return item
-                
+
         if is_search_embedded:
             for authentication in self._authentications:
                 if authentication.get_public_key_id() == key_id:
@@ -286,7 +282,7 @@ class OceanDDO(object):
             if authentication.is_public_key():
                 index += 1
         return index
-        
+
     # return the authentication based on it's id
     def get_authentication_from_public_key_id(self, key_id):
         for authentication in self._authentications:
@@ -323,7 +319,6 @@ class OceanDDO(object):
 
         if self._public_keys:
             for public_key in self._public_keys:
-                pass
                 hash_text.append(public_key.get_type())
                 hash_text.append(public_key.get_value())
 
@@ -333,7 +328,7 @@ class OceanDDO(object):
                     public_key = authentication.get_public_key()
                     hash_text.append(public_key.get_type())
                     hash_text.append(public_key.get_value())
-                    
+
         if self._services:
             for service in self._services:
                 hash_text.append(service.get_type())
@@ -351,41 +346,41 @@ class OceanDDO(object):
                 and len(self._services) == 0            \
                 and self._proof == None                 \
                 and self._created == None
-    
+
     def is_did_assigend(self):
         return self._did != ''
-    
+
     def get_created_time(self):
         return self._created
 
     # method to copy a DDO and assign a new did to all of the keys to an empty/non DID assigned DDO.
     # we assume that this ddo has been created as empty ( no did )
     def create_new(self, did):
-        
+
         if self.is_did_assigend():
             raise Exception('Cannot assign a DID to a completed DDO object')
         ddo = OceanDDO(did, created = self._created)
         for public_key in self._public_keys:
             public_key.assign_did(did)
             ddo.add_public_key(public_key)
-            
+
         for authentication in self._authentications:
             authentication.assign_did(did)
             ddo.add_authentication(authentication)
-            
+
         for service in self._services:
             service.assign_did(did)
             ddo.add_service(service)
-            
-        
+
+
         if self.is_proof_defined():
             if re.match('^#.*', self._proof['creator']):
                 proof = self._proof
                 proof['creator'] = did + proof['creator']
             ddo.add_proof(proof)
-            
+
         return ddo
-            
+
     @property
     def public_keys(self):
         return self._public_keys
@@ -401,7 +396,7 @@ class OceanDDO(object):
     @property
     def proof(self):
         return self._proof
-        
+
     @staticmethod
     def sign_text(text, private_key, sign_type = PUBLIC_KEY_TYPE_RSA):
         signed_text = None
@@ -434,7 +429,7 @@ class OceanDDO(object):
         public_key = PublicKeyRSA(values['id'], owner = values.get('owner', None))
         public_key.set_key_value(values)
         return public_key
-        
+
 
     @staticmethod
     def create_authentication_from_json(values):
@@ -445,19 +440,19 @@ class OceanDDO(object):
             authentication = Authentication(public_key, public_key.get_authentication_type())
         else:
             authentication = Authentication(key_id, authentication_type)
-            
+
         return authentication
 
     @staticmethod
     def create_service_from_json(values):
         if not 'id' in values:
-            raise IndexError            
+            raise IndexError
         if not 'serviceEndpoint' in values:
             raise IndexError
         if not 'type' in values:
-            raise IndexError            
+            raise IndexError
         service = Service(values['id'], values['serviceEndpoint'], values['type'])
         return service
 
-    def _get_timestamp(self):
+    def get_timestamp(self):
         return str(datetime.datetime.now())
