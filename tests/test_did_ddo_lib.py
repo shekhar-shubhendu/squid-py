@@ -145,6 +145,7 @@ def test_creating_ddo_embedded_public_key():
     for index, private_key in enumerate(private_keys):
         ddo.add_proof(index, private_key)
         ddo_text_proof = ddo.as_text()
+        assert ddo_text_proof
         assert ddo.validate_proof()
         ddo_text_proof_hash = ddo.calculate_hash()
         assert ddo_text_proof_hash
@@ -165,6 +166,7 @@ def test_creating_did_using_ddo():
     assert ddo.validate_proof()
 
     ddo_text_proof_hash = ddo.calculate_hash()
+    assert ddo_text_proof_hash
     did, assigned_ddo = did_generate_from_ddo(test_id, ddo)
 
     assert(ddo.calculate_hash() == assigned_ddo.calculate_hash())

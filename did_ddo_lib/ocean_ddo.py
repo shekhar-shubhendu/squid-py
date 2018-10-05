@@ -30,7 +30,6 @@ from base64 import (
 from .public_key_base import (
     PublicKeyBase,
     PUBLIC_KEY_STORE_TYPE_PEM,
-    PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
 )
 
