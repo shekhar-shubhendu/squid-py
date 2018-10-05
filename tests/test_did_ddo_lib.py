@@ -10,7 +10,6 @@ from did_ddo_lib import (
     did_validate,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
-#    PUBLIC_KEY_STORE_TYPE_JWK,
     PUBLIC_KEY_STORE_TYPE_HEX,
     PUBLIC_KEY_STORE_TYPE_BASE64,
     PUBLIC_KEY_STORE_TYPE_BASE85,
