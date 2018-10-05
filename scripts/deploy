@@ -12,8 +12,10 @@ cp $CONF_TEMPLATE $CONF_FILE
 #KEEPERDIR=~/Projects/keeper-contracts
 #cd $KEEPERDIR
 
-# wait for docker to compile the contracts
-sleep 2
+# wait for docker to compile and install the contracts
+echo "Waiting for keeper-contracts to be installed"
+docker exec -it docker_keeper-contracts_1 bash -c 'while [ ! -f /keeper-contracts/artifacts/ready ]; do sleep 1; done'
+
 market=$(docker exec -it docker_keeper-contracts_1 python -c "import sys, json; print(json.load(open('/keeper-contracts/artifacts/OceanMarket.development.json', 'r'))['address'])")
 token=$(docker exec -it docker_keeper-contracts_1 python -c "import sys, json; print(json.load(open('/keeper-contracts/artifacts/OceanToken.development.json', 'r'))['address'])")
 auth=$(docker exec -it docker_keeper-contracts_1 python -c "import sys, json; print(json.load(open('/keeper-contracts/artifacts/OceanAuth.development.json', 'r'))['address'])")
