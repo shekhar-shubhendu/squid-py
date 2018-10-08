@@ -3,7 +3,6 @@ import os
 
 from web3 import Web3, HTTPProvider
 
-from squid_py.config_parser import load_config_section, get_value
 from squid_py.constants import KEEPER_CONTRACTS
 from squid_py.keeper.auth import Auth
 from squid_py.keeper.market import Market
@@ -32,10 +31,10 @@ class Ocean(object):
             'auth' : '0x00..00',
             'token' : '0x00..00',
         ]
-    :param web3: Web3 object to use as the Ethereum node.
+    :param web3: Web3 object to use to connect too the keeper node.
     :param keeper_path: Path to the Ocean Protocol Keeper contracts, to load contracts and addresses via the artifacts folder.
     :param logger: Optional logger to use instead of creating our own loggger
-    :param provider_url: url of the provider
+    :param provider_url: Optional url of the ocean network provider, defaults to 'http://localhost:5000'
     :param gas_limit: Optional gas limit, defaults to 300000
     :param config_file: Optional config file to load in the above config details
     :returns: Ocean object
