@@ -16,9 +16,8 @@ cp $CONF_TEMPLATE $CONF_FILE
 # token=$(docker exec -it docker_keeper-contracts_1 python -c "import sys, json; print(json.load(open('/keeper-contracts/artifacts/OceanToken.development.json', 'r'))['address'])")
 # auth=$(docker exec -it docker_keeper-contracts_1 python -c "import sys, json; print(json.load(open('/keeper-contracts/artifacts/OceanAuth.development.json', 'r'))['address'])")
 
-while [ ! -f "/artifacts/ready" ]; do
-  sleep 2
-done
+echo "Waiting for keeper-contracts to be installed"
+docker exec -it docker_keeper-contracts_1 bash -c 'while [ ! -f /keeper-contracts/artifacts/ready ]; do sleep 1; done'
 market=$(cat /artifacts/OceanMarket.development.json | jq -r .address)
 token=$(cat /artifacts/OceanToken.development.json | jq -r .address)
 auth=$(cat /artifacts/OceanAuth.development.json | jq -r .address)

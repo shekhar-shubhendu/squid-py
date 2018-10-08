@@ -1,5 +1,9 @@
 import time
 
+from web3 import (
+    Web3
+)
+
 import squid_py.acl as acl
 from squid_py.ocean import Ocean
 from squid_py.utils.web3_helper import convert_to_string
@@ -62,12 +66,12 @@ def process_enc_token(event):
 def test_keeper():
     expire_seconds = 9999999999
     asset_price = 100
-    ocean = Ocean(host='http://localhost', port=8545, config_path='config_local.ini')
+    ocean = Ocean(keeper_url='http://localhost:8545', config_file='config_local.ini')
     market = ocean.market
     token = ocean.token
     auth = ocean.auth
-    provider_account = ocean.helper.web3.eth.accounts[0]
-    consumer_account = ocean.helper.web3.eth.accounts[1]
+    provider_account = ocean.helper.accounts[0]
+    consumer_account = ocean.helper.accounts[1]
     assert market.request_tokens(2000, provider_account)
     assert market.request_tokens(2000, consumer_account)
 
@@ -76,8 +80,8 @@ def test_keeper():
     assert market.check_asset(asset_id)
     assert asset_price == market.get_asset_price(asset_id)
 
-    json_dict['assetId'] = ocean.web3.toHex(asset_id)
-    ocean.metadata.register_asset(json_dict)
+    json_dict['assetId'] = Web3.toHex(asset_id)
+    # ocean.metadata.register_asset(json_dict)
     expiry = int(time.time() + expire_seconds)
 
     pubprivkey = acl.generate_encryption_keys()
@@ -105,7 +109,7 @@ def test_keeper():
 
     assert auth.get_order_status(request_id) == 1
 
-    token.token_approve(ocean.web3.toChecksumAddress(market.address),
+    token.token_approve(Web3.toChecksumAddress(market.address),
                         asset_price,
                         consumer_account)
 
@@ -131,4 +135,3 @@ def test_keeper():
     # assert events
     # assert events[0].args['_id'] == request_id
     # on_chain_enc_token = events[0].args["_encryptedAccessToken"]
-
