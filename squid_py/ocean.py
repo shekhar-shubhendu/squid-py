@@ -37,7 +37,7 @@ class Ocean(object):
     :param logger: Optional logger to use instead of creating our own loggger
     :param provider_url: url of the provider
     :param gas_limit: Optional gas limit, defaults to 300000
-    :param config_file: Optional config file to load in the above config
+    :param config_file: Optional config file to load in the above config details
     :returns: Ocean object
 
     An example in creating an Ocean object::
@@ -86,24 +86,7 @@ class Ocean(object):
                 self._web3 = Web3(HTTPProvider(self._keeper_url))
         if self._web3 == None:
             raise ValueError('You need to provide a valid Keeper host and port connection values')
-        """
-        try:
-            config_path = os.getenv('CONFIG_FILE') if not config_path else config_path
-            self.config = load_config_section(config_path, KEEPER_CONTRACTS)
-            self.host = get_value(self.config, 'keeper.host', 'KEEPER_HOST', host)
-            self.port = get_value(self.config, 'keeper.port', 'KEEPER_PORT', port)
-            self.web3 = self.connect_web3(self.host, self.port)
-            logging.info("web3 connection: {}".format(self.web3))
-        except:
-            logging.error('OceanContracts could not initiate. You can specify the path in $CONFIG_FILE environment '
-                          'variable.')
-            raise Exception('You should provide a valid config file.')
 
-
-        self.default_gas = get_value(self.config, 'gas.limit', 'GAS_LIMIT', 300000)
-        self.provider_uri = get_value(self.config, 'provider.uri', 'PROVIDER_URI', 'http://localhost:5000')
-        """
-#        self.node_uri = "%s:%s" % (self.host, self.port)
         self.helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
         self.metadata = Metadata(self._provider_url)
         self.market = Market(self.helper)
@@ -117,10 +100,10 @@ class Ocean(object):
     @staticmethod
     def connect_web3(host, port='8545'):
         """Establish a connexion using Web3 with the client."""
-        return Web3(HTTPProvider("%s:%s" % (host, port)))
+        return Web3(HTTPProvider("{0}:{1}" .format(host, port)))
 
     def get_message_hash(self, message):
-        return self.web3.sha3(message)
+        return self._web3.sha3(message)
 
     def generate_did(self, content):
         return 'did:ocn:' + self.market.contract_concise.generateId(content)
