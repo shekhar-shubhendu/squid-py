@@ -86,6 +86,7 @@ class Ocean(object):
         if self._web3 == None:
             raise ValueError('You need to provide a valid Keeper host and port connection values')
 
+        # TODO: properties that need to be made internal/private
         self.helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
         self.metadata = Metadata(self._provider_url)
         self.market = Market(self.helper)
@@ -96,11 +97,20 @@ class Ocean(object):
     def get_web3(self):
         return self._web3
 
-    @staticmethod
-    def connect_web3(host, port='8545'):
-        """Establish a connexion using Web3 with the client."""
-        return Web3(HTTPProvider("{0}:{1}" .format(host, port)))
+    def get_address_list(self):
+        return self._address_list
 
+    def get_gas_limit(self):
+        return self._gas_limit
+    def get_keeper_path(self):
+        return self._keeper_path
+
+    def get_keeper_url(self):
+        return self._keeper_url
+
+    def get_provider_url(self):
+        return self._provider_url
+        
     def get_message_hash(self, message):
         return self._web3.sha3(message)
 
@@ -109,3 +119,8 @@ class Ocean(object):
 
     def resolve_did(self, did):
         pass
+
+    @staticmethod
+    def connect_web3(host, port='8545'):
+        """Establish a connexion using Web3 with the client."""
+        return Web3(HTTPProvider("{0}:{1}" .format(host, port)))
