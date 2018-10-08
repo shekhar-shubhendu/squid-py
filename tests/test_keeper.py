@@ -81,7 +81,7 @@ def test_keeper():
     assert asset_price == market.get_asset_price(asset_id)
 
     json_dict['assetId'] = Web3.toHex(asset_id)
-    ocean.metadata.register_asset(json_dict)
+    # ocean.metadata.register_asset(json_dict)
     expiry = int(time.time() + expire_seconds)
 
     pubprivkey = acl.generate_encryption_keys()
