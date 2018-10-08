@@ -70,7 +70,7 @@ class Ocean(object):
         self._address_list = config.get_address_list()
         if 'address_list' in kwargs:
             address_list = kwargs['address_list']
-            for name, value in self._address_list.items():
+            for name in self._address_list:
                 if name in address_list and address_list[name]:
                     self._address_list[name] = address_list[name]
 
@@ -102,6 +102,7 @@ class Ocean(object):
 
     def get_gas_limit(self):
         return self._gas_limit
+
     def get_keeper_path(self):
         return self._keeper_path
 
@@ -110,7 +111,7 @@ class Ocean(object):
 
     def get_provider_url(self):
         return self._provider_url
-        
+
     def get_message_hash(self, message):
         return self._web3.sha3(message)
 
