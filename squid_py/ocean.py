@@ -86,7 +86,7 @@ class Ocean(object):
         else:
             self._web3 = Web3(HTTPProvider(self._keeper_url))
         if self._web3 == None:
-            raise ValueError('You need to provide a valid Keeper host and port connection values')
+            raise ValueError('You need to provide a valid Keeper URL or Web3 object')
 
         # TODO: properties that need to be made internal/private
         self._helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
@@ -139,6 +139,10 @@ class Ocean(object):
         return self._provider_url
 
     @property
+    def network_name(self):
+        return self._network_name
+
+    @property
     def accounts(self):
         accounts = []
         if self._helper and self._helper.accounts:
@@ -153,7 +157,7 @@ class Ocean(object):
     @property
     def helper(self):
         return self._helper
-    
+            
     # TODO: remove from later from user space
     @property
     def market(self):

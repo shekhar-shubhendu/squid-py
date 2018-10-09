@@ -5,8 +5,8 @@ import requests
 
 class Metadata(object):
 
-    def __init__(self, provider_uri):
-        self._base_url = provider_uri + '/api/v1/provider/assets'  # http://localhost:5000/api/v1/provider/assets/
+    def __init__(self, provider_url):
+        self._base_url = '{}/api/v1/provider/assets'.format(provider_url)
         self._headers = {'content-type': 'application/json'}
 
     def get_assets(self):

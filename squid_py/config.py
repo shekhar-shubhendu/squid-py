@@ -92,6 +92,9 @@ class Config(configparser.ConfigParser):
             path =  os.path.join(site.PREFIXES[0], 'contracts')
         return path
 
+
+    #properties
+    
     @property
     def keeper_url(self):
         return self.get(self._section_name, NAME_KEEPER_URL)
@@ -112,6 +115,8 @@ class Config(configparser.ConfigParser):
             'token' :  self.get(self._section_name, NAME_TOKEN_ADDRESS),
         }
 
+    # static methods
+    
     @staticmethod
     def get_environ_help():
         result = []
