@@ -28,4 +28,3 @@ class Token(KeeperContract):
             logging.error(e)
             raise e
 
-    

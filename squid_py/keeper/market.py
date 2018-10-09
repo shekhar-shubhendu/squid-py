@@ -12,7 +12,7 @@ DEFAULT_GAS_LIMIT = 400000
 
 class Market(KeeperContract):
 
-    def __init__(self, web3_helper):        
+    def __init__(self, web3_helper):
         KeeperContract.__init__(self, web3_helper, OCEAN_MARKET_CONTRACT, 'market')
         self._defaultGas = DEFAULT_GAS_LIMIT
 

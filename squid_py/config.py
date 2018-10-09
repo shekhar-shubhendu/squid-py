@@ -58,7 +58,7 @@ class Config(configparser.ConfigParser):
         self._section_name = KEEPER_CONTRACTS
         self._logger = kwargs.get('logger', logging.getLogger(__name__))
         self._logger.debug('Config: loading config file %s', filename)
-        
+
         if filename:
             with open(filename) as fp:
                 text = fp.read()

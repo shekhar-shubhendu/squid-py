@@ -1,9 +1,9 @@
 """
 
     Keeper Contract Base
-    
+
     All keeper contract inherit from this base class
-    
+
 """
 
 class KeeperContract(object):
@@ -16,7 +16,6 @@ class KeeperContract(object):
         self._address = web3_helper.to_checksum_address(contract[2])
         self._name = name
 
-        
     @property
     def address(self):
         return self._address

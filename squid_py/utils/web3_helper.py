@@ -31,7 +31,7 @@ class Web3Helper(object):
                 abi=abi['abi'])
             return concise_cont, contract, contract_address
 
-        
+
 
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)

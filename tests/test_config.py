@@ -35,7 +35,7 @@ def test_load():
         assert config.keeper_path == os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
     else:
         assert config.keeper_path == '/usr/contracts'
-    
+
     assert config.provider_url == 'test_provider_url'
     assert config.gas_limit == 200
 

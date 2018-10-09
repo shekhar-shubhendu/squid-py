@@ -16,8 +16,8 @@ from squid_py.ocean import (
 )
 
 from squid_py.utils import (
-    convert_to_bytes, 
-    convert_to_string, 
+    convert_to_bytes,
+    convert_to_string,
     convert_to_text
 )
 
@@ -31,7 +31,7 @@ def test_ocean_contracts():
     ocean = Ocean()
     assert ocean.token is not None
     assert ocean.keeper_url == os.environ['KEEPER_URL']
-    
+
 
 
 def test_ocean_contracts_with_conf(caplog):
@@ -75,13 +75,18 @@ def test_accounts():
 def test_errors_raised():
     with pytest.raises(TypeError):
         ocean = Ocean(keeper_url = None)
+        assert ocean == None
         ocean = Ocean()
+        assert ocean == None
     
     with pytest.raises(ValueError):
         ocean = Ocean(web3 = None)
-        
+        assert ocean == None
+
     with pytest.raises(FileNotFoundError):
         ocean = Ocean(config_file='error_file.txt')
-    
+        assert ocean == None
+
     with pytest.raises(TypeError):
         ocean = Ocean(provider_url = None)
+        assert ocean == None
