@@ -21,9 +21,9 @@ class Token(object):
                                              price,
                                              transact={'from': account_address})
 
-    def get_eth_balance(self, account):
+    def get_ether_balance(self, account_address):
         try:
-            return self.helper.web3.eth.getBalance(account, 'latest')
+            return self.helper.web3.eth.getBalance(account_address, 'latest')
         except Exception as e:
             logging.error(e)
             raise e

@@ -31,26 +31,7 @@ class Web3Helper(object):
                 abi=abi['abi'])
             return concise_cont, contract, contract_address
 
-    @property
-    def accounts(self):
-        """Return the accounts in the current network."""
-        try:
-            return self._web3.eth.accounts
-        except Exception as e:
-            logging.error("Error obtaining accounts")
-            raise Exception(e)
-
-    def get_network_name(self):
-        """Give the network name."""
-        network_id = self._web3.version.network
-        switcher = {
-            1: 'Main',
-            2: 'orden',
-            3: 'Ropsten',
-            4: 'Rinkeby',
-            42: 'Kovan',
-        }
-        return switcher.get(network_id, 'development')
+        
 
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)
@@ -75,6 +56,32 @@ class Web3Helper(object):
             daemon=True,
         ).start()
         return event_filter
+        
+    @property
+    def accounts(self):
+        """Return the accounts in the current network."""
+        try:
+            return self._web3.eth.accounts
+        except Exception as e:
+            logging.error("Error obtaining accounts")
+            raise Exception(e)
+
+    @property
+    def web3(self):
+        return self._web3
+
+    @property
+    def network_name(self):
+        """Give the network name."""
+        network_id = self._web3.version.network
+        switcher = {
+            1: 'Main',
+            2: 'orden',
+            3: 'Ropsten',
+            4: 'Rinkeby',
+            42: 'Kovan',
+        }
+        return switcher.get(network_id, 'development')
 
     @staticmethod
     def watcher(event_filter, callback):
@@ -111,7 +118,6 @@ class Web3Helper(object):
         if v != 27 and v != 28:
             v = 27 + v % 2
         return Signature(v, r, s)
-
 
 def convert_to_bytes(data):
     return Web3.toBytes(text=data)

@@ -92,7 +92,7 @@ class Ocean(object):
         self.market = Market(self.helper)
         self.auth = Auth(self.helper)
         self.token = Token(self.helper)
-        self._network_name = self.helper.get_network_name()
+        self._network_name = self.helper.network_name
 
 
     def clalculate_hash(self, message):
@@ -103,6 +103,13 @@ class Ocean(object):
 
     def resolve_did(self, did):
         pass
+        
+    def get_ether_balance(self, account_address):
+        return self.token.get_ether_balance(account_address)
+        
+    def get_token_balance(self, account_address):
+        return self.token.get_token_balance(account_address)
+
 
     # Properties
     @property
@@ -129,6 +136,19 @@ class Ocean(object):
     def provider_url(self):
         return self._provider_url
 
+    @property
+    def accounts(self):
+        accounts = []
+        if self.helper and self.helper.accounts:
+            for account_address in self.helper.accounts:
+                accounts.append({
+                    'address': account_address,
+                    'ether': self.get_ether_balance(account_address),
+                    'token': self.get_token_balance(account_address)
+                })
+        return accounts
+        
+        
     # Static methods
     @staticmethod
     def connect_web3(host, port='8545'):

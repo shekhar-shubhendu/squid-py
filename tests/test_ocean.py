@@ -49,3 +49,14 @@ def test_convert():
     input_text = "my text"
     print("output %s" % convert_to_string(convert_to_bytes(input_text)))
     assert convert_to_text(convert_to_bytes(input_text)) == input_text
+
+def test_accounts():
+    ocean = Ocean(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
+    assert ocean.accounts
+    assert len(ocean.accounts) == 10
+    for account in ocean.accounts:
+        assert 'address' in account
+        assert 'token' in account
+        assert 'ether' in account
+        assert account['ether'] > 0
+        assert isinstance(account['token'], int)
