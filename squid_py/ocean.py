@@ -59,15 +59,15 @@ class Ocean(object):
 
         config = Config(config_file)
 
-        self._keeper_url = kwargs.get('keeper_url', config.get_keeper_url())
-        self._keeper_path = kwargs.get('keeper_path', config.get_keeper_path())
-        self._gas_limit = kwargs.get('gas_limit', config.get_gas_limit())
-        self._provider_url = kwargs.get('provider_url', config.get_provider_url())
+        self._keeper_url = kwargs.get('keeper_url', config.keeper_url())
+        self._keeper_path = kwargs.get('keeper_path', config.keeper_path())
+        self._gas_limit = kwargs.get('gas_limit', config.gas_limit())
+        self._provider_url = kwargs.get('provider_url', config.provider_url())
 
         # put a priority on getting the contracts directly instead of via the 'ocean node'
 
         # load in the contract addresses
-        self._address_list = config.get_address_list()
+        self._address_list = config.address_list()
         if 'address_list' in kwargs:
             address_list = kwargs['address_list']
             for name in self._address_list:
@@ -94,25 +94,8 @@ class Ocean(object):
         self.token = Token(self.helper)
         self._network_name = self.helper.get_network_name()
 
-    def get_web3(self):
-        return self._web3
 
-    def get_address_list(self):
-        return self._address_list
-
-    def get_gas_limit(self):
-        return self._gas_limit
-
-    def get_keeper_path(self):
-        return self._keeper_path
-
-    def get_keeper_url(self):
-        return self._keeper_url
-
-    def get_provider_url(self):
-        return self._provider_url
-
-    def get_message_hash(self, message):
+    def clalculate_hash(self, message):
         return self._web3.sha3(message)
 
     def generate_did(self, content):
@@ -121,6 +104,32 @@ class Ocean(object):
     def resolve_did(self, did):
         pass
 
+    # Properties
+    @property
+    def web3(self):
+        return self._web3
+
+    @property
+    def address_list(self):
+        return self._address_list
+
+    @property
+    def gas_limit(self):
+        return self._gas_limit
+
+    @property
+    def keeper_path(self):
+        return self._keeper_path
+
+    @property
+    def keeper_url(self):
+        return self._keeper_url
+
+    @property
+    def provider_url(self):
+        return self._provider_url
+
+    # Static methods
     @staticmethod
     def connect_web3(host, port='8545'):
         """Establish a connexion using Web3 with the client."""

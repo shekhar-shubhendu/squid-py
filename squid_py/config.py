@@ -78,7 +78,8 @@ class Config(configparser.ConfigParser):
                 self._logger.debug('Config: setting argument %s = %s', name, value)
                 self.set(self._section_name, name , value)
 
-    def get_keeper_path(self):
+    @property
+    def keeper_path(self):
         path = self.get(self._section_name, NAME_KEEPER_PATH)
         if os.path.exists(path):
             pass
@@ -88,16 +89,20 @@ class Config(configparser.ConfigParser):
             path =  os.path.join(site.PREFIXES[0], 'contracts')
         return path
 
-    def get_keeper_url(self):
+    @property
+    def keeper_url(self):
         return self.get(self._section_name, NAME_KEEPER_URL)
 
-    def get_gas_limit(self):
+    @property
+    def gas_limit(self):
         return self.get(self._section_name, NAME_GAS_LIMIT)
 
-    def get_provider_url(self):
+    @property
+    def provider_url(self):
         return self.get(self._section_name, NAME_PROVIDER_URL)
 
-    def get_address_list(self):
+    @property
+    def address_list(self):
         return {
             'market': self.get(self._section_name, NAME_MARKET_ADDRESS),
             'auth' :  self.get(self._section_name, NAME_AUTH_ADDRESS),
