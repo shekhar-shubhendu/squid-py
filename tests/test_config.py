@@ -3,6 +3,8 @@
 
 """
 
+import os
+
 from squid_py.config import (
     Config,
 )
@@ -29,7 +31,11 @@ def test_load():
     assert config.address_list['auth'] == 'test_auth_address'
     assert config.address_list['token'] == 'test_token_address'
     assert config.keeper_url == 'test_keeper_url'
-    assert config.keeper_path == '/usr/contracts'
+    if os.getenv('VIRTUAL_ENV'):
+        assert config.keeper_path == os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
+    else:
+        assert config.keeper_path == '/usr/contracts'
+    
     assert config.provider_url == 'test_provider_url'
     assert config.gas_limit == 200
 

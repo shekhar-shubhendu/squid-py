@@ -28,11 +28,11 @@ def test_ocean_contracts_with_conf(caplog):
     # Need to ensure config.ini is populated!
     ocean = Ocean(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
     config = Config('config_local.ini')
-    validate_market_addess = ocean.get_web3().toChecksumAddress(config.get(KEEPER_CONTRACTS, 'market.address'))
+    validate_market_addess = ocean.web3.toChecksumAddress(config.get(KEEPER_CONTRACTS, 'market.address'))
     assert ocean.market.address == validate_market_addess
     assert ocean.address_list
     assert ocean.address_list['market'] == validate_market_addess
-    assert ocean.gas_limit == config.get(KEEPER_CONTRACTS, 'gas_limit')
+    assert ocean.gas_limit == int(config.get(KEEPER_CONTRACTS, 'gas_limit'))
     assert ocean.provider_url == 'http://localhost:5000'
 
 

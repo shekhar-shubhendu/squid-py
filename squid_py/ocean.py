@@ -59,15 +59,15 @@ class Ocean(object):
 
         config = Config(config_file)
 
-        self._keeper_url = kwargs.get('keeper_url', config.keeper_url())
-        self._keeper_path = kwargs.get('keeper_path', config.keeper_path())
-        self._gas_limit = kwargs.get('gas_limit', config.gas_limit())
-        self._provider_url = kwargs.get('provider_url', config.provider_url())
+        self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
+        self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
+        self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
+        self._provider_url = kwargs.get('provider_url', config.provider_url)
 
         # put a priority on getting the contracts directly instead of via the 'ocean node'
 
         # load in the contract addresses
-        self._address_list = config.address_list()
+        self._address_list = config.address_list
         if 'address_list' in kwargs:
             address_list = kwargs['address_list']
             for name in self._address_list:

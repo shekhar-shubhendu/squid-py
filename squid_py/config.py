@@ -86,7 +86,7 @@ class Config(configparser.ConfigParser):
         path = self.get(self._section_name, NAME_KEEPER_PATH)
         if os.path.exists(path):
             pass
-        elif os.getenv('VIRTUAL_ENV') is not None:
+        elif os.getenv('VIRTUAL_ENV'):
             path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
         else:
             path =  os.path.join(site.PREFIXES[0], 'contracts')
