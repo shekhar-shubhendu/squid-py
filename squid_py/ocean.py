@@ -158,23 +158,22 @@ class Ocean(object):
     def helper(self):
         return self._helper
 
-    # TODO: remove from later from user space
+    # TODO: remove later from user space
     @property
     def market(self):
         return self._market
 
-    # TODO: remove from later from user space
+    # TODO: remove later from user space
     @property
     def token(self):
         return self._token
 
-    # TODO: remove from later from user space
+    # TODO: remove later from user space
     @property
     def metadata(self):
         return self._metadata
 
-
-    # TODO: remove from later from user space
+    # TODO: remove later from user space
     @property
     def auth(self):
         return self._auth
