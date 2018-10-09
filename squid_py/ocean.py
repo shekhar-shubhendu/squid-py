@@ -80,7 +80,7 @@ class Ocean(object):
 
         if self._provider_url == None:
             raise TypeError('You must provide a Provider URL')
-            
+
         if 'web3' in kwargs:
             self._web3 = kwargs['web3']
         else:

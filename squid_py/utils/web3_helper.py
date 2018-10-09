@@ -59,7 +59,6 @@ class Web3Helper(object):
             daemon=True,
         ).start()
         return event_filter
-        
 
 
     def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
@@ -82,7 +81,7 @@ class Web3Helper(object):
         return Signature(v, r, s)
 
     # properties
-    
+
     @property
     def accounts(self):
         """Return the accounts in the current network."""

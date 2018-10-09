@@ -25,7 +25,7 @@ class KeeperContract(object):
         return self._name
 
     # TODO: remove contract_concise and handle all contract interfaces within the contract class
-    @property 
+    @property
     def contract_concise(self):
         return self._contract_concise
 

@@ -94,7 +94,7 @@ class Config(configparser.ConfigParser):
 
 
     #properties
-    
+
     @property
     def keeper_url(self):
         return self.get(self._section_name, NAME_KEEPER_URL)
@@ -116,7 +116,7 @@ class Config(configparser.ConfigParser):
         }
 
     # static methods
-    
+
     @staticmethod
     def get_environ_help():
         result = []

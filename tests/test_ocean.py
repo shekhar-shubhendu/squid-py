@@ -78,7 +78,7 @@ def test_errors_raised():
         assert ocean == None
         ocean = Ocean()
         assert ocean == None
-    
+
     with pytest.raises(ValueError):
         ocean = Ocean(web3 = None)
         assert ocean == None
