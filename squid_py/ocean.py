@@ -9,7 +9,7 @@ from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
 from squid_py.log import setup_logging
 from squid_py.metadata import Metadata
-from squid_py.utils.web3_helper import Web3Helper
+from squid_py.utils import Web3Helper
 
 from squid_py.config import (
     Config,

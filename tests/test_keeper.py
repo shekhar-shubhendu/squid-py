@@ -1,12 +1,18 @@
 import time
 
 from web3 import (
-    Web3
+    Web3,
 )
 
 import squid_py.acl as acl
-from squid_py.ocean import Ocean
-from squid_py.utils.web3_helper import convert_to_string
+
+from squid_py.ocean import (
+    Ocean,
+)
+
+from squid_py.utils import (
+    convert_to_string,
+)
 
 json_dict = {"publisherId": "0x1",
              "base": {

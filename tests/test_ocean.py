@@ -6,9 +6,19 @@
 import logging
 import os
 
-from squid_py.constants import KEEPER_CONTRACTS
-from squid_py.ocean import Ocean
-from squid_py.utils.web3_helper import convert_to_bytes, convert_to_string, convert_to_text
+from squid_py.constants import (
+    KEEPER_CONTRACTS
+)
+
+from squid_py.ocean import (
+    Ocean
+)
+
+from squid_py.utils import (
+    convert_to_bytes, 
+    convert_to_string, 
+    convert_to_text
+)
 
 from squid_py.config import (
     Config,

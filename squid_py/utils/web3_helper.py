@@ -60,6 +60,29 @@ class Web3Helper(object):
         ).start()
         return event_filter
         
+
+
+    def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
+        # contract_instance = self.contracts[contract_name][1]
+        event = getattr(contract.events, event_name)
+        event_filter = event.createFilter(
+            fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
+        )
+        return event_filter
+
+    def to_32byte_hex(self, val):
+        return self._web3.toBytes(val).rjust(32, b'\0')
+
+    def split_signature(self, signature):
+        v = self._web3.toInt(signature[-1])
+        r = self.to_32byte_hex(int.from_bytes(signature[:32], 'big'))
+        s = self.to_32byte_hex(int.from_bytes(signature[32:64], 'big'))
+        if v != 27 and v != 28:
+            v = 27 + v % 2
+        return Signature(v, r, s)
+
+    # properties
+    
     @property
     def accounts(self):
         """Return the accounts in the current network."""
@@ -86,6 +109,7 @@ class Web3Helper(object):
         }
         return switcher.get(network_id, 'development')
 
+    # static methods
     @staticmethod
     def watcher(event_filter, callback):
         while True:
@@ -102,33 +126,3 @@ class Web3Helper(object):
 
             # always take a rest
             time.sleep(0.1)
-
-    def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
-        # contract_instance = self.contracts[contract_name][1]
-        event = getattr(contract.events, event_name)
-        event_filter = event.createFilter(
-            fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
-        )
-        return event_filter
-
-    def to_32byte_hex(self, val):
-        return self._web3.toBytes(val).rjust(32, b'\0')
-
-    def split_signature(self, signature):
-        v = self._web3.toInt(signature[-1])
-        r = self.to_32byte_hex(int.from_bytes(signature[:32], 'big'))
-        s = self.to_32byte_hex(int.from_bytes(signature[32:64], 'big'))
-        if v != 27 and v != 28:
-            v = 27 + v % 2
-        return Signature(v, r, s)
-
-def convert_to_bytes(data):
-    return Web3.toBytes(text=data)
-
-
-def convert_to_string(data):
-    return Web3.toHex(data)
-
-
-def convert_to_text(data):
-    return Web3.toText(data)
