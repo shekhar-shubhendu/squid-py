@@ -5,6 +5,7 @@
 
 import logging
 import os
+import pytest
 
 from squid_py.constants import (
     KEEPER_CONTRACTS
@@ -70,3 +71,17 @@ def test_accounts():
         assert 'ether' in account
         assert account['ether'] > 0
         assert isinstance(account['token'], int)
+
+def test_errors_raised():
+    with pytest.raises(TypeError):
+        ocean = Ocean(keeper_url = None)
+        ocean = Ocean()
+    
+    with pytest.raises(ValueError):
+        ocean = Ocean(web3 = None)
+        
+    with pytest.raises(FileNotFoundError):
+        ocean = Ocean(config_file='error_file.txt')
+    
+    with pytest.raises(TypeError):
+        ocean = Ocean(provider_url = None)

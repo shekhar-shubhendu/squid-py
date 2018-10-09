@@ -76,13 +76,15 @@ class Ocean(object):
 
 
         if  self._keeper_url == None:
-            raise TypeError('You must provide a Keeper url')
+            raise TypeError('You must provide a Keeper URL')
 
+        if self._provider_url == None:
+            raise TypeError('You must provide a Provider URL')
+            
         if 'web3' in kwargs:
             self._web3 = kwargs['web3']
         else:
-            if self._keeper_url:
-                self._web3 = Web3(HTTPProvider(self._keeper_url))
+            self._web3 = Web3(HTTPProvider(self._keeper_url))
         if self._web3 == None:
             raise ValueError('You need to provide a valid Keeper host and port connection values')
 
