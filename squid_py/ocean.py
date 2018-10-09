@@ -105,10 +105,10 @@ class Ocean(object):
 
     def resolve_did(self, did):
         pass
-        
+
     def get_ether_balance(self, account_address):
         return self._token.get_ether_balance(account_address)
-        
+
     def get_token_balance(self, account_address):
         return self._token.get_token_balance(account_address)
 

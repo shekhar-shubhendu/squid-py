@@ -30,6 +30,6 @@ class KeeperContract(object):
         return self._contract_concise
 
     # TODO: remove contract and handle all contract interfaces within the contract class
-    @property 
+    @property
     def contract(self):
         return self._contract
