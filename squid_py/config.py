@@ -58,11 +58,14 @@ class Config(configparser.ConfigParser):
         self._section_name = KEEPER_CONTRACTS
         self._logger = kwargs.get('logger', logging.getLogger(__name__))
         self._logger.debug('Config: loading config file %s', filename)
+        
         if filename:
             with open(filename) as fp:
-                lines = fp.read()
-    #            lines = ("[{}]\n".format(configparser.DEFAULTSECT)) + lines
-                self.read_string(lines)
+                text = fp.read()
+                self.read_string(text)
+        else:
+            if 'text' in kwargs:
+                self.read_string(kwargs['text'])
         self._load_environ()
 
     def _load_environ(self):
@@ -95,7 +98,7 @@ class Config(configparser.ConfigParser):
 
     @property
     def gas_limit(self):
-        return self.get(self._section_name, NAME_GAS_LIMIT)
+        return int(self.get(self._section_name, NAME_GAS_LIMIT))
 
     @property
     def provider_url(self):
