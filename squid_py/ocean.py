@@ -87,12 +87,12 @@ class Ocean(object):
             raise ValueError('You need to provide a valid Keeper host and port connection values')
 
         # TODO: properties that need to be made internal/private
-        self.helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
-        self.metadata = Metadata(self._provider_url)
-        self.market = Market(self.helper)
-        self.auth = Auth(self.helper)
-        self.token = Token(self.helper)
-        self._network_name = self.helper.network_name
+        self._helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
+        self._metadata = Metadata(self._provider_url)
+        self._market = Market(self._helper)
+        self._auth = Auth(self._helper)
+        self._token = Token(self._helper)
+        self._network_name = self._helper.network_name
 
 
     def clalculate_hash(self, message):
@@ -105,10 +105,10 @@ class Ocean(object):
         pass
         
     def get_ether_balance(self, account_address):
-        return self.token.get_ether_balance(account_address)
+        return self._token.get_ether_balance(account_address)
         
     def get_token_balance(self, account_address):
-        return self.token.get_token_balance(account_address)
+        return self._token.get_token_balance(account_address)
 
 
     # Properties
@@ -139,8 +139,8 @@ class Ocean(object):
     @property
     def accounts(self):
         accounts = []
-        if self.helper and self.helper.accounts:
-            for account_address in self.helper.accounts:
+        if self._helper and self._helper.accounts:
+            for account_address in self._helper.accounts:
                 accounts.append({
                     'address': account_address,
                     'ether': self.get_ether_balance(account_address),
@@ -148,7 +148,31 @@ class Ocean(object):
                 })
         return accounts
         
+    @property
+    def helper(self):
+        return self._helper
+    
+    # TODO: remove from later from user space
+    @property
+    def market(self):
+        return self._market
         
+    # TODO: remove from later from user space
+    @property
+    def token(self):
+        return self._token
+
+    # TODO: remove from later from user space
+    @property
+    def metadata(self):
+        return self._metadata
+
+
+    # TODO: remove from later from user space
+    @property
+    def auth(self):
+        return self._auth
+
     # Static methods
     @staticmethod
     def connect_web3(host, port='8545'):
