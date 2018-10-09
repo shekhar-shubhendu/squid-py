@@ -86,7 +86,7 @@ def test_keeper():
 
     pubprivkey = acl.generate_encryption_keys()
     pubkey = pubprivkey.public_key
-    req = auth.concise_contract.initiateAccessRequest(asset_id,
+    req = auth.contract_concise.initiateAccessRequest(asset_id,
                                                       provider_account,
                                                       pubkey,
                                                       expiry,

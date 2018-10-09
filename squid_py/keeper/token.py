@@ -3,27 +3,29 @@ import logging
 from squid_py.constants import OCEAN_TOKEN_CONTRACT
 
 
-class Token(object):
+from squid_py.keeper.keeper_contract import (
+    KeeperContract,
+)
+
+class Token(KeeperContract):
     def __init__(self, web3_helper):
-        token = web3_helper.load(OCEAN_TOKEN_CONTRACT, 'token')
-        self.helper = web3_helper
-        self.contract_concise = token[0]
-        self.contract = token[1]
-        self.address = web3_helper.to_checksum_address(token[2])
+        KeeperContract.__init__(self, web3_helper, OCEAN_TOKEN_CONTRACT, 'token')
 
     def get_token_balance(self, account_address):
         """Retrieve the ammount of tokens of an account address"""
-        return self.contract_concise.balanceOf(account_address)
+        return self._contract_concise.balanceOf(account_address)
 
     def token_approve(self, market_address, price, account_address):
         """Approve the passed address to spend the specified amount of tokens."""
-        return self.contract_concise.approve(self.helper.to_checksum_address(market_address),
+        return self._contract_concise.approve(self._helper.to_checksum_address(market_address),
                                              price,
                                              transact={'from': account_address})
 
     def get_ether_balance(self, account_address):
         try:
-            return self.helper.web3.eth.getBalance(account_address, 'latest')
+            return self._helper.get_balance(account_address, 'latest')
         except Exception as e:
             logging.error(e)
             raise e
+
+    

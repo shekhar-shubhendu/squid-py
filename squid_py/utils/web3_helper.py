@@ -40,6 +40,9 @@ class Web3Helper(object):
         """Validate the address provided."""
         return self._web3.toChecksumAddress(address)
 
+    def get_balance(self, account_address, block_identifier):
+        return self._web3.eth.getBalance(account_address, block_identifier)
+
     def get_tx_receipt(self, tx_hash):
         """Get the receipt of the tx."""
         self._web3.eth.waitForTransactionReceipt(tx_hash)
