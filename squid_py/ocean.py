@@ -153,16 +153,16 @@ class Ocean(object):
                     'token': self.get_token_balance(account_address)
                 })
         return accounts
-        
+
     @property
     def helper(self):
         return self._helper
-            
+
     # TODO: remove from later from user space
     @property
     def market(self):
         return self._market
-        
+
     # TODO: remove from later from user space
     @property
     def token(self):
