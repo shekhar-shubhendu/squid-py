@@ -16,6 +16,7 @@ from squid_py.ocean import (
 )
 
 from squid_py.utils import (
+    Web3Helper,
     convert_to_bytes,
     convert_to_string,
     convert_to_text
@@ -23,6 +24,12 @@ from squid_py.utils import (
 
 from squid_py.config import (
     Config,
+)
+
+from web3 import Web3, HTTPProvider
+
+from squid_py.keeper.contracts import (
+    Contracts
 )
 
 def test_ocean_contracts():
@@ -77,17 +84,25 @@ def test_provider_access():
     assert ocean
     assert ocean.provider_url == None
     config = Config('config_local.ini')
+    keeper_url = 'http://0.0.0.0:8545'
     address_list = {
         'market' : config.get(KEEPER_CONTRACTS, 'market.address'),
         'token' : config.get(KEEPER_CONTRACTS, 'token.address'),
         'auth' : config.get(KEEPER_CONTRACTS, 'auth.address'),
     }
 
-    ocean = Ocean(keeper_url='http://0.0.0.0:8545', provider_url = None, address_list = address_list)
+    ocean = Ocean(keeper_url=keeper_url, provider_url = None, address_list = address_list)
     assert ocean
     assert ocean.contracts.market
     assert ocean.contracts.token
     assert ocean.contracts.auth
+    
+    web3 = Web3(HTTPProvider(keeper_url))
+    assert web3
+    helper = Web3Helper(web3)
+    assert helper
+    contracts = Contracts(helper, 'venv/contracts', address_list)
+    assert contracts
 
 def test_errors_raised():
     with pytest.raises(TypeError):
