@@ -76,6 +76,18 @@ def test_provider_access():
     ocean = Ocean(provider_url = None)
     assert ocean
     assert ocean.provider_url == None
+    config = Config('config_local.ini')
+    address_list = {
+        'market' : config.get(KEEPER_CONTRACTS, 'market.address'),
+        'token' : config.get(KEEPER_CONTRACTS, 'token.address'),
+        'auth' : config.get(KEEPER_CONTRACTS, 'auth.address'),
+    }
+
+    ocean = Ocean(keeper_url='http://0.0.0.0:8545', provider_url = None, address_list = address_list)
+    assert ocean
+    assert ocean.contracts.market
+    assert ocean.contracts.token
+    assert ocean.contracts.auth
 
 def test_errors_raised():
     with pytest.raises(TypeError):
@@ -92,3 +104,7 @@ def test_errors_raised():
         ocean = Ocean(config_file='error_file.txt')
         assert ocean == None
 
+    # ocean = Ocean(address_list = { 'market': '0x00',} )
+    # assert ocean
+    # assert ocean.keeper_url == 'http://0.0.0.0:8545'
+    # assert ocean.contracts.market.address == ''
