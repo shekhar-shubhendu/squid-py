@@ -139,7 +139,7 @@ def test_errors_raised():
         assert ocean == None
 
     with pytest.raises(OceanInvalidContractAddress):
-        ocean = Ocean(address_list = { 'market': '0x00',} )
+        ocean = Ocean(address_list = { 'market': '0x00'} )
         assert ocean == None
 
     with pytest.raises(OceanInvalidContractAddress):
