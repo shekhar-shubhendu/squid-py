@@ -32,6 +32,16 @@ from squid_py.keeper import (
     Contracts
 )
 
+
+def get_keeper_path(path = ''):
+    if os.path.exists(path):
+        pass
+    elif os.getenv('VIRTUAL_ENV'):
+        path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
+    else:
+        path =  os.path.join(site.PREFIXES[0], 'contracts')
+    return path
+    
 def test_ocean_contracts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
@@ -102,7 +112,7 @@ def test_provider_access():
     assert web3
     helper = Web3Helper(web3)
     assert helper
-    contracts = Contracts(helper, 'venv/contracts', address_list)
+    contracts = Contracts(helper, get_keeper_path(), address_list)
     assert contracts
 
 def test_errors_raised():
