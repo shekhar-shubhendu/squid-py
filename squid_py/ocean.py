@@ -4,7 +4,7 @@ import os
 from web3 import Web3, HTTPProvider
 
 from squid_py.constants import KEEPER_CONTRACTS
-from squid_py.keeper.contracts import Contracts
+from squid_py.keeper import Contracts
 from squid_py.log import setup_logging
 from squid_py.metadata import Metadata
 from squid_py.utils import Web3Helper

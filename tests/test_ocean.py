@@ -7,6 +7,8 @@ import logging
 import os
 import pytest
 
+from web3 import Web3, HTTPProvider
+
 from squid_py.constants import (
     KEEPER_CONTRACTS
 )
@@ -26,9 +28,7 @@ from squid_py.config import (
     Config,
 )
 
-from web3 import Web3, HTTPProvider
-
-from squid_py.keeper.contracts import (
+from squid_py.keeper import (
     Contracts
 )
 
