@@ -11,24 +11,22 @@ Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
 class Web3Helper(object):
-    def __init__(self, web3, contract_path, address_list):
+    def __init__(self, web3):
         self._web3 = web3
-        self._contract_path = contract_path
-        self._address_list = address_list
 
-    def load(self, contract_file, name):
+    def load(self, contract_file, name, contract_path, contract_address):
         """Retrieve a tuple with the concise contract and the contract definition."""
-        contract_address = self._address_list[name]
-        contract_filename = os.path.join(self._contract_path, "{}.json".format(contract_file))
+        contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))
+        valid_address = self._web3.toChecksumAddress(contract_address)
         with open(contract_filename, 'r') as abi_definition:
             abi = json.load(abi_definition)
             concise_cont = self._web3.eth.contract(
-                address=self._web3.toChecksumAddress(contract_address),
-                abi=abi['abi'],
+                address = valid_address,
+                abi = abi['abi'],
                 ContractFactoryClass=ConciseContract)
             contract = self._web3.eth.contract(
-                address=self._web3.toChecksumAddress(contract_address),
-                abi=abi['abi'])
+                address = valid_address,
+                abi = abi['abi'])
             return concise_cont, contract, contract_address
 
 

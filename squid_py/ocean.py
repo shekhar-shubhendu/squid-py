@@ -83,13 +83,13 @@ class Ocean(object):
         if self._web3 == None:
             raise ValueError('You need to provide a valid Keeper URL or Web3 object')
 
-        self._helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
+        self._helper = Web3Helper(self._web3)
         
         # optional _provider_url
         if self._provider_url:
             self._metadata = Metadata(self._provider_url)
         self._network_name = self._helper.network_name
-        self._contracts = Contracts(self._helper)
+        self._contracts = Contracts(self._helper, self._keeper_path, self._address_list)
 
 
     def clalculate_hash(self, message):

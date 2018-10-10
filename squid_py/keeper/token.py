@@ -8,8 +8,8 @@ from squid_py.keeper.keeper_contract import (
 )
 
 class Token(KeeperContract):
-    def __init__(self, web3_helper):
-        KeeperContract.__init__(self, web3_helper, OCEAN_TOKEN_CONTRACT, 'token')
+    def __init__(self, web3_helper, contract_path, address):
+        KeeperContract.__init__(self, web3_helper, OCEAN_TOKEN_CONTRACT, 'token', contract_path, address)
 
     def get_token_balance(self, account_address):
         """Retrieve the ammount of tokens of an account address"""

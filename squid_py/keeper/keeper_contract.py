@@ -7,9 +7,9 @@
 """
 
 class KeeperContract(object):
-    def __init__(self, web3_helper, contract_name, name):
+    def __init__(self, web3_helper, contract_name, name, contract_path, address):
         self._web3_helper = web3_helper
-        contract = web3_helper.load(contract_name, name)
+        contract = web3_helper.load(contract_name, name, contract_path, address)
         self._helper = web3_helper
         self._contract_concise = contract[0]
         self._contract = contract[1]

@@ -7,8 +7,8 @@ from squid_py.keeper.keeper_contract import (
 
 class Auth(KeeperContract):
 
-    def __init__(self, web3_helper):
-        KeeperContract.__init__(self, web3_helper, OCEAN_ACL_CONTRACT, 'auth')
+    def __init__(self, web3_helper, contract_path, address):
+        KeeperContract.__init__(self, web3_helper, OCEAN_ACL_CONTRACT, 'auth', contract_path, address)
 
 
     def cancel_access_request(self, order_id, sender_address):
