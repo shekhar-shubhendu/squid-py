@@ -24,7 +24,7 @@ services:
       REUSE_DATABASE: "false"
       NETWORK_NAME: "ganache"
     volumes:
-    - /artifacts:/keeper-contracts/artifacts/
+    - artifacts:/keeper-contracts/artifacts/
 
   provider:
     image: oceanprotocol/provider:develop
@@ -39,7 +39,10 @@ services:
       DB_HOSTNAME: mongodb
       LOCAL_CONTRACTS: 'true'
     volumes:
-    - /artifacts:/usr/local/keeper-contracts/:ro
+    - artifacts:/usr/local/keeper-contracts/:ro
 
 networks:
   backend:
+
+volumes:
+  artifacts:
