@@ -4,9 +4,7 @@ import os
 from web3 import Web3, HTTPProvider
 
 from squid_py.constants import KEEPER_CONTRACTS
-from squid_py.keeper.auth import Auth
-from squid_py.keeper.market import Market
-from squid_py.keeper.token import Token
+from squid_py.keeper.contracts import Contracts
 from squid_py.log import setup_logging
 from squid_py.metadata import Metadata
 from squid_py.utils import Web3Helper
@@ -90,26 +88,24 @@ class Ocean(object):
         # optional _provider_url
         if self._provider_url:
             self._metadata = Metadata(self._provider_url)
-        self._market = Market(self._helper)
-        self._auth = Auth(self._helper)
-        self._token = Token(self._helper)
         self._network_name = self._helper.network_name
+        self._contracts = Contracts(self._helper)
 
 
     def clalculate_hash(self, message):
         return self._web3.sha3(message)
 
     def generate_did(self, content):
-        return 'did:ocn:' + self.market.contract_concise.generateId(content)
+        return 'did:ocn:' + self._contracts.market.contract_concise.generateId(content)
 
     def resolve_did(self, did):
         pass
 
     def get_ether_balance(self, account_address):
-        return self._token.get_ether_balance(account_address)
+        return self._contracts.token.get_ether_balance(account_address)
 
     def get_token_balance(self, account_address):
-        return self._token.get_token_balance(account_address)
+        return self._contracts.token.get_token_balance(account_address)
 
 
     # Properties
@@ -159,23 +155,12 @@ class Ocean(object):
 
     # TODO: remove later from user space
     @property
-    def market(self):
-        return self._market
-
-    # TODO: remove later from user space
-    @property
-    def token(self):
-        return self._token
-
-    # TODO: remove later from user space
-    @property
     def metadata(self):
         return self._metadata
 
-    # TODO: remove later from user space
     @property
-    def auth(self):
-        return self._auth
+    def contracts(self):
+        return self._contracts
 
     # Static methods
     @staticmethod
