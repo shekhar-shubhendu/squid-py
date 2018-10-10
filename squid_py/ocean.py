@@ -34,7 +34,7 @@ class Ocean(object):
     :param web3: Web3 object to use to connect too the keeper node.
     :param keeper_path: Path to the Ocean Protocol Keeper contracts, to load contracts and addresses via the artifacts folder.
     :param logger: Optional logger to use instead of creating our own loggger
-    :param provider_url: Optional url of the ocean network provider, defaults to 'http://localhost:5000'
+    :param provider_url: Optional url of the ocean network provider, can be None
     :param gas_limit: Optional gas limit, defaults to 300000
     :param config_file: Optional config file to load in the above config details
     :returns: Ocean object
@@ -78,9 +78,6 @@ class Ocean(object):
         if  self._keeper_url == None:
             raise TypeError('You must provide a Keeper URL')
 
-        if self._provider_url == None:
-            raise TypeError('You must provide a Provider URL')
-
         if 'web3' in kwargs:
             self._web3 = kwargs['web3']
         else:
@@ -88,9 +85,11 @@ class Ocean(object):
         if self._web3 == None:
             raise ValueError('You need to provide a valid Keeper URL or Web3 object')
 
-        # TODO: properties that need to be made internal/private
         self._helper = Web3Helper(self._web3, self._keeper_path, self._address_list)
-        self._metadata = Metadata(self._provider_url)
+        
+        # optional _provider_url
+        if self._provider_url:
+            self._metadata = Metadata(self._provider_url)
         self._market = Market(self._helper)
         self._auth = Auth(self._helper)
         self._token = Token(self._helper)

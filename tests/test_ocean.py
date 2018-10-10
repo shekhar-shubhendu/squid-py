@@ -72,6 +72,11 @@ def test_accounts():
         assert account['ether'] > 0
         assert isinstance(account['token'], int)
 
+def test_provider_access():
+    ocean = Ocean(provider_url = None)
+    assert ocean
+    assert ocean.provider_url == None
+
 def test_errors_raised():
     with pytest.raises(TypeError):
         ocean = Ocean(keeper_url = None)
@@ -87,6 +92,3 @@ def test_errors_raised():
         ocean = Ocean(config_file='error_file.txt')
         assert ocean == None
 
-    with pytest.raises(TypeError):
-        ocean = Ocean(provider_url = None)
-        assert ocean == None
