@@ -7,6 +7,11 @@ from web3.contract import ConciseContract
 from collections import namedtuple
 from threading import Thread
 
+
+from squid_py.exceptions import (
+    OceanInvalidContractAddress,
+)
+
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
@@ -17,7 +22,13 @@ class Web3Helper(object):
     def load(self, contract_file, name, contract_path, contract_address):
         """Retrieve a tuple with the concise contract and the contract definition."""
         contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))
-        valid_address = self._web3.toChecksumAddress(contract_address)
+        try:
+            valid_address = self._web3.toChecksumAddress(contract_address)
+        except ValueError as e:
+            raise OceanInvalidContractAddress
+        except Exception as e:
+            raise e
+            
         with open(contract_filename, 'r') as abi_definition:
             abi = json.load(abi_definition)
             concise_cont = self._web3.eth.contract(

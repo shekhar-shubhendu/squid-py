@@ -13,8 +13,9 @@ from squid_py.constants import (
     KEEPER_CONTRACTS
 )
 
-from squid_py.ocean import (
-    Ocean
+from squid_py import (
+    Ocean,
+    OceanInvalidContractAddress
 )
 
 from squid_py.utils import (
@@ -41,7 +42,7 @@ def get_keeper_path(path = ''):
     else:
         path =  os.path.join(site.PREFIXES[0], 'contracts')
     return path
-    
+
 def test_ocean_contracts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
@@ -116,6 +117,13 @@ def test_provider_access():
     assert contracts
 
 def test_errors_raised():
+    config = Config('config_local.ini')
+    address_list = {
+        'market' : config.get(KEEPER_CONTRACTS, 'market.address'),
+        'token' : config.get(KEEPER_CONTRACTS, 'token.address'),
+        'auth' : config.get(KEEPER_CONTRACTS, 'auth.address'),
+    }
+
     with pytest.raises(TypeError):
         ocean = Ocean(keeper_url = None)
         assert ocean == None
@@ -130,7 +138,14 @@ def test_errors_raised():
         ocean = Ocean(config_file='error_file.txt')
         assert ocean == None
 
-    # ocean = Ocean(address_list = { 'market': '0x00',} )
-    # assert ocean
-    # assert ocean.keeper_url == 'http://0.0.0.0:8545'
-    # assert ocean.contracts.market.address == ''
+    with pytest.raises(OceanInvalidContractAddress):
+        ocean = Ocean(address_list = { 'market': '0x00',} )
+        assert ocean == None
+
+    with pytest.raises(OceanInvalidContractAddress):
+        ocean = Ocean(address_list = { 'market': address_list['market'] + 'FF' } )
+        assert ocean == None
+
+    with pytest.raises(OceanInvalidContractAddress):
+        ocean = Ocean(address_list = { 'market': address_list['market'][4:] } )
+        assert ocean == None

@@ -6,7 +6,7 @@ from web3 import (
 
 import squid_py.acl as acl
 
-from squid_py.ocean import (
+from squid_py import (
     Ocean,
 )
 
