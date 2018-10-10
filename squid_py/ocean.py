@@ -3,15 +3,13 @@ import os
 
 from web3 import Web3, HTTPProvider
 
-from squid_py.constants import KEEPER_CONTRACTS
+from squid_py.config import (
+    Config,
+)
 from squid_py.keeper import Contracts
 from squid_py.log import setup_logging
 from squid_py.metadata import Metadata
 from squid_py.utils import Web3Helper
-
-from squid_py.config import (
-    Config,
-)
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -19,7 +17,6 @@ setup_logging()
 
 
 class Ocean(object):
-
     """Create a new Ocean object for access to the Ocean Protocol Network
 
     :param keeper_url: URL of the Keeper network to connect too.
@@ -72,15 +69,14 @@ class Ocean(object):
                 if name in address_list and address_list[name]:
                     self._address_list[name] = address_list[name]
 
-
-        if  self._keeper_url == None:
+        if self._keeper_url is None:
             raise TypeError('You must provide a Keeper URL')
 
         if 'web3' in kwargs:
             self._web3 = kwargs['web3']
         else:
             self._web3 = Web3(HTTPProvider(self._keeper_url))
-        if self._web3 == None:
+        if self._web3 is None:
             raise ValueError('You need to provide a valid Keeper URL or Web3 object')
 
         self._helper = Web3Helper(self._web3)
@@ -90,7 +86,6 @@ class Ocean(object):
             self._metadata = Metadata(self._provider_url)
         self._network_name = self._helper.network_name
         self._contracts = Contracts(self._helper, self._keeper_path, self._address_list)
-
 
     def calculate_hash(self, message):
         return self._web3.sha3(message)
@@ -106,7 +101,6 @@ class Ocean(object):
 
     def get_token_balance(self, account_address):
         return self._contracts.token.get_token_balance(account_address)
-
 
     # Properties
     @property
@@ -166,4 +160,4 @@ class Ocean(object):
     @staticmethod
     def connect_web3(host, port='8545'):
         """Establish a connexion using Web3 with the client."""
-        return Web3(HTTPProvider("{0}:{1}" .format(host, port)))
+        return Web3(HTTPProvider("{0}:{1}".format(host, port)))

@@ -3,12 +3,12 @@ import logging
 from squid_py.constants import (
     OCEAN_MARKET_CONTRACT
 )
-
 from squid_py.keeper.keeper_contract import (
     KeeperContract,
 )
 
 DEFAULT_GAS_LIMIT = 400000
+
 
 class Market(KeeperContract):
 
@@ -60,7 +60,6 @@ class Market(KeeperContract):
             'gas': self._defaultGas
         })
 
-
     def calculate_message_hash(self, message):
         return self._contract_concise.generateId(message)
 
@@ -69,4 +68,3 @@ class Market(KeeperContract):
 
     def resolve_did(self, did):
         pass
-

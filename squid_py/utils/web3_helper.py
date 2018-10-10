@@ -1,12 +1,11 @@
-import logging
-import time
 import json
+import logging
 import os.path
-from web3 import Web3
-from web3.contract import ConciseContract
+import time
 from collections import namedtuple
 from threading import Thread
 
+from web3.contract import ConciseContract
 
 from squid_py.exceptions import (
     OceanInvalidContractAddress,
@@ -32,15 +31,13 @@ class Web3Helper(object):
         with open(contract_filename, 'r') as abi_definition:
             abi = json.load(abi_definition)
             concise_cont = self._web3.eth.contract(
-                address = valid_address,
-                abi = abi['abi'],
+                address=valid_address,
+                abi=abi['abi'],
                 ContractFactoryClass=ConciseContract)
             contract = self._web3.eth.contract(
-                address = valid_address,
-                abi = abi['abi'])
+                address=valid_address,
+                abi=abi['abi'])
             return concise_cont, contract, contract_address
-
-
 
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)
@@ -68,7 +65,6 @@ class Web3Helper(object):
             daemon=True,
         ).start()
         return event_filter
-
 
     def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
         # contract_instance = self.contracts[contract_name][1]

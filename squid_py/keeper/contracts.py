@@ -7,6 +7,7 @@ from squid_py.keeper.auth import Auth
 from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
 
+
 class Contracts(object):
     def __init__(self, web3_helper, contract_path, address_list):
         self._helper = web3_helper

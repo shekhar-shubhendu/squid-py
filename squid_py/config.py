@@ -2,10 +2,9 @@
 
 """
 
-
-import os
 import configparser
 import logging
+import os
 import site
 
 from squid_py.constants import (
@@ -28,30 +27,31 @@ NAME_AUTH_ADDRESS = 'auth.address'
 NAME_TOKEN_ADDRESS = 'token.address'
 
 environ_names = {
-    NAME_KEEPER_URL : ['KEEPER_URL', 'Keeper URL'],
-    NAME_KEEPER_PATH : ['KEEPER_PATH', 'Path to the keeper contracts'],
-    NAME_GAS_LIMIT : ['GAS_LIMIT', 'Gas limit'],
-    NAME_PROVIDER_URL : [ 'PROVIDER_URL', 'Provider URL'],
-    NAME_MARKET_ADDRESS  : ['MARKET_ADDRESS', 'Market address'],
-    NAME_AUTH_ADDRESS  : ['AUTH_ADDRESS', 'Auth address'],
-    NAME_TOKEN_ADDRESS : ['TOKEN_ADDRESS', 'Token address'],
+    NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
+    NAME_KEEPER_PATH: ['KEEPER_PATH', 'Path to the keeper contracts'],
+    NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
+    NAME_PROVIDER_URL: ['PROVIDER_URL', 'Provider URL'],
+    NAME_MARKET_ADDRESS: ['MARKET_ADDRESS', 'Market address'],
+    NAME_AUTH_ADDRESS: ['AUTH_ADDRESS', 'Auth address'],
+    NAME_TOKEN_ADDRESS: ['TOKEN_ADDRESS', 'Token address'],
 }
 
 config_defaults = {
-    KEEPER_CONTRACTS : {
-        NAME_KEEPER_URL : DEFAULT_KEEPER_URL,
-        NAME_KEEPER_PATH : DEFAULT_KEEPER_PATH,
-        NAME_GAS_LIMIT : DEFAULT_GAS_LIMIT,
-        NAME_PROVIDER_URL : DEFAULT_NAME_PROVIDER_URL,
-        NAME_MARKET_ADDRESS : '',
-        NAME_AUTH_ADDRESS : '',
+    KEEPER_CONTRACTS: {
+        NAME_KEEPER_URL: DEFAULT_KEEPER_URL,
+        NAME_KEEPER_PATH: DEFAULT_KEEPER_PATH,
+        NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
+        NAME_PROVIDER_URL: DEFAULT_NAME_PROVIDER_URL,
+        NAME_MARKET_ADDRESS: '',
+        NAME_AUTH_ADDRESS: '',
         NAME_TOKEN_ADDRESS: '',
     }
 }
 
+
 class Config(configparser.ConfigParser):
 
-    def __init__(self, filename = None, **kwargs):
+    def __init__(self, filename=None, **kwargs):
         configparser.ConfigParser.__init__(self)
 
         self.read_dict(config_defaults)
@@ -71,15 +71,15 @@ class Config(configparser.ConfigParser):
     def _load_environ(self):
         for option_name, environ_item in environ_names.items():
             value = os.environ.get(environ_item[0])
-            if value != None:
+            if value is not None:
                 self._logger.debug('Config: setting environ %s = %s', option_name, value)
-                self.set(self._section_name, option_name , value)
+                self.set(self._section_name, option_name, value)
 
     def set_arguments(self, items):
         for name, value in items.items():
-            if value != None:
+            if value is not None:
                 self._logger.debug('Config: setting argument %s = %s', name, value)
-                self.set(self._section_name, name , value)
+                self.set(self._section_name, name, value)
 
     @property
     def keeper_path(self):
@@ -89,11 +89,10 @@ class Config(configparser.ConfigParser):
         elif os.getenv('VIRTUAL_ENV'):
             path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
         else:
-            path =  os.path.join(site.PREFIXES[0], 'contracts')
+            path = os.path.join(site.PREFIXES[0], 'contracts')
         return path
 
-
-    #properties
+    # properties
 
     @property
     def keeper_url(self):
@@ -111,8 +110,8 @@ class Config(configparser.ConfigParser):
     def address_list(self):
         return {
             'market': self.get(self._section_name, NAME_MARKET_ADDRESS),
-            'auth' :  self.get(self._section_name, NAME_AUTH_ADDRESS),
-            'token' :  self.get(self._section_name, NAME_TOKEN_ADDRESS),
+            'auth': self.get(self._section_name, NAME_AUTH_ADDRESS),
+            'token': self.get(self._section_name, NAME_TOKEN_ADDRESS),
         }
 
     # static methods
