@@ -28,7 +28,7 @@ class Web3Helper(object):
             raise OceanInvalidContractAddress
         except Exception as e:
             raise e
-            
+
         with open(contract_filename, 'r') as abi_definition:
             abi = json.load(abi_definition)
             concise_cont = self._web3.eth.contract(
