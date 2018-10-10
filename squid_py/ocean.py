@@ -92,7 +92,7 @@ class Ocean(object):
         self._contracts = Contracts(self._helper, self._keeper_path, self._address_list)
 
 
-    def clalculate_hash(self, message):
+    def calculate_hash(self, message):
         return self._web3.sha3(message)
 
     def generate_did(self, content):
