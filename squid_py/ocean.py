@@ -84,7 +84,7 @@ class Ocean(object):
             raise ValueError('You need to provide a valid Keeper URL or Web3 object')
 
         self._helper = Web3Helper(self._web3)
-        
+
         # optional _provider_url
         if self._provider_url:
             self._metadata = Metadata(self._provider_url)

@@ -96,7 +96,8 @@ def test_provider_access():
     assert ocean.contracts.market
     assert ocean.contracts.token
     assert ocean.contracts.auth
-    
+
+    # the same above but for a low level access to the modules within squid-py
     web3 = Web3(HTTPProvider(keeper_url))
     assert web3
     helper = Web3Helper(web3)
