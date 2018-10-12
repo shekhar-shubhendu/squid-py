@@ -10,15 +10,19 @@ services:
     command: mongod
     networks:
     - backend
- 
+
   keeper-contracts:
-    image: oceanprotocol/keeper-contracts:develop
+    image: oceanprotocol/keeper-contracts:latest
     ports:
     - 8545:8545
     networks:
     - backend
     environment:
-      LOCAL_CONTRACTS: 'true'
+      LOCAL_CONTRACTS: "true"
+      DEPLOY_CONTRACTS: "true"
+      DATABASE_PATH: "/ganache-db"
+      REUSE_DATABASE: "false"
+      NETWORK_NAME: "ganache"
     volumes:
     - artifacts:/keeper-contracts/artifacts/
 
@@ -37,10 +41,8 @@ services:
     volumes:
     - artifacts:/usr/local/keeper-contracts/:ro
 
-
 networks:
   backend:
 
 volumes:
   artifacts:
-
