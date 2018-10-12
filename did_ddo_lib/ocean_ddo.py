@@ -6,7 +6,6 @@ import json
 import datetime
 import re
 
-
 from web3 import (
     Web3
 )
