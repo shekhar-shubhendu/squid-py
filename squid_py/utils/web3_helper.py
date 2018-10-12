@@ -1,56 +1,43 @@
-import logging
-import time
 import json
+import logging
 import os.path
-from web3 import Web3
-from web3.contract import ConciseContract
+import time
 from collections import namedtuple
 from threading import Thread
+
+from web3.contract import ConciseContract
+
+from squid_py.exceptions import (
+    OceanInvalidContractAddress,
+)
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
 class Web3Helper(object):
-    def __init__(self, web3, contract_path, address_list):
+    def __init__(self, web3):
         self._web3 = web3
-        self._contract_path = contract_path
-        self._address_list = address_list
 
-    def load(self, contract_file, name):
+    def load(self, contract_file, name, contract_path, contract_address):
         """Retrieve a tuple with the concise contract and the contract definition."""
-        contract_address = self._address_list[name]
-        contract_filename = os.path.join(self._contract_path, "{}.json".format(contract_file))
+        contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))
+        try:
+            valid_address = self._web3.toChecksumAddress(contract_address)
+        except ValueError as e:
+            raise OceanInvalidContractAddress("Invalid contract address for keeper contract '{}'".format(name))
+        except Exception as e:
+            raise e
+
         with open(contract_filename, 'r') as abi_definition:
             abi = json.load(abi_definition)
             concise_cont = self._web3.eth.contract(
-                address=self._web3.toChecksumAddress(contract_address),
+                address=valid_address,
                 abi=abi['abi'],
                 ContractFactoryClass=ConciseContract)
             contract = self._web3.eth.contract(
-                address=self._web3.toChecksumAddress(contract_address),
+                address=valid_address,
                 abi=abi['abi'])
             return concise_cont, contract, contract_address
-
-    @property
-    def accounts(self):
-        """Return the accounts in the current network."""
-        try:
-            return self._web3.eth.accounts
-        except Exception as e:
-            logging.error("Error obtaining accounts")
-            raise Exception(e)
-
-    def get_network_name(self):
-        """Give the network name."""
-        network_id = self._web3.version.network
-        switcher = {
-            1: 'Main',
-            2: 'orden',
-            3: 'Ropsten',
-            4: 'Rinkeby',
-            42: 'Kovan',
-        }
-        return switcher.get(network_id, 'development')
 
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)
@@ -58,6 +45,9 @@ class Web3Helper(object):
     def to_checksum_address(self, address):
         """Validate the address provided."""
         return self._web3.toChecksumAddress(address)
+
+    def get_balance(self, account_address, block_identifier):
+        return self._web3.eth.getBalance(account_address, block_identifier)
 
     def get_tx_receipt(self, tx_hash):
         """Get the receipt of the tx."""
@@ -75,23 +65,6 @@ class Web3Helper(object):
             daemon=True,
         ).start()
         return event_filter
-
-    @staticmethod
-    def watcher(event_filter, callback):
-        while True:
-            try:
-                events = event_filter.get_all_entries()
-            except ValueError as err:
-                # ignore error, but log it
-                print('Got error grabbing keeper events: ', str(err))
-                events = []
-
-            for event in events:
-                callback(event)
-                # time.sleep(0.1)
-
-            # always take a rest
-            time.sleep(0.1)
 
     def install_filter(self, contract, event_name, fromBlock=0, toBlock='latest', filters=None):
         # contract_instance = self.contracts[contract_name][1]
@@ -112,14 +85,48 @@ class Web3Helper(object):
             v = 27 + v % 2
         return Signature(v, r, s)
 
+    # properties
 
-def convert_to_bytes(data):
-    return Web3.toBytes(text=data)
+    @property
+    def accounts(self):
+        """Return the accounts in the current network."""
+        try:
+            return self._web3.eth.accounts
+        except Exception as e:
+            logging.error("Error obtaining accounts")
+            raise Exception(e)
 
+    @property
+    def web3(self):
+        return self._web3
 
-def convert_to_string(data):
-    return Web3.toHex(data)
+    @property
+    def network_name(self):
+        """Give the network name."""
+        network_id = self._web3.version.network
+        switcher = {
+            1: 'Main',
+            2: 'orden',
+            3: 'Ropsten',
+            4: 'Rinkeby',
+            42: 'Kovan',
+        }
+        return switcher.get(network_id, 'development')
 
+    # static methods
+    @staticmethod
+    def watcher(event_filter, callback):
+        while True:
+            try:
+                events = event_filter.get_all_entries()
+            except ValueError as err:
+                # ignore error, but log it
+                print('Got error grabbing keeper events: ', str(err))
+                events = []
 
-def convert_to_text(data):
-    return Web3.toText(data)
+            for event in events:
+                callback(event)
+                # time.sleep(0.1)
+
+            # always take a rest
+            time.sleep(0.1)

@@ -1,12 +1,18 @@
 import time
 
 from web3 import (
-    Web3
+    Web3,
 )
 
 import squid_py.acl as acl
-from squid_py.ocean import Ocean
-from squid_py.utils.web3_helper import convert_to_string
+
+from squid_py import (
+    Ocean,
+)
+
+from squid_py.utils import (
+    convert_to_string,
+)
 
 json_dict = {"publisherId": "0x1",
              "base": {
@@ -67,9 +73,9 @@ def test_keeper():
     expire_seconds = 9999999999
     asset_price = 100
     ocean = Ocean(keeper_url='http://localhost:8545', config_file='config_local.ini')
-    market = ocean.market
-    token = ocean.token
-    auth = ocean.auth
+    market = ocean.contracts.market
+    token = ocean.contracts.token
+    auth = ocean.contracts.auth
     provider_account = ocean.helper.accounts[0]
     consumer_account = ocean.helper.accounts[1]
     assert market.request_tokens(2000, provider_account)
@@ -86,7 +92,7 @@ def test_keeper():
 
     pubprivkey = acl.generate_encryption_keys()
     pubkey = pubprivkey.public_key
-    req = auth.concise_contract.initiateAccessRequest(asset_id,
+    req = auth.contract_concise.initiateAccessRequest(asset_id,
                                                       provider_account,
                                                       pubkey,
                                                       expiry,
