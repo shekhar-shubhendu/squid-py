@@ -162,6 +162,7 @@ def test_creating_did_using_ddo():
     # add a proof to the first public_key/authentication
     ddo.add_proof(0, private_keys[0])
     ddo_text_proof = ddo.as_text()
+    assert ddo_text_proof
     assert ddo.validate_proof()
 
     ddo_text_proof_hash = ddo.calculate_hash()
