@@ -24,7 +24,7 @@ class Web3Helper(object):
         try:
             valid_address = self._web3.toChecksumAddress(contract_address)
         except ValueError as e:
-            raise OceanInvalidContractAddress("keeper contract '{}'".format(name))
+            raise OceanInvalidContractAddress("Invalid contract address for keeper contract '{}'".format(name))
         except Exception as e:
             raise e
 

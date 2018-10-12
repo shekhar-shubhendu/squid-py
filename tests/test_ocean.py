@@ -138,14 +138,14 @@ def test_errors_raised():
         ocean = Ocean(config_file='error_file.txt')
         assert ocean == None
 
-    with pytest.raises(OceanInvalidContractAddress, message = "keeper contract 'market'"):
+    with pytest.raises(OceanInvalidContractAddress, message = "Invalid contract address for keeper contract 'market'"):
         ocean = Ocean(address_list = { 'market': '0x00'} )
         assert ocean == None
 
-    with pytest.raises(OceanInvalidContractAddress, message = "keeper contract 'market'"):
+    with pytest.raises(OceanInvalidContractAddress, message = "Invalid contract address for keeper contract 'market'"):
         ocean = Ocean(address_list = { 'market': address_list['market'] + 'FF' } )
         assert ocean == None
 
-    with pytest.raises(OceanInvalidContractAddress, message = "keeper contract 'market'"):
+    with pytest.raises(OceanInvalidContractAddress, message = "Invalid contract address for keeper contract 'market'"):
         ocean = Ocean(address_list = { 'market': address_list['market'][4:] } )
         assert ocean == None
