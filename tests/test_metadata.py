@@ -39,6 +39,7 @@ json_dict = {"publisherId": "0x1",
 
 def test_ocean_provider():
     ocean_provider = Ocean(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
-    asset = ocean_provider.metadata.register_asset(json_dict)
-    assert ocean_provider.metadata.get_asset_ddo(asset['assetId'])['base']['name'] == asset['base']['name']
-    ocean_provider.metadata.retire_asset(asset['assetId'])
+    asset = ocean_provider.metadata.publish_asset_metadata(json_dict)
+    assert len(ocean_provider.metadata.search(search_query={"text": "Office"})) == 1
+    assert ocean_provider.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
+    ocean_provider.metadata.retire_asset_metadata(asset['assetId'])

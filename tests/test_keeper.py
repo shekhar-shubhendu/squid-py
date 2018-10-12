@@ -134,7 +134,7 @@ def test_keeper():
 
     print('buyer balance = ', token.get_token_balance(consumer_account))
     print('seller balance = ', token.get_token_balance(provider_account))
-    ocean.metadata.retire_asset(convert_to_string(asset_id))
+    ocean.metadata.retire_asset_metadata(convert_to_string(asset_id))
 
 
     # events = get_events(filter_token_published)
