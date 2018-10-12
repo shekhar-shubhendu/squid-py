@@ -84,3 +84,24 @@ You can then validate the signature against the key_name used to obtain the sign
 ddo.validate_from_key(key_name, signature_text, signature_value)
 ```
 
+## DDO Hash
+
+Originally the idea was to use do the following process to generate a DID:
+
+1. Calculate or get the base id, in our example this will be an assetId.
+
+2. Create a DDO with an empty DID fields as Ids.
+
+3. Perform a hash on this partially completed DDO, without hashing the ID fields.
+
+4. Hash the item from #1 + the DDO hash to give a DID.
+
+5. Then apply the DID to the Id fields in the DDO.
+
+### Conclusion
+
+At the moment this does not seem to work so well. In theroy we can create the same DDO with or without key Ids, and get the same hash and validation.
+
+So I think maybe the best way is to just hash the JSON text returned from the DDO.as_text() method.
+
+
