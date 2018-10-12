@@ -20,6 +20,5 @@ deploy:
   password: ${PYPI_PASSWORD}
   on:
     tags: true
-    branch: master
     repo: oceanprotocol/squid-py
     python: 3.6
