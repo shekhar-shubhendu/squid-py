@@ -26,17 +26,17 @@ from base64 import (
     b64encode
 )
 
-from .public_key_base import (
-    PublicKeyBase,
-    PUBLIC_KEY_STORE_TYPE_PEM,
-    PUBLIC_KEY_STORE_TYPE_BASE64,
-    PUBLIC_KEY_STORE_TYPE_JWK,
-)
 
 from .public_key_rsa import (
     PublicKeyRSA,
     AUTHENTICATION_TYPE_RSA,
     PUBLIC_KEY_TYPE_RSA,
+)
+
+from .public_key_base import (
+    PublicKeyBase,
+    PUBLIC_KEY_STORE_TYPE_PEM,
+    PUBLIC_KEY_STORE_TYPE_BASE64,
 )
 
 from .authentication import (
@@ -64,9 +64,6 @@ class OceanDDO(object):
 
         if ddo_text:
             self.read_json(ddo_text)
-
-        # so that codacy does not complain, even if we do not add the var below in the import
-        assert PUBLIC_KEY_STORE_TYPE_JWK
 
     # clear the DDO data values
     def clear(self):
