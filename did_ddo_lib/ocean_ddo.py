@@ -2,8 +2,8 @@
     DID Lib to do DID's and DDO's
 
 """
-import json
 import datetime
+import json
 import re
 
 from web3 import (
