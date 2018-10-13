@@ -33,10 +33,9 @@ from .public_key_rsa import (
     PUBLIC_KEY_TYPE_RSA,
 )
 
-from did_ddo_lib.public_key_base import (
+from .public_key_base import (
     PublicKeyBase,
     PUBLIC_KEY_STORE_TYPE_PEM,
-    PUBLIC_KEY_STORE_TYPE_BASE64,
 )
 
 from .authentication import (
