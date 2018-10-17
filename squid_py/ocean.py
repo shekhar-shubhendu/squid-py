@@ -143,6 +143,10 @@ class Ocean(object):
                 })
         return accounts
 
+    def get_accounts(self):
+        # Wrapper for API unification
+        return self.accounts
+
     @property
     def helper(self):
         return self._helper
