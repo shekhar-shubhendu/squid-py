@@ -16,7 +16,7 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 setup_logging()
 
 
-class Ocean(object):
+class Ocean:
     """Create a new Ocean object for access to the Ocean Protocol Network
 
     :param keeper_url: URL of the Keeper network to connect too.
@@ -165,3 +165,40 @@ class Ocean(object):
     def connect_web3(host, port='8545'):
         """Establish a connexion using Web3 with the client."""
         return Web3(HTTPProvider("{0}:{1}".format(host, port)))
+
+class OceanNew:
+    def __init__(self):
+        self.keeper = None
+
+
+    @property
+    def accounts(self):
+        accounts = []
+        if self._helper and self._helper.accounts:
+            for account_address in self._helper.accounts:
+                accounts.append({
+                    'address': account_address,
+                    'ether': self.get_ether_balance(account_address),
+                    'token': self.get_token_balance(account_address)
+                })
+        return accounts
+
+    def get_accounts(self):
+        # Wrapper for API unification
+        return self.accounts
+
+class Account:
+    def __init__(self):
+        pass
+
+class Asset:
+    def __init__(self):
+        pass
+
+    def purchase(self):
+        pass
+
+class Order:
+    def __init__(self):
+        pass
+
