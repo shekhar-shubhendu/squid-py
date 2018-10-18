@@ -6,7 +6,7 @@
 import logging
 import os
 import pytest
-
+import time
 # from web3 import Web3, HTTPProvider
 
 # from squid_py.constants import KEEPER_CONTRACTS
@@ -33,21 +33,52 @@ from squid_py.config import Config
 def test_ocean_instance():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
-
+    ocean.print_config()
     assert ocean.keeper.token is not None
 
 
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
-
-    account_list = ocean.get_accounts()
-    for act in account_list:
-        print(act)
+    ocean.update_accounts()
+    for acct in ocean.accounts:
+        print(acct)
 
     for account in ocean.accounts:
         assert account.ether >= 0
         assert account.ocean >= 0
+
+def test_token_request():
+    # NB - This doesn't cost Ether!!!!!!!
+    ocean = Ocean('config_local.ini')
+
+    amount = 2000
+
+    # Get the current accounts, assign 2
+    ocean.update_accounts()
+    provider_account = ocean.accounts[0]
+    consumer_account = ocean.accounts[1]
+
+    # Start balances for comparison
+    provider_start_eth = provider_account.ether
+    provider_start_ocean = provider_account.ocean
+
+    # Make requests, assert success on request
+    assert provider_account.request_tokens(amount)
+    assert consumer_account.request_tokens(amount)
+
+    # Update and print balances
+    ocean.update_accounts()
+    for acct in ocean.accounts:
+        print(acct)
+
+    provider_account = ocean.accounts[0]
+    consumer_account = ocean.accounts[1]
+    # time.sleep(10)
+    # Confirm balance change
+    # NB - This doesn't cost Ether!!!!!!!
+    assert provider_account.ether == provider_start_eth
+    assert provider_account.ocean == provider_start_ocean + amount
 
 def oldtest_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'

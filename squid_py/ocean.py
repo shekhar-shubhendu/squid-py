@@ -189,6 +189,7 @@ class Ocean:
         # With the interface loaded, the Keeper node is connected with all contracts
         self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
 
+        self.accounts = None
 
     def print_config(self):
         logging.debug("Ocean object configuration:".format())
@@ -200,11 +201,7 @@ class Ocean:
         logging.debug("Ocean.address_list.token: {}".format(self.config.address_list['token']))
         logging.debug("Ocean.address_list.auth: {}".format(self.config.address_list['auth']))
 
-    @property
-    def accounts(self):
-        return self.get_accounts()
-
-    def get_accounts(self):
+    def update_accounts(self):
         """
         Using the Web3 driver, get all account addresses
         For each address, instantiate a new Account object
@@ -212,10 +209,14 @@ class Ocean:
         """
         accounts_list = []
         for account_address in self._web3.eth.accounts:
-            # logging.debug("Fetching account {}".format(account_address))
             accounts_list.append(Account(self.keeper,account_address))
 
-        return accounts_list
+        self.accounts = accounts_list
+
+    def get_accounts(self):
+        self.update_accounts()
+        return self.accounts
+
 
 class Account:
     def __init__(self, keeper, address):
@@ -227,6 +228,8 @@ class Account:
         """
         self.keeper = keeper
         self.address = address
+
+        # Inititalize the balances with the current values from the Blockchain
         self.ether = self.get_ether_balance()
         self.ocean = self.get_ocean_balance()
 
@@ -235,17 +238,19 @@ class Account:
         Call the Token contract method .web3.eth.getBalance()
         :return: Ether balance, int
         """
-        return self.keeper.token.get_ether_balance(self.address)
+        self.ether = self.keeper.token.get_ether_balance(self.address)
+        return self.ether
 
     def get_ocean_balance(self):
         """
         Call the Token contract method .balanceOf(account_address)
         :return: Ocean token balance, int
         """
-        return self.keeper.token.get_token_balance(self.address)
+        self.ocean = self.keeper.token.get_token_balance(self.address)
+        return self.ocean
 
-    def request_tokens(self):
-        pass
+    def request_tokens(self,amount):
+        self.keeper.market.request_tokens(amount,self.address)
 
     def get_balance(self):
         pass
