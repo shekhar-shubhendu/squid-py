@@ -167,31 +167,38 @@ class Ocean_Legacy:
         return Web3(HTTPProvider("{0}:{1}".format(host, port)))
 
 class Ocean:
-    """
-    """
     def __init__(self, config_file):
         """
+        The Ocean class is the entry point into Ocean Protocol.
+        This class is an aggregation of
+         * the smart contracts via the Keeper class
+         * the metadata store
+         * and utilities
+        Ocean is also a wrapper for the web3.py interface (https://github.com/ethereum/web3.py)
+        An instance of Ocean is parameterized by a configuration file.
 
         :param config_file:
         """
 
-        config = Config(config_file)
-        self.config = config
-
-        logging.debug("Ocean object configuration:".format())
-        logging.debug("Ocean.keeper_path: {}".format(config.keeper_path))
-        logging.debug("Ocean.keeper_url: {}".format(config.keeper_url))
-        logging.debug("Ocean.gas_limit: {}".format(config.gas_limit))
-        logging.debug("Ocean.provider_url: {}".format(config.provider_url))
-        logging.debug("Ocean.address_list.market: {}".format(config.address_list['market']))
-        logging.debug("Ocean.address_list.token: {}".format(config.address_list['token']))
-        logging.debug("Ocean.address_list.auth: {}".format(config.address_list['auth']))
+        # Configuration information for the market is stored in the Config class
+        self.config = Config(config_file)
 
         # For development, we use the HTTPProvider Web3 interface
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
         # With the interface loaded, the Keeper node is connected with all contracts
-        self.keeper = Keeper(self._web3, config.keeper_path, config.address_list)
+        self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
+
+
+    def print_config(self):
+        logging.debug("Ocean object configuration:".format())
+        logging.debug("Ocean.keeper_path: {}".format(self.config.keeper_path))
+        logging.debug("Ocean.keeper_url: {}".format(self.config.keeper_url))
+        logging.debug("Ocean.gas_limit: {}".format(self.config.gas_limit))
+        logging.debug("Ocean.provider_url: {}".format(self.config.provider_url))
+        logging.debug("Ocean.address_list.market: {}".format(self.config.address_list['market']))
+        logging.debug("Ocean.address_list.token: {}".format(self.config.address_list['token']))
+        logging.debug("Ocean.address_list.auth: {}".format(self.config.address_list['auth']))
 
     @property
     def accounts(self):
