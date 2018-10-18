@@ -6,7 +6,7 @@ from web3 import Web3, HTTPProvider
 from squid_py.config import (
     Config,
 )
-from squid_py.keeper import Contracts
+from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.metadata import Metadata
 from squid_py.utils import Web3Helper
@@ -85,7 +85,7 @@ class Ocean_Legacy:
         if self._provider_url:
             self._metadata = Metadata(self._provider_url)
         self._network_name = self._helper.network_name
-        self._contracts = Contracts(self._helper, self._keeper_path, self._address_list)
+        self._contracts = Keeper(self._helper, self._keeper_path, self._address_list)
 
     def calculate_hash(self, message):
         return self._web3.sha3(message)

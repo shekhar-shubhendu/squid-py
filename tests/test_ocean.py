@@ -17,7 +17,7 @@ from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, conv
 
 from squid_py.config import Config
 
-from squid_py.keeper import Contracts
+from squid_py.keeper import Keeper
 
 
 def get_keeper_path(path=''):
@@ -109,7 +109,7 @@ def test_provider_access():
     assert web3
     helper = Web3Helper(web3)
     assert helper
-    contracts = Contracts(helper, get_keeper_path(), address_list)
+    contracts = Keeper(helper, get_keeper_path(), address_list)
     assert contracts
 
 

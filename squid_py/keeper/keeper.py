@@ -8,7 +8,7 @@ from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
 
 
-class Contracts(object):
+class Keeper(object):
     def __init__(self, web3_helper, contract_path, address_list):
         self._helper = web3_helper
         self._market = Market(self._helper, contract_path, address_list['market'])
