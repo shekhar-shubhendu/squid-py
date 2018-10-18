@@ -173,8 +173,27 @@ class Ocean:
 
 
     def __init__(self,config_file):
-        self.keeper =  Keeper(self._helper, self._keeper_path, self._address_list)
+        # self.keeper =  Keeper(self._helper, self._keeper_path, self._address_list)
+        config = Config(config_file)
 
+        logging.debug("Ocean object instantiated".format())
+
+        logging.debug("Ocean.keeper_path: {}".format(config.keeper_path))
+
+        logging.debug("Ocean.keeper_url: {}".format(config.keeper_url))
+        logging.debug("Ocean.gas_limit: {}".format(config.gas_limit))
+        logging.debug("Ocean.provider_url: {}".format(config.provider_url))
+
+        logging.debug("Ocean.address_list.market: {}".format(config.address_list['market']))
+        logging.debug("Ocean.address_list.token: {}".format(config.address_list['token']))
+        logging.debug("Ocean.address_list.auth: {}".format(config.address_list['auth']))
+
+
+
+        # self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
+        # self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
+        # self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
+        # self._provider_url = kwargs.get('provider_url', config.provider_url)
 
     @property
     def accounts(self):

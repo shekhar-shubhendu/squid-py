@@ -7,10 +7,20 @@
 """
 
 class ContractWrapperBase(object):
-    def __init__(self, web3_helper, contract_name, name, contract_path, address):
-        self._web3_helper = web3_helper
-        contract = web3_helper.load(contract_name, name, contract_path, address)
-        self._helper = web3_helper
+
+    """
+    Base class for all contract objects.
+    """
+    def __init__(self, web3, contract_name, name, contract_path, address):
+        """
+        :param contract_name:
+        :param name:
+        :param contract_path:
+        :param address:
+        """
+        # self._web3_helper = web3_helper
+        contract = self.load(contract_name, name, contract_path, address)
+        # self._helper = web3_helper
         self._contract_concise = contract[0]
         self._contract = contract[1]
         self._address = web3_helper.to_checksum_address(contract[2])
