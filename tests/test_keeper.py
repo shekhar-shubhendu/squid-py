@@ -5,45 +5,14 @@ from web3 import Web3
 import squid_py.acl as acl
 
 from squid_py import Ocean_Legacy
-
+import json
 from squid_py.utils import convert_to_string
+import pathlib
 
-json_dict = {"publisherId": "0x1",
-             "base": {
-                 "name": "UK Weather information 20111",
-                 "description": "Weather information of UK including temperature and humidity",
-                 "size": "3.1gb",
-                 "author": "Met Office",
-                 "license": "CC-BY",
-                 "copyrightHolder": "Met Office",
-                 "encoding": "UTF-8",
-                 "compression": "zip",
-                 "contentType": "text/csv",
-                 "workExample": "stationId,latitude,longitude,datetime,temperature,humidity\n"
-                                "423432fsd,51.509865,-0.118092,2011-01-01T10:55:11+00:00,7.2,68",
-                 "contentUrls": ["https://testocnfiles.blob.core.windows.net/testfiles/testzkp.pdf"],
-                 "links": [
-                     {"sample1": "http://data.ceda.ac.uk/badc/ukcp09/data/gridded-land-obs/gridded-land-obs-daily/"},
-                     {
-                         "sample2": "http://data.ceda.ac.uk/badc/ukcp09/data/gridded-land-obs/gridded-land-obs-averages-25km/"},
-                     {"fieldsDescription": "http://data.ceda.ac.uk/badc/ukcp09/"}
-                 ],
-                 "inLanguage": "en",
-                 "tags": "weather, uk, 2011, temperature, humidity",
-                 "price": 10,
-                 "type": "dataset"
-             },
-             "curation": {
-                 "rating": 0,
-                 "numVotes": 0,
-                 "schema": "Binary Votting"
-             },
-             "additionalInformation": {
-                 "updateFrecuency": "yearly"
-             },
-             "assetId": "001"
-             }
-
+SAMPLE_METADATA_PATH = pathlib.Path.cwd() / 'tests' / 'sample_metadata.json'
+assert SAMPLE_METADATA_PATH.exists()
+with open(SAMPLE_METADATA_PATH) as f:
+    SAMPLE_METADATA = json.load(f)
 
 def get_events(event_filter, max_iterations=100, pause_duration=0.1):
     events = event_filter.get_new_entries()
@@ -76,11 +45,11 @@ def test_keeper():
     assert market.request_tokens(2000, consumer_account)
 
     # 1. Provider register an asset
-    asset_id = market.register_asset(json_dict['base']['name'],json_dict['base']['description'], asset_price, provider_account)
+    asset_id = market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, provider_account)
     assert market.check_asset(asset_id)
     assert asset_price == market.get_asset_price(asset_id)
 
-    json_dict['assetId'] = Web3.toHex(asset_id)
+    SAMPLE_METADATA['assetId'] = Web3.toHex(asset_id)
     # ocean.metadata.register_asset(json_dict)
     expiry = int(time.time() + expire_seconds)
 
