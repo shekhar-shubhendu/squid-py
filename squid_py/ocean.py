@@ -186,10 +186,15 @@ class Ocean:
         logging.debug("Ocean.address_list.token: {}".format(config.address_list['token']))
         logging.debug("Ocean.address_list.auth: {}".format(config.address_list['auth']))
 
+        # For development, we use the HTTPProvider Web3 interface
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
+        # With the interface loaded, the Keeper node is connected with all contracts
         self.keeper = Keeper(self._web3, config.keeper_path, config.address_list)
 
+    @property
+    def accounts(self):
+        return self.get_accounts()
 
     def get_accounts(self):
         """
@@ -197,19 +202,34 @@ class Ocean:
         For each address, instantiate a new Account object
         :return:
         """
-        accounts = []
+        accounts_list = []
         for account_address in self._web3.eth.accounts:
-            accounts.append({
-                'address': account_address,
-                'ether': self.get_ether_balance(account_address),
-                'token': self.get_token_balance(account_address)
-            })
+            logging.debug("Fetching account {}".format(account_address))
+            accounts_list.append(Account(self.keeper,account_address))
 
-        return self.accounts
+        return accounts_list
 
 class Account:
-    def __init__(self):
+    def __init__(self, keeper, address):
+        self.keeper = keeper
+        self.address = address
+        self.ether = self.get_ether_balance()
+        self.ocean = self.get_ocean_balance()
+
+    def get_ether_balance(self):
+        return self.keeper.token.get_ether_balance(self.address)
+
+    def get_ocean_balance(self):
+        return self.keeper.token.get_token_balance(self.address)
+
+    def request_tokens(self):
         pass
+
+    def get_balance(self):
+        pass
+
+    def __str__(self):
+        return "Account {} with {} Eth, {} Ocean".format(self.address, self.ether, self.ocean)
 
 class Asset:
     def __init__(self):
