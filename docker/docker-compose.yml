@@ -27,7 +27,7 @@ services:
     - artifacts:/keeper-contracts/artifacts/
 
   provider:
-    image: oceanprotocol/provider:develop
+    image: oceanprotocol/provider:feature_add-query-endpoint
     ports:
     - 5000:5000
     networks:
