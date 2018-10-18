@@ -42,9 +42,9 @@ class Web3Helper(object):
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)
 
-    def to_checksum_address(self, address):
-        """Validate the address provided."""
-        return self._web3.toChecksumAddress(address)
+    # def to_checksum_address(self, address):
+    #     """Validate the address provided."""
+    #     return self._web3.toChecksumAddress(address)
 
     def get_balance(self, account_address, block_identifier):
         return self._web3.eth.getBalance(account_address, block_identifier)

@@ -12,13 +12,13 @@ class Token(ContractWrapperBase):
 
     def get_token_balance(self, account_address):
         """Retrieve the ammount of tokens of an account address"""
-        return self._contract_concise.balanceOf(account_address)
+        return self.contract_concise.balanceOf(account_address)
 
     def token_approve(self, market_address, price, account_address):
         """Approve the passed address to spend the specified amount of tokens."""
-        return self._contract_concise.approve(self._helper.to_checksum_address(market_address),
-                                              price,
-                                              transact={'from': account_address})
+        return self.contract_concise.approve(self._helper.to_checksum_address(market_address),
+                                             price,
+                                             transact={'from': account_address})
 
     def get_ether_balance(self, account_address):
         try:
