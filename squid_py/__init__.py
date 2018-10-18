@@ -6,5 +6,5 @@ from .exceptions import (
 )
 
 from .ocean import (
-    Ocean,
+    Ocean_Legacy,
 )

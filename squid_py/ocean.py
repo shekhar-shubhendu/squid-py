@@ -16,7 +16,7 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 setup_logging()
 
 
-class Ocean:
+class Ocean_Legacy:
     """Create a new Ocean object for access to the Ocean Protocol Network
 
     :param keeper_url: URL of the Keeper network to connect too.
@@ -166,7 +166,7 @@ class Ocean:
         """Establish a connexion using Web3 with the client."""
         return Web3(HTTPProvider("{0}:{1}".format(host, port)))
 
-class OceanNew:
+class Ocean:
     def __init__(self):
         self.keeper = None
 

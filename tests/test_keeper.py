@@ -1,18 +1,12 @@
 import time
 
-from web3 import (
-    Web3,
-)
+from web3 import Web3
 
 import squid_py.acl as acl
 
-from squid_py import (
-    Ocean,
-)
+from squid_py import Ocean_Legacy
 
-from squid_py.utils import (
-    convert_to_string,
-)
+from squid_py.utils import convert_to_string
 
 json_dict = {"publisherId": "0x1",
              "base": {
@@ -72,7 +66,7 @@ def process_enc_token(event):
 def test_keeper():
     expire_seconds = 9999999999
     asset_price = 100
-    ocean = Ocean(keeper_url='http://localhost:8545', config_file='config_local.ini')
+    ocean = Ocean_Legacy(keeper_url='http://localhost:8545', config_file='config_local.ini')
     market = ocean.contracts.market
     token = ocean.contracts.token
     auth = ocean.contracts.auth
