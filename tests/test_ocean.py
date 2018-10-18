@@ -34,6 +34,8 @@ def test_ocean_contracts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
     ocean = Ocean(os.environ['CONFIG_FILE'])
+
+    print(ocean.accounts)
     # assert ocean.keeper.token is not None
     # assert ocean.keeper_url == os.environ['KEEPER_URL']
 

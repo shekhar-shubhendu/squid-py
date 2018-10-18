@@ -178,13 +178,10 @@ class Ocean:
         self.config = config
 
         logging.debug("Ocean object configuration:".format())
-
         logging.debug("Ocean.keeper_path: {}".format(config.keeper_path))
-
         logging.debug("Ocean.keeper_url: {}".format(config.keeper_url))
         logging.debug("Ocean.gas_limit: {}".format(config.gas_limit))
         logging.debug("Ocean.provider_url: {}".format(config.provider_url))
-
         logging.debug("Ocean.address_list.market: {}".format(config.address_list['market']))
         logging.debug("Ocean.address_list.token: {}".format(config.address_list['token']))
         logging.debug("Ocean.address_list.auth: {}".format(config.address_list['auth']))
@@ -192,25 +189,22 @@ class Ocean:
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
         self.keeper = Keeper(self._web3, config.keeper_path, config.address_list)
-        # self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
-        # self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
-        # self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
-        # self._provider_url = kwargs.get('provider_url', config.provider_url)
 
-    @property
-    def accounts(self):
-        accounts = []
-        if self._helper and self._helper.accounts:
-            for account_address in self._helper.accounts:
-                accounts.append({
-                    'address': account_address,
-                    'ether': self.get_ether_balance(account_address),
-                    'token': self.get_token_balance(account_address)
-                })
-        return accounts
 
     def get_accounts(self):
-        # Wrapper for API unification
+        """
+        Using the Web3 driver, get all account addresses
+        For each address, instantiate a new Account object
+        :return:
+        """
+        accounts = []
+        for account_address in self._web3.eth.accounts:
+            accounts.append({
+                'address': account_address,
+                'ether': self.get_ether_balance(account_address),
+                'token': self.get_token_balance(account_address)
+            })
+
         return self.accounts
 
 class Account:

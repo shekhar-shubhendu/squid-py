@@ -6,6 +6,7 @@
 
 """
 import os
+import logging
 import json
 
 from web3.contract import ConciseContract
@@ -21,6 +22,8 @@ class ContractWrapperBase(object):
         self.contract = contract[1]
         self.address = self.to_checksum_address(contract[2])
         self.name = name
+
+        logging.debug("Loaded {}".format(self))
 
     def load(self, contract_file, name, contract_path, contract_address):
         """Retrieve a tuple with the concise contract and the contract definition."""
@@ -47,3 +50,6 @@ class ContractWrapperBase(object):
     def to_checksum_address(self, address):
         """Validate the address provided."""
         return self.web3.toChecksumAddress(address)
+
+    def __str__(self):
+        return "{} at {}".format(self.name, self.address)
