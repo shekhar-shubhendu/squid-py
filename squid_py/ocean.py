@@ -167,8 +167,13 @@ class Ocean_Legacy:
         return Web3(HTTPProvider("{0}:{1}".format(host, port)))
 
 class Ocean:
-    def __init__(self):
-        self.keeper = None
+    """
+    During development, the
+    """
+
+
+    def __init__(self,config_file):
+        self.keeper =  Keeper(self._helper, self._keeper_path, self._address_list)
 
 
     @property

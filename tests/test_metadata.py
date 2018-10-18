@@ -1,5 +1,6 @@
 from squid_py.ocean import Ocean_Legacy
 import json
+import pathlib
 
 SAMPLE_METADATA_PATH = pathlib.Path.cwd() / 'tests' / 'sample_metadata.json'
 assert SAMPLE_METADATA_PATH.exists()
