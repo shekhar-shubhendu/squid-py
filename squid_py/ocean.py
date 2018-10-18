@@ -170,9 +170,7 @@ class Ocean:
     """
     During development, the
     """
-
-
-    def __init__(self,config_file):
+    def __init__(self, config_file):
 
         config = Config(config_file)
         self.config = config
