@@ -168,9 +168,12 @@ class Ocean_Legacy:
 
 class Ocean:
     """
-    During development, the
     """
     def __init__(self, config_file):
+        """
+
+        :param config_file:
+        """
 
         config = Config(config_file)
         self.config = config
@@ -198,26 +201,40 @@ class Ocean:
         """
         Using the Web3 driver, get all account addresses
         For each address, instantiate a new Account object
-        :return:
+        :return: List of Account instances
         """
         accounts_list = []
         for account_address in self._web3.eth.accounts:
-            logging.debug("Fetching account {}".format(account_address))
+            # logging.debug("Fetching account {}".format(account_address))
             accounts_list.append(Account(self.keeper,account_address))
 
         return accounts_list
 
 class Account:
     def __init__(self, keeper, address):
+        """
+        Hold account address, and update balances of Ether and Ocean token
+
+        :param keeper: The instantiated Keeper
+        :param address: The address of this account
+        """
         self.keeper = keeper
         self.address = address
         self.ether = self.get_ether_balance()
         self.ocean = self.get_ocean_balance()
 
     def get_ether_balance(self):
+        """
+        Call the Token contract method .web3.eth.getBalance()
+        :return: Ether balance, int
+        """
         return self.keeper.token.get_ether_balance(self.address)
 
     def get_ocean_balance(self):
+        """
+        Call the Token contract method .balanceOf(account_address)
+        :return: Ocean token balance, int
+        """
         return self.keeper.token.get_token_balance(self.address)
 
     def request_tokens(self):
