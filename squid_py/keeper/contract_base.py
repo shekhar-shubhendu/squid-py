@@ -5,6 +5,8 @@
     All keeper contract inherit from this base class
 
 """
+import os
+import json
 
 class ContractWrapperBase(object):
 
@@ -18,6 +20,7 @@ class ContractWrapperBase(object):
         :param contract_path:
         :param address:
         """
+        self._web3 = web3
         # self._web3_helper = web3_helper
         contract = self.load(contract_name, name, contract_path, address)
         # self._helper = web3_helper

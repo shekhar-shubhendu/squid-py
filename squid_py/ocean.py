@@ -173,10 +173,11 @@ class Ocean:
 
 
     def __init__(self,config_file):
-        # self.keeper =  Keeper(self._helper, self._keeper_path, self._address_list)
-        config = Config(config_file)
 
-        logging.debug("Ocean object instantiated".format())
+        config = Config(config_file)
+        self.config = config
+
+        logging.debug("Ocean object configuration:".format())
 
         logging.debug("Ocean.keeper_path: {}".format(config.keeper_path))
 
@@ -188,8 +189,9 @@ class Ocean:
         logging.debug("Ocean.address_list.token: {}".format(config.address_list['token']))
         logging.debug("Ocean.address_list.auth: {}".format(config.address_list['auth']))
 
+        self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
-
+        self.keeper = Keeper(self._web3, config.keeper_path, config.address_list)
         # self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
         # self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
         # self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
