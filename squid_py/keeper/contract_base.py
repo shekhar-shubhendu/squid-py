@@ -11,7 +11,7 @@ import json
 
 from web3.contract import ConciseContract
 
-class ContractWrapperBase(object):
+class ContractBase(object):
     """
     Base class for all contract objects.
     """

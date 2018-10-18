@@ -7,27 +7,27 @@ import logging
 import os
 import pytest
 
-from web3 import Web3, HTTPProvider
+# from web3 import Web3, HTTPProvider
 
-from squid_py.constants import KEEPER_CONTRACTS
+# from squid_py.constants import KEEPER_CONTRACTS
 
-from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
+# from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
 
-from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, convert_to_text
-
+# from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, convert_to_text
+from squid_py import Ocean
 from squid_py.config import Config
 
-from squid_py.keeper import Keeper
+# from squid_py.keeper import Keeper
 
 
-def get_keeper_path(path=''):
-    if os.path.exists(path):
-        pass
-    elif os.getenv('VIRTUAL_ENV'):
-        path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
-    else:
-        path = os.path.join(site.PREFIXES[0], 'contracts')
-    return path
+# def get_keeper_path(path=''):
+#     if os.path.exists(path):
+#         pass
+#     elif os.getenv('VIRTUAL_ENV'):
+#         path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
+#     else:
+#         path = os.path.join(site.PREFIXES[0], 'contracts')
+#     return path
 
 
 def test_ocean_instance():
@@ -35,28 +35,39 @@ def test_ocean_instance():
     ocean = Ocean(os.environ['CONFIG_FILE'])
 
     assert ocean.keeper.token is not None
-    assert ocean.config.keeper_url == os.environ['KEEPER_URL']
 
 
-# def test_ocean_contracts_legacy():
-#     os.environ['CONFIG_FILE'] = 'config_local.ini'
-#     os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
-#     ocean = Ocean_Legacy()
-#     assert ocean.contracts.token is not None
-#     assert ocean.keeper_url == os.environ['KEEPER_URL']
+def test_accounts():
+    os.environ['CONFIG_FILE'] = 'config_local.ini'
+    ocean = Ocean(os.environ['CONFIG_FILE'])
+
+    account_list = ocean.get_accounts()
+    for act in account_list:
+        print(act)
+
+    for account in ocean.accounts:
+        assert account.ether >= 0
+        assert account.ocean >= 0
+
+def oldtest_ocean_contracts_legacy():
+    os.environ['CONFIG_FILE'] = 'config_local.ini'
+    os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
+    ocean = Ocean_Legacy()
+    assert ocean.contracts.token is not None
+    assert ocean.keeper_url == os.environ['KEEPER_URL']
 
 
-# def test_ocean_contracts_with_conf(caplog):
-#     caplog.set_level(logging.DEBUG)
-#     # Need to ensure config.ini is populated!
-#     ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
-#     config = Config('config_local.ini')
-#     validate_market_addess = ocean.web3.toChecksumAddress(config.get(KEEPER_CONTRACTS, 'market.address'))
-#     assert ocean.contracts.market.address == validate_market_addess
-#     assert ocean.address_list
-#     assert ocean.address_list['market'] == validate_market_addess
-#     assert ocean.gas_limit == int(config.get(KEEPER_CONTRACTS, 'gas_limit'))
-#     assert ocean.provider_url == 'http://localhost:5000'
+def oldtest_ocean_contracts_with_conf(caplog):
+    caplog.set_level(logging.DEBUG)
+    # Need to ensure config.ini is populated!
+    ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
+    config = Config('config_local.ini')
+    validate_market_addess = ocean.web3.toChecksumAddress(config.get(KEEPER_CONTRACTS, 'market.address'))
+    assert ocean.contracts.market.address == validate_market_addess
+    assert ocean.address_list
+    assert ocean.address_list['market'] == validate_market_addess
+    assert ocean.gas_limit == int(config.get(KEEPER_CONTRACTS, 'gas_limit'))
+    assert ocean.provider_url == 'http://localhost:5000'
 
 
 def oldtest_split_signature():
@@ -73,17 +84,7 @@ def oldtest_convert():
     print("output %s" % convert_to_string(convert_to_bytes(input_text)))
     assert convert_to_text(convert_to_bytes(input_text)) == input_text
 
-def test_accounts():
-    os.environ['CONFIG_FILE'] = 'config_local.ini'
-    ocean = Ocean(os.environ['CONFIG_FILE'])
 
-    account_list = ocean.get_accounts()
-    for act in account_list:
-        print(act)
-
-    for account in ocean.accounts:
-        assert account.ether >= 0
-        assert account.ocean >= 0
 
 def oldtest_legacy_accounts_legacy():
     ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')

@@ -4,16 +4,16 @@ from squid_py.constants import (
     OCEAN_MARKET_CONTRACT
 )
 from squid_py.keeper.contract_base import (
-    ContractWrapperBase,
+    ContractBase,
 )
 
 DEFAULT_GAS_LIMIT = 400000
 
 
-class Market(ContractWrapperBase):
+class Market(ContractBase):
 
     def __init__(self, web3_helper, contract_path, address):
-        ContractWrapperBase.__init__(self, web3_helper, OCEAN_MARKET_CONTRACT, 'market', contract_path, address)
+        ContractBase.__init__(self, web3_helper, OCEAN_MARKET_CONTRACT, 'market', contract_path, address)
         self._defaultGas = DEFAULT_GAS_LIMIT
 
     # call functions (costs no gas)

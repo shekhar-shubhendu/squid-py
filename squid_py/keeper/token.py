@@ -2,13 +2,13 @@ import logging
 
 from squid_py.constants import OCEAN_TOKEN_CONTRACT
 from squid_py.keeper.contract_base import (
-    ContractWrapperBase,
+    ContractBase,
 )
 
 
-class Token(ContractWrapperBase):
+class Token(ContractBase):
     def __init__(self, web3, contract_path, address):
-        ContractWrapperBase.__init__(self, web3, OCEAN_TOKEN_CONTRACT, 'token', contract_path, address)
+        ContractBase.__init__(self, web3, OCEAN_TOKEN_CONTRACT, 'token', contract_path, address)
 
     def get_token_balance(self, account_address):
         """Retrieve the amount of tokens of an account address"""
