@@ -14,7 +14,7 @@ import time
 # from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
 
 # from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, convert_to_text
-from squid_py import Ocean
+from squid_py.ocean import Ocean
 from squid_py.config import Config
 
 # from squid_py.keeper import Keeper

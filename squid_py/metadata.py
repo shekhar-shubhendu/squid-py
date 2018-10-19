@@ -3,12 +3,23 @@ import json
 
 import requests
 
+from squid_py.asset import Asset
+import logging
 
 class Metadata(object):
 
+
     def __init__(self, provider_url):
+        """
+        The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API
+
+        :param provider_url:
+        """
         self._base_url = '{}/api/v1/provider/assets'.format(provider_url)
         self._headers = {'content-type': 'application/json'}
+
+        logging.debug("Metadata Store connected at {}".format(provider_url))
+        logging.debug("Metadata assets at {}".format(self._base_url))
 
     def list_assets(self):
         return json.loads(requests.get(self._base_url).content)
@@ -20,6 +31,7 @@ class Metadata(object):
         return json.loads(requests.get(self._base_url + '/metadata').content)
 
     def publish_asset_metadata(self, data):
+        asset = Asset
         return json.loads(
             requests.post(self._base_url + '/metadata', data=json.dumps(data), headers=self._headers).content)
 

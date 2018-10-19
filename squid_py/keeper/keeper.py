@@ -19,7 +19,6 @@ class Keeper(object):
         :param address_list:
         """
 
-
         self.web3 = web3
         self.contract_path = contract_path
         self.address_list = address_list

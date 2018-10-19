@@ -4,7 +4,8 @@
 
 import logging
 import os
-from squid_py import Ocean
+from squid_py.ocean import Ocean
+
 
 import json
 import pathlib
