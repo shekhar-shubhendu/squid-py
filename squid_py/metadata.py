@@ -8,7 +8,6 @@ import logging
 
 class Metadata(object):
 
-
     def __init__(self, provider_url):
         """
         The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API

@@ -1,4 +1,5 @@
 from squid_py.ocean import Ocean
+from squid_py.asset import Asset
 
 import json
 import pathlib
@@ -8,14 +9,22 @@ assert SAMPLE_METADATA_PATH.exists(), "{} does not exist!".format(SAMPLE_METADAT
 with open(SAMPLE_METADATA_PATH) as f:
     SAMPLE_METADATA = json.load(f)
 
+
+def test_asset_class():
+    asset = Asset(asset_id='TestID', publisher_id='TestPID', price = 0)
+    print(asset)
+
 def test_ocean_metadata():
     ocean = Ocean('config_local.ini')
+    # Instantiate a new Asset
+
+
 
     # Publish the metadata
     asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA)
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 1
     assert ocean.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-
+    ocean.metadata.list_assets()
     # Retire the metadata
     ocean.metadata.retire_asset_metadata(asset['assetId'])
 

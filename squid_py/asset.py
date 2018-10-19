@@ -69,3 +69,6 @@ class Asset:
 
     def get_service_agreements(self):
         pass
+
+    def __str__(self):
+        return "Asset {} for {}, published by {}".format(self.asset_id, self.price,self.publisher_id)
