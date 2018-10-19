@@ -35,9 +35,9 @@ class Market(ContractBase):
     def request_tokens(self, amount, address):
         """Request an amount of tokens for a particular address."""
         try:
-            self.contract_concise.requestTokens(amount, transact={'from': address})
-            logging.info("Requesting %s tokens" % amount)
-            return True
+            receipt = self.contract_concise.requestTokens(amount, transact={'from': address})
+            logging.info("{} requests {} tokens, returning receipt".format(address,amount))
+            return receipt
         except:
             return False
 

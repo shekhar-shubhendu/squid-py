@@ -49,7 +49,6 @@ def test_accounts():
         assert account.ocean >= 0
 
 def test_token_request():
-    # NB - This doesn't cost Ether!!!!!!!
     ocean = Ocean('config_local.ini')
 
     amount = 2000
@@ -64,13 +63,13 @@ def test_token_request():
     provider_start_ocean = ocean.accounts[provider_address].ocean
 
     # Make requests, assert success on request
-    assert ocean.accounts[provider_address].request_tokens(amount)
-    assert ocean.accounts[consumer_address].request_tokens(amount)
+    rcpt = ocean.accounts[provider_address].request_tokens(amount)
+    ocean._web3.eth.waitForTransactionReceipt(rcpt)
+    rcpt = ocean.accounts[consumer_address].request_tokens(amount)
+    ocean._web3.eth.waitForTransactionReceipt(rcpt)
 
     # Update and print balances
     # Ocean.accounts is a dict address: account
-    #TODO: Change to wait!
-    time.sleep(2) # Wait for blockchain update
     ocean.update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
