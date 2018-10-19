@@ -52,5 +52,10 @@ class ContractBase(object):
         """Validate the address provided."""
         return self.web3.toChecksumAddress(address)
 
+    def get_tx_receipt(self, tx_hash):
+        """Get the receipt of a tx."""
+        self.web3.eth.waitForTransactionReceipt(tx_hash)
+        return self.web3.eth.getTransactionReceipt(tx_hash)
+
     def __str__(self):
         return "{} at {}".format(self.name, self.address)

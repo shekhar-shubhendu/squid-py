@@ -194,14 +194,14 @@ class Ocean:
         assert self.accounts
 
     def print_config(self):
-        logging.debug("Ocean object configuration:".format())
-        logging.debug("Ocean.keeper_path: {}".format(self.config.keeper_path))
-        logging.debug("Ocean.keeper_url: {}".format(self.config.keeper_url))
-        logging.debug("Ocean.gas_limit: {}".format(self.config.gas_limit))
-        logging.debug("Ocean.provider_url: {}".format(self.config.provider_url))
-        logging.debug("Ocean.address_list.market: {}".format(self.config.address_list['market']))
-        logging.debug("Ocean.address_list.token: {}".format(self.config.address_list['token']))
-        logging.debug("Ocean.address_list.auth: {}".format(self.config.address_list['auth']))
+        print("Ocean object configuration:".format())
+        print("Ocean.keeper_path: {}".format(self.config.keeper_path))
+        print("Ocean.keeper_url: {}".format(self.config.keeper_url))
+        print("Ocean.gas_limit: {}".format(self.config.gas_limit))
+        print("Ocean.provider_url: {}".format(self.config.provider_url))
+        print("Ocean.address_list.market: {}".format(self.config.address_list['market']))
+        print("Ocean.address_list.token: {}".format(self.config.address_list['token']))
+        print("Ocean.address_list.auth: {}".format(self.config.address_list['auth']))
 
     def update_accounts(self):
         """

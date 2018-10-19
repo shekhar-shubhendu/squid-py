@@ -46,8 +46,8 @@ class Market(ContractBase):
             price,
             transact={'from': publisher_address, 'gas': self._defaultGas}
         )
-        self._helper.get_tx_receipt(result)
-        logging.info('registered: %s' % result)
+        self.get_tx_receipt(result)
+        logging.info("Registered Asset, generated ID {}".format(asset_id))
         return asset_id
 
     def purchase_asset(self, asset_id, order, publisher_address, sender_address):

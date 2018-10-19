@@ -49,10 +49,7 @@ class Web3Helper(object):
     def get_balance(self, account_address, block_identifier):
         return self._web3.eth.getBalance(account_address, block_identifier)
 
-    def get_tx_receipt(self, tx_hash):
-        """Get the receipt of the tx."""
-        self._web3.eth.waitForTransactionReceipt(tx_hash)
-        return self._web3.eth.getTransactionReceipt(tx_hash)
+
 
     def watch_event(self, contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest', filters=None, ):
         event_filter = self.install_filter(

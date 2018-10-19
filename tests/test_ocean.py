@@ -36,6 +36,8 @@ def test_ocean_instance():
     ocean.print_config()
     assert ocean.keeper.token is not None
 
+    # There is ONE Web3 instance
+    assert ocean.keeper.market.web3 is ocean.keeper.auth.web3 is ocean.keeper.token.web3
 
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
