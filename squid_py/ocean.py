@@ -206,6 +206,7 @@ class Ocean:
     def update_accounts(self):
         """
         Using the Web3 driver, get all account addresses
+        This is used for development to get an overview of all accounts
         For each address, instantiate a new Account object
         :return: List of Account instances
         """
@@ -307,6 +308,30 @@ class Asset:
         # Decode the the access token, get service_endpoint and request_id
 
         return
+
+    def get_DDO(self):
+        """
+
+        :return:
+        """
+
+    def get_DID(self):
+        pass
+
+    def publish_metadata(self):
+        pass
+
+    def get_metadata(self):
+        pass
+
+    def update_metadata(self):
+        pass
+
+    def retire_metadata(self):
+        pass
+
+    def get_service_agreements(self):
+        pass
 
 class Order:
     def __init__(self):

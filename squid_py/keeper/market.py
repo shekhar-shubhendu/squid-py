@@ -43,7 +43,14 @@ class Market(ContractBase):
             return False
 
     def register_asset(self, name, description, price, publisher_address):
-        """Register an asset on chain."""
+        """
+        Register an asset on chain.
+        :param name:
+        :param description:
+        :param price:
+        :param publisher_address:
+        :return:
+        """
         asset_id = self.contract_concise.generateId(name + description)
         result = self.contract_concise.register(
             asset_id,
