@@ -207,11 +207,11 @@ class Ocean:
         For each address, instantiate a new Account object
         :return: List of Account instances
         """
-        accounts_list = []
+        accounts_dict = dict()
         for account_address in self._web3.eth.accounts:
-            accounts_list.append(Account(self.keeper,account_address))
+            accounts_dict[account_address] = Account(self.keeper, account_address)
 
-        self.accounts = accounts_list
+        self.accounts = accounts_dict
 
     def get_accounts(self):
         self.update_accounts()
@@ -250,7 +250,7 @@ class Account:
         return self.ocean
 
     def request_tokens(self,amount):
-        self.keeper.market.request_tokens(amount,self.address)
+        return self.keeper.market.request_tokens(amount,self.address)
 
     def get_balance(self):
         pass

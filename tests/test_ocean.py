@@ -41,10 +41,10 @@ def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
     ocean.update_accounts()
-    for acct in ocean.accounts:
-        print(acct)
+    for address in ocean.accounts:
+        print(ocean.accounts[address])
 
-    for account in ocean.accounts:
+    for address, account in ocean.accounts.items():
         assert account.ether >= 0
         assert account.ocean >= 0
 
@@ -56,29 +56,30 @@ def test_token_request():
 
     # Get the current accounts, assign 2
     ocean.update_accounts()
-    provider_account = ocean.accounts[0]
-    consumer_account = ocean.accounts[1]
+    provider_address = list(ocean.accounts)[0]
+    consumer_address = list(ocean.accounts)[1]
 
     # Start balances for comparison
-    provider_start_eth = provider_account.ether
-    provider_start_ocean = provider_account.ocean
+    provider_start_eth = ocean.accounts[provider_address].ether
+    provider_start_ocean = ocean.accounts[provider_address].ocean
 
     # Make requests, assert success on request
-    assert provider_account.request_tokens(amount)
-    assert consumer_account.request_tokens(amount)
+    assert ocean.accounts[provider_address].request_tokens(amount)
+    assert ocean.accounts[consumer_address].request_tokens(amount)
 
     # Update and print balances
+    # Ocean.accounts is a dict address: account
+    #TODO: Change to wait!
+    time.sleep(2) # Wait for blockchain update
     ocean.update_accounts()
-    for acct in ocean.accounts:
-        print(acct)
+    for address in ocean.accounts:
+        print(ocean.accounts[address])
+    provider_current_eth = ocean.accounts[provider_address].ether
+    provider_current_ocean = ocean.accounts[provider_address].ocean
 
-    provider_account = ocean.accounts[0]
-    consumer_account = ocean.accounts[1]
-    # time.sleep(10)
     # Confirm balance change
-    # NB - This doesn't cost Ether!!!!!!!
-    assert provider_account.ether == provider_start_eth
-    assert provider_account.ocean == provider_start_ocean + amount
+    assert provider_current_eth < provider_start_eth
+    assert provider_current_ocean == provider_start_ocean + amount
 
 def oldtest_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
