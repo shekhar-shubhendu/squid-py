@@ -19,7 +19,7 @@ def test_sample_data():
     assert SAMPLE_METADATA
     logging.debug("Loaded metadata file {} for price: {}".format(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['price']))
 
-def test_sample_data():
+def test_register_data():
     ocean = Ocean('config_local.ini')
     asset_price = 100
 
@@ -44,3 +44,6 @@ def test_sample_data():
     asset_id = ocean.keeper.market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, provider_acct.address)
     assert ocean.keeper.market.check_asset(asset_id)
     assert asset_price == ocean.keeper.market.get_asset_price(asset_id)
+
+def test_check_data():
+    pass

@@ -36,6 +36,5 @@ class Service(object):
         }
         return json.dumps(values)
 
-
     def is_valid(self):
         return self._endpoint != None and self._type != None

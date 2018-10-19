@@ -261,11 +261,52 @@ class Account:
         return "Account {} with {} Eth, {} Ocean".format(self.address, self.ether, self.ocean)
 
 class Asset:
-    def __init__(self):
-        pass
+    def __init__(self, asset_id, publisher_id, price):
+        """
+        Represent an asset in the MetaData store
 
-    def purchase(self):
-        pass
+        :param asset_id:
+        :param publisher_id:
+        :param price:
+        """
+
+        self.asset_id = asset_id
+        self.publisher_id = publisher_id
+        self.price = price
+
+
+    def purchase(self, consumer, timeout):
+        """
+        Generate an order for purchase of this Asset
+
+        :param timeout:
+        :param consumer: Account object of the requester
+        :return: Order object
+        """
+        # Check if asset exists
+
+        # Approve the token transfer
+
+        # Submit access request
+
+        return
+
+    def consume(self, order, consumer):
+        """
+
+        :param order: Order object
+        :param consumer: Consumer Account
+        :return: access_url
+        :rtype: string
+        :raises :
+        """
+
+        # Get access token (jwt)
+
+        # Download the asset from the provider using the URL in access token
+        # Decode the the access token, get service_endpoint and request_id
+
+        return
 
 class Order:
     def __init__(self):

@@ -13,7 +13,11 @@ class Market(ContractBase):
 
     # call functions (costs no gas)
     def check_asset(self, asset_id):
-        """Check that this particular asset is already registered on chain."""
+        """
+        Check that this particular asset is already registered on chain."
+        :param asset_id: ID of the asset to check for existance
+        :return: Boolean
+        """
         return self.contract_concise.checkAsset(asset_id)
 
     def verify_order_payment(self, order_id):
