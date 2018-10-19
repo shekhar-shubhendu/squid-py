@@ -189,7 +189,9 @@ class Ocean:
         # With the interface loaded, the Keeper node is connected with all contracts
         self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
 
-        self.accounts = None
+        # Collect the accounts
+        self.accounts = self.get_accounts()
+        assert self.accounts
 
     def print_config(self):
         logging.debug("Ocean object configuration:".format())
