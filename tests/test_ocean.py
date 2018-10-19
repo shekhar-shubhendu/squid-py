@@ -76,9 +76,19 @@ def test_token_request():
     provider_current_eth = ocean.accounts[provider_address].ether
     provider_current_ocean = ocean.accounts[provider_address].ocean
 
-    # Confirm balance change
+    # Confirm balance changes
     assert provider_current_eth < provider_start_eth
     assert provider_current_ocean == provider_start_ocean + amount
+
+
+def test_assets():
+    ocean = Ocean('config_local.ini')
+
+    amount = 2000
+
+    # Get the current accounts, assign 2
+    ocean.update_accounts()
+
 
 def oldtest_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'

@@ -1,9 +1,7 @@
 """
-
     Keeper Contract Base
 
     All keeper contract inherit from this base class
-
 """
 import os
 import logging
@@ -17,9 +15,12 @@ class ContractBase(object):
     """
     def __init__(self, web3, contract_name, name, contract_path, address):
         self.web3 = web3
+
+        # Load the contract objects
         contract = self.load(contract_name, name, contract_path, address)
         self.contract_concise = contract[0]
         self.contract = contract[1]
+
         self.address = self.to_checksum_address(contract[2])
         self.name = name
 

@@ -1,19 +1,14 @@
 import logging
 
-from squid_py.constants import (
-    OCEAN_MARKET_CONTRACT
-)
-from squid_py.keeper.contract_base import (
-    ContractBase,
-)
+from squid_py.constants import OCEAN_MARKET_CONTRACT
+from squid_py.keeper.contract_base import ContractBase
 
 DEFAULT_GAS_LIMIT = 400000
 
-
 class Market(ContractBase):
 
-    def __init__(self, web3_helper, contract_path, address):
-        ContractBase.__init__(self, web3_helper, OCEAN_MARKET_CONTRACT, 'market', contract_path, address)
+    def __init__(self, web3, contract_path, address):
+        ContractBase.__init__(self, web3, OCEAN_MARKET_CONTRACT, 'market', contract_path, address)
         self._defaultGas = DEFAULT_GAS_LIMIT
 
     # call functions (costs no gas)
@@ -39,6 +34,8 @@ class Market(ContractBase):
             logging.info("{} requests {} tokens, returning receipt".format(address,amount))
             return receipt
         except:
+            #TODO: Specify error
+            raise
             return False
 
     def register_asset(self, name, description, price, publisher_address):
