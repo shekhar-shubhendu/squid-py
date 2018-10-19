@@ -6,9 +6,9 @@
 import os
 import logging
 import json
-
+from web3 import Web3
 from web3.contract import ConciseContract
-from ..utils.web3_helper_module import convert_to_bytes
+# from ..utils.web3_helper_module import convert_to_bytes, convert_to_string, convert_to_text
 
 class ContractBase(object):
     """
@@ -63,3 +63,12 @@ class ContractBase(object):
 
     def __str__(self):
         return "{} at {}".format(self.name, self.address)
+
+    def convert_to_bytes(self, data):
+        return Web3.toBytes(text=data)
+
+    def convert_to_string(self,data):
+        return Web3.toHex(data)
+
+    def convert_to_text(self, data):
+        return Web3.toText(data)
