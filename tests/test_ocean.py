@@ -39,6 +39,8 @@ def test_ocean_instance():
     # There is ONE Web3 instance
     assert ocean.keeper.market.web3 is ocean.keeper.auth.web3 is ocean.keeper.token.web3
 
+    ocean.print_config()
+
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
@@ -82,7 +84,7 @@ def test_token_request():
     assert provider_current_eth < provider_start_eth
     assert provider_current_ocean == provider_start_ocean + amount
 
-def oldtest_ocean_contracts_legacy():
+def _test_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     os.environ['KEEPER_URL'] = 'http://0.0.0.0:8545'
     ocean = Ocean_Legacy()
@@ -90,7 +92,7 @@ def oldtest_ocean_contracts_legacy():
     assert ocean.keeper_url == os.environ['KEEPER_URL']
 
 
-def oldtest_ocean_contracts_with_conf(caplog):
+def _test_ocean_contracts_with_conf(caplog):
     caplog.set_level(logging.DEBUG)
     # Need to ensure config.ini is populated!
     ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
@@ -103,7 +105,7 @@ def oldtest_ocean_contracts_with_conf(caplog):
     assert ocean.provider_url == 'http://localhost:5000'
 
 
-def oldtest_split_signature():
+def _test_split_signature():
     ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
     signature = b'\x19\x15!\xecwnX1o/\xdeho\x9a9\xdd9^\xbb\x8c2z\x88!\x95\xdc=\xe6\xafc\x0f\xe9\x14\x12\xc6\xde\x0b\n\xa6\x11\xc0\x1cvv\x9f\x99O8\x15\xf6f\xe7\xab\xea\x982Ds\x0bX\xd9\x94\xa42\x01'
     split_signature = ocean.helper.split_signature(signature=signature)
@@ -112,14 +114,14 @@ def oldtest_split_signature():
     assert split_signature.s == b'\x14\x12\xc6\xde\x0b\n\xa6\x11\xc0\x1cvv\x9f\x99O8\x15\xf6f\xe7\xab\xea\x982Ds\x0bX\xd9\x94\xa42'
 
 
-def oldtest_convert():
+def _test_convert():
     input_text = "my text"
     print("output %s" % convert_to_string(convert_to_bytes(input_text)))
     assert convert_to_text(convert_to_bytes(input_text)) == input_text
 
 
 
-def oldtest_legacy_accounts_legacy():
+def _test_legacy_accounts_legacy():
     ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
     assert ocean.accounts
     assert len(ocean.accounts) == 10
@@ -131,7 +133,7 @@ def oldtest_legacy_accounts_legacy():
         assert isinstance(account['token'], int)
 
 
-def oldtest_provider_access():
+def _test_provider_access():
     ocean = Ocean_Legacy(provider_url=None)
     assert ocean
     assert ocean.provider_url == None
@@ -158,7 +160,7 @@ def oldtest_provider_access():
     assert contracts
 
 
-def oldtest_errors_raised():
+def _test_errors_raised():
     config = Config('config_local.ini')
     address_list = {
         'market': config.get(KEEPER_CONTRACTS, 'market.address'),
