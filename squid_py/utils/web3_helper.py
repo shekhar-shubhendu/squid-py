@@ -71,8 +71,6 @@ class Web3Helper(object):
         )
         return event_filter
 
-    def to_32byte_hex(self, val):
-        return self._web3.toBytes(val).rjust(32, b'\0')
 
     def split_signature(self, signature):
         v = self._web3.toInt(signature[-1])

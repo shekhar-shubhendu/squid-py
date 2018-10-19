@@ -8,6 +8,7 @@ import logging
 import json
 
 from web3.contract import ConciseContract
+from ..utils.web3_helper_module import convert_to_bytes
 
 class ContractBase(object):
     """
@@ -56,6 +57,9 @@ class ContractBase(object):
         """Get the receipt of a tx."""
         self.web3.eth.waitForTransactionReceipt(tx_hash)
         return self.web3.eth.getTransactionReceipt(tx_hash)
+
+    def to_32byte_hex(self, val):
+        return self.web3.toBytes(val).rjust(32, b'\0')
 
     def __str__(self):
         return "{} at {}".format(self.name, self.address)
