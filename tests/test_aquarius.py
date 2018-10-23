@@ -19,10 +19,19 @@ def test_ocean_metadata():
     # Instantiate a new Asset
 
     # Publish the metadata
-    asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA)
+    #TODO: Handle duplicate!
+    try:
+        asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA)
+    except:
+        pass
+
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 1
     assert ocean.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-    ocean.metadata.list_assets()
+    aquarius_assets = ocean.metadata.list_assets()
+    for ass in aquarius_assets:
+        print(ass)
+        # print("ASSET:",ass['assetsIds'])
+    print(aquarius_assets)
     # Retire the metadata
     ocean.metadata.retire_asset_metadata(asset['assetId'])
 

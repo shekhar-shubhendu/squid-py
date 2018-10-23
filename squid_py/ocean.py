@@ -15,15 +15,6 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 setup_logging()
 
-class LoggerCritical:
-    def __enter__(self):
-        my_logger = logging.getLogger()
-        my_logger.setLevel("CRITICAL")
-    def __exit__(self, type, value, traceback):
-        my_logger = logging.getLogger()
-        my_logger.setLevel("DEBUG")
-
-
 class Ocean:
     def __init__(self, config_file):
         """
@@ -60,6 +51,7 @@ class Ocean:
         assert self.accounts
 
     def print_config(self):
+        #TODO: Cleanup
         print("Ocean object configuration:".format())
         print("Ocean.config.keeper_path: {}".format(self.config.keeper_path))
         print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
@@ -87,6 +79,38 @@ class Ocean:
         self.update_accounts()
         return self.accounts
 
+    def get_asset(self):
+        """
+        Given an assetID, return the Asset
+        :return: Asset object
+        """
+        pass
+        return this_asset
+
+    def get_asset_ids(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def search_assets(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def register(self,Asset):
+        """
+        Register an asset in both the Market (on-chain) and in the Meta Data store
+
+        Wrapper on keeper.market.register and metadata.publish_asset
+
+        :param Asset: Asset object
+        :return:
+        """
+        pass
 
 class Order:
     def __init__(self):

@@ -30,7 +30,7 @@ class Metadata(object):
         return json.loads(requests.get(self._base_url + '/metadata').content)
 
     def publish_asset_metadata(self, data):
-        asset = Asset
+        # asset = Asset
         return json.loads(
             requests.post(self._base_url + '/metadata', data=json.dumps(data), headers=self._headers).content)
 
