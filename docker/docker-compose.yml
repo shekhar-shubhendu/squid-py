@@ -27,7 +27,8 @@ services:
     - artifacts:/keeper-contracts/artifacts/
 
   provider:
-    image: oceanprotocol/provider:feature_add-query-endpoint
+    image: oceanprotocol/provider:feature_move-functionalities-brizo
+
     ports:
     - 5000:5000
     networks:
@@ -35,7 +36,7 @@ services:
     depends_on:
     - keeper-contracts
     environment:
-      KEEPER_HOST: http://keeper-contracts
+      KEEPER_URL: http://keeper-contracts:8545
       DB_HOSTNAME: mongodb
       LOCAL_CONTRACTS: 'true'
     volumes:

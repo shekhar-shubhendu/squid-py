@@ -1,3 +1,5 @@
+
+
 class Asset:
     def __init__(self, asset_id, publisher_id, price):
         """
