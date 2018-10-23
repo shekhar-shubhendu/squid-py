@@ -18,8 +18,6 @@ def test_ocean_metadata():
     ocean = Ocean('config_local.ini')
     # Instantiate a new Asset
 
-
-
     # Publish the metadata
     asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA)
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 1
