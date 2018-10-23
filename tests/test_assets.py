@@ -33,6 +33,7 @@ def test_sample_data():
     logging.debug("Loaded metadata file {} for price: {}".format(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['price']))
 
 def test_register_data():
+    logging.debug("".format())
     ocean = Ocean('config_local.ini')
     asset_price = 100
 
@@ -58,12 +59,18 @@ def test_register_data():
     ##########################################################
     # Register
     ##########################################################
-    # with LoggerCritical():
     asset_id = ocean.keeper.market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, provider_acct.address)
 
-    assert ocean.keeper.market.check_asset(asset_id)
-    assert asset_price == ocean.keeper.market.get_asset_price(asset_id)
-    print(logging.Logger.manager.loggerDict)
+
+    # Check exists
+    chain_asset_exists = ocean.keeper.market.check_asset(asset_id)
+    logging.info("check_asset = {}".format(chain_asset_exists))
+    assert chain_asset_exists
+
+    # Check price
+    chain_asset_price = ocean.keeper.market.get_asset_price(asset_id)
+    assert asset_price == chain_asset_price
+    logging.info("chain_asset_price = {}".format(chain_asset_price))
 
 def test_check_data():
 
