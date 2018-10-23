@@ -45,8 +45,7 @@ class Ocean:
 
 
         # Collect the accounts
-        with LoggerCritical():
-            self.accounts = self.get_accounts()
+        self.accounts = self.get_accounts()
 
         assert self.accounts
 

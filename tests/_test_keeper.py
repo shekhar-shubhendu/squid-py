@@ -9,7 +9,7 @@ import json
 from squid_py.utils import convert_to_string
 import pathlib
 
-SAMPLE_METADATA_PATH = pathlib.Path.cwd() / 'tests' / 'sample_metadata.json'
+SAMPLE_METADATA_PATH = pathlib.Path.cwd() / 'tests' / 'sample_metadata1.json'
 assert SAMPLE_METADATA_PATH.exists()
 with open(SAMPLE_METADATA_PATH) as f:
     SAMPLE_METADATA = json.load(f)
