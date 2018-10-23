@@ -15,6 +15,9 @@ assert SAMPLE_METADATA_PATH.exists(), "{} does not exist!".format(SAMPLE_METADAT
 with open(SAMPLE_METADATA_PATH) as f:
     SAMPLE_METADATA = json.load(f)
 
+
+
+
 def test_sample_data():
     ocean = Ocean('config_local.ini')
     assert SAMPLE_METADATA
