@@ -15,6 +15,14 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 setup_logging()
 
+class LoggerCritical:
+    def __enter__(self):
+        my_logger = logging.getLogger()
+        my_logger.setLevel("CRITICAL")
+    def __exit__(self, type, value, traceback):
+        my_logger = logging.getLogger()
+        my_logger.setLevel("DEBUG")
+
 
 class Ocean:
     def __init__(self, config_file):
@@ -46,7 +54,9 @@ class Ocean:
 
 
         # Collect the accounts
-        self.accounts = self.get_accounts()
+        with LoggerCritical():
+            self.accounts = self.get_accounts()
+
         assert self.accounts
 
     def print_config(self):
@@ -66,6 +76,7 @@ class Ocean:
         For each address, instantiate a new Account object
         :return: List of Account instances
         """
+        logging.debug("Updating accounts")
         accounts_dict = dict()
         for account_address in self._web3.eth.accounts:
             accounts_dict[account_address] = Account(self.keeper, account_address)
