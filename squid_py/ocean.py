@@ -6,7 +6,7 @@ from web3 import Web3, HTTPProvider
 from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
-from squid_py.metadata import Metadata
+from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.account import Account
 
 from squid_py.utils import Web3Helper
@@ -40,7 +40,7 @@ class Ocean:
 
         # Add the Metadata store to the interface
         if self.config.provider_url:
-            self.metadata = Metadata(self.config.provider_url)
+            self.metadata = AquariusWrapper(self.config.provider_url)
         else: self.metadata = None
 
 

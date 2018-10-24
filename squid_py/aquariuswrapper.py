@@ -6,7 +6,7 @@ import requests
 from squid_py.asset import Asset
 import logging
 
-class Metadata(object):
+class AquariusWrapper(object):
 
     def __init__(self, provider_url):
         """
