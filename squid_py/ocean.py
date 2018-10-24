@@ -100,7 +100,7 @@ class Ocean:
         """
         pass
 
-    def register(self,Asset):
+    def register(self,asset):
         """
         Register an asset in both the Market (on-chain) and in the Meta Data store
 
@@ -109,6 +109,15 @@ class Ocean:
         :param Asset: Asset object
         :return:
         """
+        # First, publish this asset to the MetaData store
+        meta_data_assets = self.metadata.list_assets()
+
+        # If this asset is already registered, remove it from the metadatastore
+        #TODO: Handle this differently!
+        if asset['assetId'] in meta_data_assets['assetsIds']:
+            print("Removing asset {}".format(SAMPLE_METADATA1['assetId']))
+            ocean.metadata.get_asset_metadata(SAMPLE_METADATA1['assetId'])
+            ocean.metadata.retire_asset_metadata(SAMPLE_METADATA1['assetId'])
         pass
 
 class Order:

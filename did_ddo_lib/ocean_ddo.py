@@ -5,51 +5,18 @@
 import datetime
 import json
 import re
+from base64 import b64encode
 
-from web3 import (
-    Web3
-)
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA256
+from web3 import Web3
 
-from Crypto.PublicKey import (
- 	RSA,
-)
-
-from Crypto.Signature import (
-    PKCS1_v1_5
-)
-
-from Crypto.Hash import (
-   SHA256
-)
-
-from base64 import (
-    b64encode
-)
-
-
-from .public_key_rsa import (
-    PublicKeyRSA,
-    AUTHENTICATION_TYPE_RSA,
-    PUBLIC_KEY_TYPE_RSA,
-)
-
-from .public_key_base import (
-    PublicKeyBase,
-    PUBLIC_KEY_STORE_TYPE_PEM,
-)
-
-from .authentication import (
-    Authentication,
-)
-
-from .service import (
-    Service,
-)
-
-from .constants import (
-    KEY_PAIR_MODULUS_BIT,
-    DID_DDO_CONTEXT_URL,
-)
+from .authentication import Authentication
+from .constants import KEY_PAIR_MODULUS_BIT, DID_DDO_CONTEXT_URL
+from .public_key_base import PublicKeyBase, PUBLIC_KEY_STORE_TYPE_PEM
+from .public_key_rsa import PublicKeyRSA, AUTHENTICATION_TYPE_RSA, PUBLIC_KEY_TYPE_RSA
+from .service import Service
 
 class OceanDDO(object):
 

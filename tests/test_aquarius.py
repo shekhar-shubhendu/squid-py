@@ -62,6 +62,10 @@ def test_ocean_metadata():
 
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 0
 
+def test_ocean_register():
+    # Create 2 asset objects
+    this_asset = Asset()
+
 def _test_ocean_provider():
     ocean_provider = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
     asset = ocean_provider.metadata.publish_asset_metadata(json_dict)
