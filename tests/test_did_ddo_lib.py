@@ -2,6 +2,8 @@
     Test did_lib
 """
 import secrets
+import json
+import pathlib
 
 from did_ddo_lib import (
     did_generate,
@@ -177,3 +179,15 @@ def test_creating_did_using_ddo():
 
     # check to see if did is valid against the old ddo
     assert did_validate(did, test_id, ddo)
+
+def test_load_ddo_json():
+    SAMPLE_DDO_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'ddo' / 'sample1.json'
+    assert SAMPLE_DDO_PATH.exists(), "{} does not exist!".format(SAMPLE_METADATA_PATH)
+    with open(SAMPLE_DDO_PATH) as f:
+        SAMPLE_DDO_JSON_DICT = json.load(f)
+
+    SAMPLE_DDO_JSON_STRING = json.dumps(SAMPLE_DDO_JSON_DICT)
+
+    this_ddo = OceanDDO()
+    this_ddo.read_json(SAMPLE_DDO_JSON_STRING)
+
