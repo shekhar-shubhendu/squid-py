@@ -1,4 +1,5 @@
 import os
+import hashlib
 import logging
 import json
 from .ddo import DDO
@@ -46,7 +47,16 @@ class Asset:
     @property
     def has_metadata(self):
         metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
-        assert len(metadata_service) == 1
+        return len(metadata_service) == 1
+
+    def generate_did(self,length=32):
+        """
+        During development, the DID can be generated here for convenience.
+        """
+        #assert self.asset_id == None
+        assert self.ddo.is_valid
+        hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
+
 
     def assign_metadata(self):
         pass

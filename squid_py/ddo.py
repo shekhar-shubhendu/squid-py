@@ -51,3 +51,7 @@ class DDO(dict):
         required_keys = ['@context', 'id', 'publicKey', 'authentication', 'service']
         return all(req_key in self for req_key in required_keys)
 
+    @property
+    def raw_string(self):
+        return json.dumps(self)
+

@@ -18,6 +18,7 @@ def test_asset_from_ddo_file():
     asset = Asset.from_ddo_json_file(sample_ddo_path)
 
     print(asset.metadata)
+    asset.generate_did()
 
 def test_register_data_market():
     """
