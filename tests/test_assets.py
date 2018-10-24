@@ -12,6 +12,13 @@ import pathlib
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
+def test_asset_from_ddo_file():
+    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+    asset = Asset.from_ddo_json_file(sample_ddo_path)
+
+    print(asset.metadata)
+
 def test_register_data_market():
     """
     Setup accounts and asset, register this asset on Aquarius and in Keeper
