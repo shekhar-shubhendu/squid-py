@@ -59,15 +59,15 @@ def test_token_request():
 
     # Get the current accounts, assign 2
     ocean.update_accounts()
-    provider_address = list(ocean.accounts)[0]
+    aquarius_address = list(ocean.accounts)[0]
     consumer_address = list(ocean.accounts)[1]
 
     # Start balances for comparison
-    provider_start_eth = ocean.accounts[provider_address].ether
-    provider_start_ocean = ocean.accounts[provider_address].ocean
+    aquarius_start_eth = ocean.accounts[aquarius_address].ether
+    aquarius_start_ocean = ocean.accounts[aquarius_address].ocean
 
     # Make requests, assert success on request
-    rcpt = ocean.accounts[provider_address].request_tokens(amount)
+    rcpt = ocean.accounts[aquarius_address].request_tokens(amount)
     ocean._web3.eth.waitForTransactionReceipt(rcpt)
     rcpt = ocean.accounts[consumer_address].request_tokens(amount)
     ocean._web3.eth.waitForTransactionReceipt(rcpt)
@@ -77,12 +77,12 @@ def test_token_request():
     ocean.update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
-    provider_current_eth = ocean.accounts[provider_address].ether
-    provider_current_ocean = ocean.accounts[provider_address].ocean
+    aquarius_current_eth = ocean.accounts[aquarius_address].ether
+    aquarius_current_ocean = ocean.accounts[aquarius_address].ocean
 
     # Confirm balance changes
-    assert provider_current_eth < provider_start_eth
-    assert provider_current_ocean == provider_start_ocean + amount
+    assert aquarius_current_eth < aquarius_start_eth
+    assert aquarius_current_ocean == aquarius_start_ocean + amount
 
 def _test_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
@@ -102,7 +102,7 @@ def _test_ocean_contracts_with_conf(caplog):
     assert ocean.address_list
     assert ocean.address_list['market'] == validate_market_addess
     assert ocean.gas_limit == int(config.get(KEEPER_CONTRACTS, 'gas_limit'))
-    assert ocean.provider_url == 'http://localhost:5000'
+    assert ocean.aquarius_url == 'http://localhost:5000'
 
 
 def _test_split_signature():
@@ -133,10 +133,10 @@ def _test_legacy_accounts_legacy():
         assert isinstance(account['token'], int)
 
 
-def _test_provider_access():
-    ocean = Ocean_Legacy(provider_url=None)
+def _test_aquarius_access():
+    ocean = Ocean_Legacy(aquarius_url=None)
     assert ocean
-    assert ocean.provider_url == None
+    assert ocean.aquarius_url == None
     config = Config('config_local.ini')
     keeper_url = 'http://0.0.0.0:8545'
     address_list = {
@@ -145,7 +145,7 @@ def _test_provider_access():
         'auth': config.get(KEEPER_CONTRACTS, 'auth.address'),
     }
 
-    ocean = Ocean_Legacy(keeper_url=keeper_url, provider_url=None, address_list=address_list)
+    ocean = Ocean_Legacy(keeper_url=keeper_url, aquarius_url=None, address_list=address_list)
     assert ocean
     assert ocean.contracts.market
     assert ocean.contracts.token

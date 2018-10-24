@@ -43,7 +43,7 @@ class Asset:
 
         # Get access token (jwt)
 
-        # Download the asset from the provider using the URL in access token
+        # Download the asset from the aquarius using the URL in access token
         # Decode the the access token, get service_endpoint and request_id
 
         return

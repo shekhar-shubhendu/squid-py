@@ -19,7 +19,7 @@ token.address = test_token_address
 keeper.url = test_keeper_url
 keeper.path = test_keeper_path
 gas_limit = 200
-provider.url = test_provider_url
+aquarius.url = test_aquarius_url
 
 """
 
@@ -36,7 +36,7 @@ def test_load():
     else:
         assert config.keeper_path == '/usr/contracts'
 
-    assert config.provider_url == 'test_provider_url'
+    assert config.aquarius_url == 'test_aquarius_url'
     assert config.gas_limit == 200
 
 

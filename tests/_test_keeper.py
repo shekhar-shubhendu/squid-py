@@ -39,13 +39,13 @@ def test_keeper():
     market = ocean.contracts.market
     token = ocean.contracts.token
     auth = ocean.contracts.auth
-    provider_account = ocean.helper.accounts[0]
+    aquarius_account = ocean.helper.accounts[0]
     consumer_account = ocean.helper.accounts[1]
-    assert market.request_tokens(2000, provider_account)
+    assert market.request_tokens(2000, aquarius_account)
     assert market.request_tokens(2000, consumer_account)
 
-    # 1. Provider register an asset
-    asset_id = market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, provider_account)
+    # 1. Aquarius register an asset
+    asset_id = market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, aquarius_account)
     assert market.check_asset(asset_id)
     assert asset_price == market.get_asset_price(asset_id)
 
@@ -56,7 +56,7 @@ def test_keeper():
     pubprivkey = acl.generate_encryption_keys()
     pubkey = pubprivkey.public_key
     req = auth.contract_concise.initiateAccessRequest(asset_id,
-                                                      provider_account,
+                                                      aquarius_account,
                                                       pubkey,
                                                       expiry,
                                                       transact={'from': consumer_account})
@@ -83,12 +83,12 @@ def test_keeper():
                         consumer_account)
 
     buyer_balance_start = token.get_token_balance(consumer_account)
-    seller_balance_start = token.get_token_balance(provider_account)
+    seller_balance_start = token.get_token_balance(aquarius_account)
     print('starting buyer balance = ', buyer_balance_start)
     print('starting seller balance = ', seller_balance_start)
 
     send_payment = market.contract_concise.sendPayment(request_id,
-                                                       provider_account,
+                                                       aquarius_account,
                                                        asset_price,
                                                        expiry,
                                                        transact={'from': consumer_account, 'gas': 400000})
@@ -96,7 +96,7 @@ def test_keeper():
     print('Receipt: %s' % receipt)
 
     print('buyer balance = ', token.get_token_balance(consumer_account))
-    print('seller balance = ', token.get_token_balance(provider_account))
+    print('seller balance = ', token.get_token_balance(aquarius_account))
     ocean.metadata.retire_asset_metadata(convert_to_string(asset_id))
 
 

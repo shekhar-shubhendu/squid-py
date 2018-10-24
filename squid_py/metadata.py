@@ -8,16 +8,16 @@ import logging
 
 class Metadata(object):
 
-    def __init__(self, provider_url):
+    def __init__(self, aquarius_url):
         """
         The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API
 
-        :param provider_url:
+        :param aquarius_url:
         """
-        self._base_url = '{}/api/v1/provider/assets'.format(provider_url)
+        self._base_url = '{}/api/v1/aquarius/assets'.format(aquarius_url)
         self._headers = {'content-type': 'application/json'}
 
-        logging.debug("Metadata Store connected at {}".format(provider_url))
+        logging.debug("Metadata Store connected at {}".format(aquarius_url))
         logging.debug("Metadata assets at {}".format(self._base_url))
 
     def list_assets(self):

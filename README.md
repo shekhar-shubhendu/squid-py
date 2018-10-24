@@ -40,7 +40,7 @@ The docker container has three main service images running;
 
 1. [bigchaindb/bigchaindb](https://hub.docker.com/r/bigchaindb/bigchaindb/):2.0.0-beta1 (with tendermint)
 1. [oceanprotocol/keeper-contracts](https://hub.docker.com/r/oceanprotocol/keeper-contracts/):0.1
-1. [oceanprotocol/provider](https://hub.docker.com/r/oceanprotocol/provider/):0.1 (API documentation exposed at http://localhost:5000/api/v1/docs/)
+1. [oceanprotocol/aquarius](https://hub.docker.com/r/oceanprotocol/aquarius/):0.1 (API documentation exposed at http://localhost:5000/api/v1/docs/)
 
 Mac: 
 if you are running on mac, gnu-sed needs to be installed
@@ -76,14 +76,14 @@ You will find as well two methods that allow you to register and consume an asse
 ```python
 from squid_py.consumer import register, consume
 register(publisher_account=ocean.web3.eth.accounts[1],
-         provider_account=ocean.web3.eth.accounts[0],
+         aquarius_account=ocean.web3.eth.accounts[0],
          price=10,
          ocean_contracts_wrapper=ocean,
          json_metadata=json_consume
                           )
 consume(resource=resouce_id,
         consumer_account=ocean.web3.eth.accounts[1],
-        provider_account=ocean.web3.eth.accounts[0],
+        aquarius_account=ocean.web3.eth.accounts[0],
         ocean_contracts_wrapper=ocean,
         json_metadata=json_request_consume)
 
