@@ -16,7 +16,7 @@ class Asset:
                 - Create an asset based on a DDO file
             3.
 
-        :param asset_id:
+        :param asset_id: The same as the DID
         :param publisher_id:
         :param price:
         :param ddo: DDO instance
@@ -27,12 +27,12 @@ class Asset:
         self.price = price
         self.ddo = ddo
 
-
-
     @classmethod
     def from_ddo_json_file(cls,json_file_path):
         this_asset = cls()
         this_asset.ddo = DDO.from_json_file(json_file_path)
+        this_asset.asset_id = this_asset.ddo['id']
+        logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
     def purchase(self, consumer, timeout):

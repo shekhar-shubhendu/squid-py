@@ -6,14 +6,6 @@ import logging
 import os
 from squid_py.ocean import Ocean
 
-class LoggerCritical:
-    def __enter__(self):
-        my_logger = logging.getLogger()
-        my_logger.setLevel("CRITICAL")
-    def __exit__(self, type, value, traceback):
-        my_logger = logging.getLogger()
-        my_logger.setLevel("DEBUG")
-
 import json
 import pathlib
 
@@ -26,11 +18,6 @@ with open(SAMPLE_METADATA_PATH) as f:
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
-
-def test_sample_data():
-    ocean = Ocean('config_local.ini')
-    assert SAMPLE_METADATA
-    logging.debug("Loaded metadata file {} for price: {}".format(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['price']))
 
 def test_register_data():
     logging.debug("".format())
