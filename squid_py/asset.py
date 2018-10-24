@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-# from .ddo import DDO
+from .ddo import DDO
 import pathlib
 
 class Asset:
@@ -96,7 +96,4 @@ class Asset:
         return "Asset {} for {}, published by {}".format(self.asset_id, self.price,self.publisher_id)
 
 
-#%%
-sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'sample1.json'
-assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-asset = Asset.from_ddo_json_file(sample_ddo_path)
+
