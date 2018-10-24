@@ -14,17 +14,17 @@ class Auth(ContractBase):
         """You can cancel consent and do refund only after consumer makes the payment and timeout."""
         return self.contract_concise.cancelAccessRequest(order_id, call={'from': sender_address})
 
-    def initiate_access_request(self, asset_id, provider_address, pubkey, expiry, sender_address):
+    def initiate_access_request(self, asset_id, aquarius_address, pubkey, expiry, sender_address):
         """Consumer initiates access request of service"""
         return self.contract_concise.initiateAccessRequest(asset_id,
-                                                           provider_address,
+                                                           aquarius_address,
                                                            pubkey,
                                                            expiry,
                                                            transact={'from': sender_address})
 
     def commit_access_request(self, order_id, is_available, expiration_date, discovery, permissions,
                               access_agreement_ref, accesss_agreement_type, sender_address, gas_amount):
-        """Provider commits the access request of service"""
+        """Aquarius commits the access request of service"""
         return self.contract_concise.commitAccessRequest(order_id,
                                                          is_available,
                                                          expiration_date,
@@ -38,7 +38,7 @@ class Auth(ContractBase):
                                                          )
 
     def deliver_access_token(self, order_id, enc_jwt, sender_address):
-        """Provider delivers the access token of service to on-chain"""
+        """Aquarius delivers the access token of service to on-chain"""
         return self.contract_concise.deliverAccessToken(order_id,
                                                         enc_jwt,
                                                         transact={'from': sender_address,

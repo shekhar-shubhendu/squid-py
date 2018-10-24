@@ -12,7 +12,7 @@ class Ocean_Legacy:
     :param web3: Web3 object to use to connect too the keeper node.
     :param keeper_path: Path to the Ocean Protocol Keeper contracts, to load contracts and addresses via the artifacts folder.
     :param logger: Optional logger to use instead of creating our own loggger
-    :param provider_url: Optional url of the ocean network provider, can be None
+    :param aquarius_url: Optional url of the ocean network aquarius, can be None
     :param gas_limit: Optional gas limit, defaults to 300000
     :param config_file: Optional config file to load in the above config details
     :returns: Ocean object
@@ -24,7 +24,7 @@ class Ocean_Legacy:
             'auth' : '0x00..00',
             'token' : '0x00..00',
         ]
-        ocean = Ocean(url='http://localhost:8545', provider_url = 'http://localhost:5000', address_list = address)
+        ocean = Ocean(url='http://localhost:8545', aquarius_url = 'http://localhost:5000', address_list = address)
         print(ocean.accounts[0])
 
     """
@@ -40,7 +40,7 @@ class Ocean_Legacy:
         self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
         self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
         self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
-        self._provider_url = kwargs.get('provider_url', config.provider_url)
+        self._aquarius_url = kwargs.get('aquarius_url', config.aquarius_url)
 
         # put a priority on getting the contracts directly instead of via the 'ocean node'
 
@@ -64,9 +64,9 @@ class Ocean_Legacy:
 
         self._helper = Web3Helper(self._web3)
 
-        # optional _provider_url
-        if self._provider_url:
-            self._metadata = Metadata(self._provider_url)
+        # optional _aquarius_url
+        if self._aquarius_url:
+            self._metadata = Metadata(self._aquarius_url)
         self._network_name = self._helper.network_name
         self._contracts = Keeper(self._helper, self._keeper_path, self._address_list)
 
@@ -107,8 +107,8 @@ class Ocean_Legacy:
         return self._keeper_url
 
     @property
-    def provider_url(self):
-        return self._provider_url
+    def aquarius_url(self):
+        return self._aquarius_url
 
     @property
     def network_name(self):

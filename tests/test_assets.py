@@ -33,21 +33,21 @@ def test_register_data_market():
     ##########################################################
     # Setup 2 accounts
     ##########################################################
-    provider_address = list(ocean.accounts)[0]
+    aquarius_address = list(ocean.accounts)[0]
     consumer_address = list(ocean.accounts)[1]
-    provider_acct = ocean.accounts[provider_address]
+    aquarius_acct = ocean.accounts[aquarius_address]
     consumer_acct = ocean.accounts[consumer_address]
 
     # ensure Ocean token balance
-    if provider_acct.ocean == 0:
-        rcpt = provider_acct.request_tokens(200)
+    if aquarius_acct.ocean == 0:
+        rcpt = aquarius_acct.request_tokens(200)
         ocean._web3.eth.waitForTransactionReceipt(rcpt)
     if consumer_acct.ocean == 0:
         rcpt = consumer_acct.request_tokens(200)
         ocean._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!
-    assert provider_acct.ocean > 0
+    assert aquarius_acct.ocean > 0
     assert consumer_acct.ocean > 0
 
     ##########################################################
@@ -59,7 +59,7 @@ def test_register_data_market():
     ##########################################################
     # Register
     ##########################################################
-    asset_id = ocean.keeper.market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, provider_acct.address)
+    asset_id = ocean.keeper.market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, aquarius_acct.address)
 
     # Check exists
     chain_asset_exists = ocean.keeper.market.check_asset(asset_id)

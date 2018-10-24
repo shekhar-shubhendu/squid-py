@@ -72,3 +72,10 @@ def _test_ocean_provider():
     assert len(ocean_provider.metadata.search(search_query={"text": "Office"})) == 1
     assert ocean_provider.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
     ocean_provider.metadata.retire_asset_metadata(asset['assetId'])
+
+def _test_ocean_aquarius():
+    ocean_aquarius = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
+    asset = ocean_aquarius.metadata.publish_asset_metadata(json_dict)
+    assert len(ocean_aquarius.metadata.search(search_query={"text": "Office"})) == 1
+    assert ocean_aquarius.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
+    ocean_aquarius.metadata.retire_asset_metadata(asset['assetId'])

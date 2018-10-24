@@ -35,8 +35,6 @@ class Ocean:
         # For development, we use the HTTPProvider Web3 interface
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
-        # With the interface loaded, the Keeper node is connected with all contracts
-        self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
 
         # Add the Metadata store to the interface
         if self.config.provider_url:
@@ -55,7 +53,7 @@ class Ocean:
         print("Ocean.config.keeper_path: {}".format(self.config.keeper_path))
         print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
         print("Ocean.config.gas_limit: {}".format(self.config.gas_limit))
-        print("Ocean.config.provider_url: {}".format(self.config.provider_url))
+        print("Ocean.config.aquarius_url: {}".format(self.config.aquarius_url))
         print("Ocean.config.address_list.market: {}".format(self.config.address_list['market']))
         print("Ocean.config.address_list.token: {}".format(self.config.address_list['token']))
         print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
