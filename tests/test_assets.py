@@ -24,19 +24,21 @@ def test_create_asset_simple():
     with pytest.raises(AttributeError):
         asset1.generate_did()
 
-
 def test_create_asset_ddo_file():
     # An asset can be created directly from a DDO .json file
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
-    asset = Asset.from_ddo_json_file(sample_ddo_path)
+    asset1 = Asset.from_ddo_json_file(sample_ddo_path)
 
-    assert isinstance(asset.ddo, DDO)
+    assert isinstance(asset1.ddo, DDO)
+    assert asset1.ddo.is_valid
+    asset1.generate_did()
 
-    print(asset.metadata)
+    assert asset1.has_metadata
+    print(asset1.metadata)
 
-def test_register_data_market():
+def test_register_data_asset_market():
     """
     Setup accounts and asset, register this asset in Keeper node (On-chain only)
     """
@@ -91,9 +93,9 @@ def test_register_data_market():
     assert asset_price == chain_asset_price
     logging.info("chain_asset_price = {}".format(chain_asset_price))
 
-def test_register_asset_aquarius():
+def test_publish_data_asset_aquarius():
     """
-    Setup accounts and asset, register this asset on Aquarius (MetaData)
+    Setup accounts and asset, register this asset on Aquarius (MetaData store)
     """
     logging.debug("".format())
     ocean = Ocean('config_local.ini')
@@ -125,49 +127,19 @@ def test_register_asset_aquarius():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-
-    ##########################################################
-    # Register
-    ##########################################################
-    # The asset requires an ID before registration!
     asset.generate_did()
 
-    # Call the Register function
-    result = ocean.keeper.market.register_asset(asset, asset_price, aquarius_acct.address)
-
-    # Check exists
-    chain_asset_exists = ocean.keeper.market.check_asset(asset.asset_id)
-    logging.info("check_asset = {}".format(chain_asset_exists))
-    assert chain_asset_exists
-
-    # Check price
-    chain_asset_price = ocean.keeper.market.get_asset_price(asset.asset_id)
-    assert asset_price == chain_asset_price
-    logging.info("chain_asset_price = {}".format(chain_asset_price))
-def test_check_data():
-
-    pass
-
-
-def test_ocean_metadata():
-    """
-    Low level test directly on the metadata store object
-    :return:
-    """
-    ocean = Ocean('config_local.ini')
-    # Instantiate a new Asset
-
-    # First, get all currently registered asset ID's
+    ##########################################################
+    # List currently published assets
+    ##########################################################
     meta_data_assets = ocean.metadata.list_assets()
     print("Currently registered assets:")
     print(meta_data_assets['assetsIds'])
 
-    # If this asset is already registered, remove it from the metadatastore
-    if SAMPLE_METADATA1['assetId'] in meta_data_assets['assetsIds']:
-        print("Removing asset {}".format(SAMPLE_METADATA1['assetId']))
-        ocean.metadata.get_asset_metadata(SAMPLE_METADATA1['assetId'])
-        ocean.metadata.retire_asset_metadata(SAMPLE_METADATA1['assetId'])
-
+    if asset.asset_id in meta_data_assets:
+        print("Removing asset {}".format(asset.asset_id))
+        ocean.metadata.get_asset_metadata(asset.asset_id)
+        ocean.metadata.retire_asset_metadata(asset.asset_id)
     # Publish the metadata
     print("Publishing")
     asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA1)
@@ -187,20 +159,3 @@ def test_ocean_metadata():
 
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 0
 
-def test_ocean_register():
-    # Create 2 asset objects
-    this_asset = Asset()
-
-def _test_ocean_provider():
-    ocean_provider = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
-    asset = ocean_provider.metadata.publish_asset_metadata(json_dict)
-    assert len(ocean_provider.metadata.search(search_query={"text": "Office"})) == 1
-    assert ocean_provider.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-    ocean_provider.metadata.retire_asset_metadata(asset['assetId'])
-
-def _test_ocean_aquarius():
-    ocean_aquarius = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
-    asset = ocean_aquarius.metadata.publish_asset_metadata(json_dict)
-    assert len(ocean_aquarius.metadata.search(search_query={"text": "Office"})) == 1
-    assert ocean_aquarius.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-    ocean_aquarius.metadata.retire_asset_metadata(asset['assetId'])
