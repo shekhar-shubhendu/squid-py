@@ -49,12 +49,19 @@ class Asset:
         metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
         return len(metadata_service) == 1
 
+    def is_valid_did(self,length=32):
+        """The Asset.asset_id must conform to the specification"""
+        return len(self.asset_id) == length
+
     def generate_did(self,length=32):
         """
         During development, the DID can be generated here for convenience.
         """
-        #assert self.asset_id == None
-        assert self.ddo.is_valid
+        if not self.ddo:
+            raise AttributeError("No DDO object in {}".format(self))
+        if not self.ddo.is_valid:
+            raise ValueError("Invalid DDO object in {}".format(self))
+
         self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
 
     def assign_metadata(self):

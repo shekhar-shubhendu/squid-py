@@ -5,24 +5,36 @@ import logging
 import os
 from squid_py.ocean import Ocean
 from squid_py.asset import Asset
+from squid_py.ddo import DDO
 import json
 import pathlib
+import pytest
+
 
 # Disable low level loggers
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
-def test_asset_class():
-    asset = Asset(asset_id='TestID', publisher_id='TestPID', price = 0)
-    print(asset)
+def test_create_asset_simple():
+    # An asset can be be created directly
+    asset1 = Asset(asset_id='TestID', publisher_id='TestPID', price = 0, ddo=None)
+    assert not asset1.is_valid_did()
 
-def test_asset_from_ddo_file():
+    # Can gen the DID locally BUT it requires a DDO!
+    with pytest.raises(AttributeError):
+        asset1.generate_did()
+
+
+def test_create_asset_ddo_file():
+    # An asset can be created directly from a DDO .json file
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
     asset = Asset.from_ddo_json_file(sample_ddo_path)
 
+    assert isinstance(asset.ddo, DDO)
+
     print(asset.metadata)
-    asset.generate_did()
 
 def test_register_data_market():
     """
@@ -152,7 +164,7 @@ def test_ocean_metadata():
 
     # If this asset is already registered, remove it from the metadatastore
     if SAMPLE_METADATA1['assetId'] in meta_data_assets['assetsIds']:
-        print("Removing asset {}".format(SAMPLE_METADATA1['assetId'] ))
+        print("Removing asset {}".format(SAMPLE_METADATA1['assetId']))
         ocean.metadata.get_asset_metadata(SAMPLE_METADATA1['assetId'])
         ocean.metadata.retire_asset_metadata(SAMPLE_METADATA1['assetId'])
 
