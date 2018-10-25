@@ -66,4 +66,6 @@ class AquariusWrapper(object):
                           headers=self._headers).content))
 
     def retire_asset_metadata(self, asset_id):
-        return requests.delete(self._base_url + '/metadata/%s' % asset_id, headers=self._headers)
+        response = requests.delete(self._base_url + '/metadata/%s' % asset_id, headers=self._headers)
+        logging.debug("Removed asset_id: {} from metadata store".format(asset_id))
+        return response

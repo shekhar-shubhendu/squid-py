@@ -137,7 +137,6 @@ def test_publish_data_asset_aquarius():
     print(meta_data_assets['assetsIds'])
 
     if asset.asset_id in meta_data_assets['assetsIds']:
-        print("Removing asset {}".format(asset.asset_id))
         ocean.metadata.get_asset_metadata(asset.asset_id)
         ocean.metadata.retire_asset_metadata(asset.asset_id)
     # Publish the metadata
@@ -185,7 +184,6 @@ def test_ocean_publish():
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
     if asset.asset_id in meta_data_assets['assetsIds']:
-        print("Removing asset {}".format(asset.asset_id))
         ocean.metadata.get_asset_metadata(asset.asset_id)
         ocean.metadata.retire_asset_metadata(asset.asset_id)
 
