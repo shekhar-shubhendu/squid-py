@@ -56,18 +56,24 @@ def test_register_data_market():
 
     asset = Asset.from_ddo_json_file(sample_ddo_path)
 
+
     ##########################################################
     # Register
     ##########################################################
-    asset_id = ocean.keeper.market.register_asset(SAMPLE_METADATA['base']['name'], SAMPLE_METADATA['base']['description'], asset_price, aquarius_acct.address)
+
+    # The asset requires an ID before registration!
+    asset.generate_did()
+
+    # Call the Register function
+    result = ocean.keeper.market.register_asset(asset, asset_price, aquarius_acct.address)
 
     # Check exists
-    chain_asset_exists = ocean.keeper.market.check_asset(asset_id)
+    chain_asset_exists = ocean.keeper.market.check_asset(asset.asset_id)
     logging.info("check_asset = {}".format(chain_asset_exists))
     assert chain_asset_exists
 
     # Check price
-    chain_asset_price = ocean.keeper.market.get_asset_price(asset_id)
+    chain_asset_price = ocean.keeper.market.get_asset_price(asset.asset_id)
     assert asset_price == chain_asset_price
     logging.info("chain_asset_price = {}".format(chain_asset_price))
 

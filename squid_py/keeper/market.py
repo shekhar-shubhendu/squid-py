@@ -42,24 +42,37 @@ class Market(ContractBase):
             raise
             return False
 
-    def register_asset(self, name, description, price, publisher_address):
+    def register_asset(self, asset, price, publisher_address):
         """
         Register an asset on chain.
+
+        Calls the OceanMarket.register function, .sol code below:
+
+            function register(bytes32 assetId, uint256 price) public validAddress(msg.sender) returns (bool success) {
+                require(mAssets[assetId].owner == address(0), 'Owner address is not 0x0.');
+                mAssets[assetId] = Asset(msg.sender, price, false);
+                mAssets[assetId].active = true;
+
+                emit AssetRegistered(assetId, msg.sender);
+                return true;
+            }
+
         :param name:
         :param description:
         :param price:
         :param publisher_address:
         :return:
         """
-        asset_id = self.contract_concise.generateId(name + description)
+        assert asset.asset_id
+
         result = self.contract_concise.register(
-            asset_id,
+            asset.asset_id,
             price,
             transact={'from': publisher_address, 'gas': self._defaultGas}
         )
         self.get_tx_receipt(result)
-        logging.info("Registered Asset, generated ID {}".format(self.convert_to_string(asset_id)))
-        return asset_id
+        logging.info("Registered Asset".format())
+        return result
 
     def purchase_asset(self, asset_id, order, publisher_address, sender_address):
         asset_price = self.contract.getAssetPrice(asset_id)

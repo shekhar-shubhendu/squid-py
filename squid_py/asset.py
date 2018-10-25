@@ -55,8 +55,7 @@ class Asset:
         """
         #assert self.asset_id == None
         assert self.ddo.is_valid
-        hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
-
+        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
 
     def assign_metadata(self):
         pass
