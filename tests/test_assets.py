@@ -149,7 +149,7 @@ def test_publish_data_asset_aquarius():
 
     #TODO: Ensure returned metadata equals sent!
     published_metadata = ocean.metadata.get_asset_metadata(asset.asset_id)
-    asset.metadata.keys() in published_metadata.keys()
+    assert sorted(list(asset.metadata.keys())) in sorted(list(published_metadata.keys()))
     asset.metadata == published_metadata
 
 def test_ocean_publish():
@@ -181,6 +181,13 @@ def test_ocean_publish():
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
     asset.generate_did()
+
+    # For this test, ensure the asset does not exist in Aquarius
+    meta_data_assets = ocean.metadata.list_assets()
+    if asset.asset_id in meta_data_assets['assetsIds']:
+        print("Removing asset {}".format(asset.asset_id))
+        ocean.metadata.get_asset_metadata(asset.asset_id)
+        ocean.metadata.retire_asset_metadata(asset.asset_id)
 
     ##########################################################
     # Register using high-level interface

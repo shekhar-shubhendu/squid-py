@@ -121,7 +121,7 @@ class Ocean:
 
         # 2) Check that the publisher is valid and has funds
         self.update_accounts()
-        assert publisher_acct in self.accounts
+        assert publisher_acct.address in self.accounts
 
         # 3) Publish to metadata store
         # Check if it's already registered first!
@@ -132,7 +132,7 @@ class Ocean:
         self.metadata.publish_asset_metadata(asset)
 
         # 4) Register the asset onto blockchain
-        result = self.keeper.market.register_asset(asset, asset_price, publisher_acct)
+        result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
 
 
 class Order:
