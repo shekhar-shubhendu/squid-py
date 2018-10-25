@@ -14,10 +14,12 @@ class AquariusWrapper(object):
 
         :param aquarius_url:
         """
+
         self._base_url = '{}/api/v1/aquarius/assets'.format(aquarius_url)
         self._headers = {'content-type': 'application/json'}
 
         logging.debug("Metadata Store connected at {}".format(aquarius_url))
+        logging.debug("Metadata Store API documentation at {}/api/v1/docs".format(aquarius_url))
         logging.debug("Metadata assets at {}".format(self._base_url))
 
     def list_assets(self):
@@ -29,10 +31,24 @@ class AquariusWrapper(object):
     def list_assets_metadata(self):
         return json.loads(requests.get(self._base_url + '/metadata').content)
 
-    def publish_asset_metadata(self, data):
-        # asset = Asset
-        return json.loads(
-            requests.post(self._base_url + '/metadata', data=json.dumps(data), headers=self._headers).content)
+    def publish_asset_metadata(self, asset):
+        this_metadata = asset.metadata
+        this_metadata['publisherId'] = asset.publisher_id
+        this_metadata['assetId'] = asset.asset_id
+        data = json.dumps(this_metadata)
+
+        response = requests.post(self._base_url + '/metadata', data=data, headers=self._headers)
+        if response.status_code == 500:
+            raise Exception("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
+        elif response.status_code == 400:
+            raise Exception("400 ERROR Full error: \n{}".format(response.text))
+        elif response.status_code != 200:
+            raise Exception(" ERROR Full error: \n{}".format(response.text))
+        elif response.status_code == 200:
+            response = json.loads(response.content)
+            return json.loads(response.content)
+        else:
+            raise Exception("ERROR")
 
     def update_asset_metadata(self, data):
         return json.loads(

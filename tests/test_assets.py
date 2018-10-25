@@ -142,7 +142,7 @@ def test_publish_data_asset_aquarius():
         ocean.metadata.retire_asset_metadata(asset.asset_id)
     # Publish the metadata
     print("Publishing")
-    asset = ocean.metadata.publish_asset_metadata(SAMPLE_METADATA1)
+    asset = ocean.metadata.publish_asset_metadata(asset)
 
     assert len(ocean.metadata.search(search_query={"text": "Office"})) == 1
     assert ocean.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
