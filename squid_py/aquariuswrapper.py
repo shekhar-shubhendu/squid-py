@@ -26,7 +26,12 @@ class AquariusWrapper(object):
         return json.loads(requests.get(self._base_url).content)
 
     def get_asset_metadata(self, asset_did):
-        return json.loads(requests.get(self._base_url + '/metadata/%s' % asset_did).content)
+        response = requests.get(self._base_url + '/metadata/%s' % asset_did).content
+        response_dict = json.loads(response)
+        metadata_base = response_dict['base']
+        metadata = dict()
+        metadata['base'] = metadata_base
+        return metadata
 
     def list_assets_metadata(self):
         return json.loads(requests.get(self._base_url + '/metadata').content)
@@ -39,14 +44,15 @@ class AquariusWrapper(object):
 
         response = requests.post(self._base_url + '/metadata', data=data, headers=self._headers)
         if response.status_code == 500:
-            raise Exception("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
+            raise ValueError("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
         elif response.status_code == 400:
             raise Exception("400 ERROR Full error: \n{}".format(response.text))
-        elif response.status_code != 200:
-            raise Exception(" ERROR Full error: \n{}".format(response.text))
-        elif response.status_code == 200:
+        elif response.status_code != 201:
+            raise Exception("{} ERROR Full error: \n{}".format(response.status_code,response.text))
+        elif response.status_code == 201:
             response = json.loads(response.content)
-            return json.loads(response.content)
+            logging.debug("Published {}".format(asset))
+            return response
         else:
             raise Exception("ERROR")
 

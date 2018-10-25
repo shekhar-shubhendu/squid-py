@@ -136,26 +136,53 @@ def test_publish_data_asset_aquarius():
     print("Currently registered assets:")
     print(meta_data_assets['assetsIds'])
 
-    if asset.asset_id in meta_data_assets:
+    if asset.asset_id in meta_data_assets['assetsIds']:
         print("Removing asset {}".format(asset.asset_id))
         ocean.metadata.get_asset_metadata(asset.asset_id)
         ocean.metadata.retire_asset_metadata(asset.asset_id)
     # Publish the metadata
-    print("Publishing")
-    asset = ocean.metadata.publish_asset_metadata(asset)
+    this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
-    assert len(ocean.metadata.search(search_query={"text": "Office"})) == 1
-    assert ocean.metadata.get_asset_metadata(asset['assetId'])['base']['name'] == asset['base']['name']
-    aquarius_assets = ocean.metadata.list_assets()
+    print("Publishing again should raise error")
+    with pytest.raises(ValueError):
+        this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
-    print("Currently registered assets:")
-    print(aquarius_assets)
-    # for ass in aquarius_assets:
-    #     print(ass)
-        # print("ASSET:",ass['assetsIds'])
-    # print(aquarius_assets)
-    # Retire the metadata
-    ocean.metadata.retire_asset_metadata(asset['assetId'])
+    #TODO: Ensure returned metadata equals sent!
+    published_metadata = ocean.metadata.get_asset_metadata(asset.asset_id)
+    asset.metadata.keys() in published_metadata.keys()
+    asset.metadata == published_metadata
 
-    assert len(ocean.metadata.search(search_query={"text": "Office"})) == 0
+def test_ocean_publish():
+    """
+    Setup accounts and asset, register this asset on Aquarius (MetaData store)
+    """
+    logging.debug("".format())
+    ocean = Ocean('config_local.ini')
+    asset_price = 100
+    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
+    ##########################################################
+    # Setup account
+    ##########################################################
+    publisher_address = list(ocean.accounts)[0]
+    publisher_acct = ocean.accounts[publisher_address]
+
+    # ensure Ocean token balance
+    if publisher_acct.ocean == 0:
+        rcpt = aquarius_acct.request_tokens(200)
+        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+
+    # You will need some token to make this transfer!
+    assert publisher_acct.ocean > 0
+
+    ##########################################################
+    # Create an Asset with valid metadata
+    ##########################################################
+    asset = Asset.from_ddo_json_file(sample_ddo_path)
+    asset.generate_did()
+
+    ##########################################################
+    # Register using high-level interface
+    ##########################################################
+    ocean.register(asset,100,publisher_acct)

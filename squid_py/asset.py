@@ -125,7 +125,7 @@ class Asset:
         pass
 
     def __str__(self):
-        return "Asset {} for {}, published by {}".format(self.asset_id, self.price,self.publisher_id)
+        return "Asset {}, price: {}, publisher: {}".format(self.asset_id, self.price,self.publisher_id)
 
 
 

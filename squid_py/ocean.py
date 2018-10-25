@@ -100,25 +100,40 @@ class Ocean:
         """
         pass
 
-    def register(self,asset):
+    def register(self, asset, asset_price, publisher_acct):
         """
         Register an asset in both the Market (on-chain) and in the Meta Data store
 
-        Wrapper on keeper.market.register and metadata.publish_asset
+        Wrapper on both
+            - keeper.market.register
+            - metadata.publish_asset
 
-        :param Asset: Asset object
+        :param asset:
+        :param asset_price:
+        :param publisher_acct:
         :return:
         """
-        # First, publish this asset to the MetaData store
-        meta_data_assets = self.metadata.list_assets()
 
-        # If this asset is already registered, remove it from the metadatastore
-        #TODO: Handle this differently!
-        if asset['assetId'] in meta_data_assets['assetsIds']:
-            print("Removing asset {}".format(SAMPLE_METADATA1['assetId']))
-            ocean.metadata.get_asset_metadata(SAMPLE_METADATA1['assetId'])
-            ocean.metadata.retire_asset_metadata(SAMPLE_METADATA1['assetId'])
-        pass
+        # 1) Check that the asset is valid
+        assert asset.has_metadata
+        assert asset.is_valid_did
+        assert asset.ddo.is_valid
+
+        # 2) Check that the publisher is valid and has funds
+        self.update_accounts()
+        assert publisher_acct in self.accounts
+
+        # 3) Publish to metadata store
+        # Check if it's already registered first!
+        if asset.asset_id in self.metadata.list_assets()['assetsIds']:
+            #TODO: raise proper error
+            raise
+
+        self.metadata.publish_asset_metadata(asset)
+
+        # 4) Register the asset onto blockchain
+        result = self.keeper.market.register_asset(asset, asset_price, publisher_acct)
+
 
 class Order:
     def __init__(self):
