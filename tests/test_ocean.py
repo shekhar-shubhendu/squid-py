@@ -31,7 +31,8 @@ from squid_py.config import Config
 
 
 def test_ocean_instance():
-    os.environ['CONFIG_FILE'] = 'config_local.ini'
+    path_config = 'config_local.ini'
+    os.environ['CONFIG_FILE'] = path_config
     ocean = Ocean(os.environ['CONFIG_FILE'])
     ocean.print_config()
     assert ocean.keeper.token is not None
@@ -48,6 +49,7 @@ def test_accounts():
     for address in ocean.accounts:
         print(ocean.accounts[address])
 
+    # These accounts have a positive ETH balance
     for address, account in ocean.accounts.items():
         assert account.ether >= 0
         assert account.ocean >= 0
