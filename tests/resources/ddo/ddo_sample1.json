@@ -1,6 +1,6 @@
 {
   "@context": "https://w3id.org/future-method/v1",
-  "id": "did:op:123456789abcdefghi",
+  "id": "did:op:12345678123456781234567812345678",
   "publicKey": [
     {
       "id": "did:op:123456789abcdefghi#keys-1",

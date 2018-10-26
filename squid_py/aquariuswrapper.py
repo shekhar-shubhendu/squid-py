@@ -51,9 +51,9 @@ class AquariusWrapper(object):
         else:
             raise Exception("ERROR")
 
-    def update_asset_metadata(self, data):
+    def update_asset_metadata(self, asset):
         return json.loads(
-            requests.put(self._base_url + '/ddo/%s' % data['id'], data=json.dumps(data), headers=self._headers).content)
+            requests.put(self._base_url + '/ddo/%s' % asset.ddo['id'], data=json.dumps(asset.ddo), headers=self._headers).content)
 
     def search(self, search_query):
         return ast.literal_eval(json.loads(

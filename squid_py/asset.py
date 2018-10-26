@@ -27,6 +27,12 @@ class Asset:
         self.publisher_id = publisher_id
         self.price = price
         self.ddo = ddo
+
+    @property
+    def bare_did_string(self):
+        #TODO: This is temp, until the proper handling is implemented!
+        return self.asset_id.split(':')[-1]
+
     def assign_did_from_ddo(self):
         """
         #TODO: This is a temporary hack, need to clearly define how DID is assigned!
