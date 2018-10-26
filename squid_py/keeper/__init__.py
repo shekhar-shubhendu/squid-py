@@ -4,8 +4,8 @@
 
 """
 
-from .contracts import (
-    Contracts
+from .keeper import (
+    Keeper
 )
 
 from .auth import (

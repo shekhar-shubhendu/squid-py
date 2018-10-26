@@ -3,161 +3,139 @@ import os
 
 from web3 import Web3, HTTPProvider
 
-from squid_py.config import (
-    Config,
-)
-from squid_py.keeper import Contracts
+from squid_py.config import Config
+from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
-from squid_py.metadata import Metadata
+from squid_py.aquariuswrapper import AquariusWrapper
+from squid_py.account import Account
+
 from squid_py.utils import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 setup_logging()
 
+class Ocean:
+    def __init__(self, config_file):
+        """
+        The Ocean class is the entry point into Ocean Protocol.
+        This class is an aggregation of
+         * the smart contracts via the Keeper class
+         * the metadata store
+         * and utilities
+        Ocean is also a wrapper for the web3.py interface (https://github.com/ethereum/web3.py)
+        An instance of Ocean is parameterized by a configuration file.
 
-class Ocean(object):
-    """Create a new Ocean object for access to the Ocean Protocol Network
+        :param config_file:
+        """
 
-    :param keeper_url: URL of the Keeper network to connect too.
-    :param address_list: Dictinorary of contract addresses.
-        [
-            'market': '0x00..00',
-            'auth' : '0x00..00',
-            'token' : '0x00..00',
-        ]
-    :param web3: Web3 object to use to connect too the keeper node.
-    :param keeper_path: Path to the Ocean Protocol Keeper contracts, to load contracts and addresses via the artifacts folder.
-    :param logger: Optional logger to use instead of creating our own loggger
-    :param provider_url: Optional url of the ocean network provider, can be None
-    :param gas_limit: Optional gas limit, defaults to 300000
-    :param config_file: Optional config file to load in the above config details
-    :returns: Ocean object
+        # Configuration information for the market is stored in the Config class
+        self.config = Config(config_file)
 
-    An example in creating an Ocean object::
+        # For development, we use the HTTPProvider Web3 interface
+        self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
-        address = [
-            'market': '0x00..00',
-            'auth' : '0x00..00',
-            'token' : '0x00..00',
-        ]
-        ocean = Ocean(url='http://localhost:8545', provider_url = 'http://localhost:5000', address_list = address)
-        print(ocean.accounts[0])
+         # With the interface loaded, the Keeper node is connected with all contracts
+        self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
 
-    """
+        # Add the Metadata store to the interface
+        if self.config.aquarius_url:
+            self.metadata = AquariusWrapper(self.config.aquarius_url)
+        else: self.metadata = None
 
-    def __init__(self, **kwargs):
-        self._w3 = None
-        self._logger = kwargs.get('logger') or logging.getLogger(__name__)
 
-        config_file = kwargs.get('config_file', os.getenv(CONFIG_FILE_ENVIRONMENT_NAME) or None)
+        # Collect the accounts
+        self.accounts = self.get_accounts()
 
-        config = Config(config_file)
+        assert self.accounts
 
-        self._keeper_url = kwargs.get('keeper_url', config.keeper_url)
-        self._keeper_path = kwargs.get('keeper_path', config.keeper_path)
-        self._gas_limit = kwargs.get('gas_limit', config.gas_limit)
-        self._provider_url = kwargs.get('provider_url', config.provider_url)
+    def print_config(self):
+        #TODO: Cleanup
+        print("Ocean object configuration:".format())
+        print("Ocean.config.keeper_path: {}".format(self.config.keeper_path))
+        print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
+        print("Ocean.config.gas_limit: {}".format(self.config.gas_limit))
+        print("Ocean.config.aquarius_url: {}".format(self.config.aquarius_url))
+        print("Ocean.config.address_list.market: {}".format(self.config.address_list['market']))
+        print("Ocean.config.address_list.token: {}".format(self.config.address_list['token']))
+        print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
 
-        # put a priority on getting the contracts directly instead of via the 'ocean node'
+    def update_accounts(self):
+        """
+        Using the Web3 driver, get all account addresses
+        This is used for development to get an overview of all accounts
+        For each address, instantiate a new Account object
+        :return: List of Account instances
+        """
+        logging.debug("Updating accounts")
+        accounts_dict = dict()
+        for account_address in self._web3.eth.accounts:
+            accounts_dict[account_address] = Account(self.keeper, account_address)
 
-        # load in the contract addresses
-        self._address_list = config.address_list
-        if 'address_list' in kwargs:
-            address_list = kwargs['address_list']
-            for name in self._address_list:
-                if name in address_list and address_list[name]:
-                    self._address_list[name] = address_list[name]
+        self.accounts = accounts_dict
 
-        if self._keeper_url is None:
-            raise TypeError('You must provide a Keeper URL')
+    def get_accounts(self):
+        self.update_accounts()
+        return self.accounts
 
-        if 'web3' in kwargs:
-            self._web3 = kwargs['web3']
-        else:
-            self._web3 = Web3(HTTPProvider(self._keeper_url))
-        if self._web3 is None:
-            raise ValueError('You need to provide a valid Keeper URL or Web3 object')
+    def get_asset(self):
+        """
+        Given an assetID, return the Asset
+        :return: Asset object
+        """
+        pass
+        return this_asset
 
-        self._helper = Web3Helper(self._web3)
+    def get_asset_ids(self):
+        """
 
-        # optional _provider_url
-        if self._provider_url:
-            self._metadata = Metadata(self._provider_url)
-        self._network_name = self._helper.network_name
-        self._contracts = Contracts(self._helper, self._keeper_path, self._address_list)
-
-    def calculate_hash(self, message):
-        return self._web3.sha3(message)
-
-    def generate_did(self, content):
-        return 'did:ocn:' + self._contracts.market.contract_concise.generateId(content)
-
-    def resolve_did(self, did):
+        :return:
+        """
         pass
 
-    def get_ether_balance(self, account_address):
-        return self._contracts.token.get_ether_balance(account_address)
+    def search_assets(self):
+        """
 
-    def get_token_balance(self, account_address):
-        return self._contracts.token.get_token_balance(account_address)
+        :return:
+        """
+        pass
 
-    # Properties
-    @property
-    def web3(self):
-        return self._web3
+    def register(self, asset, asset_price, publisher_acct):
+        """
+        Register an asset in both the Market (on-chain) and in the Meta Data store
 
-    @property
-    def address_list(self):
-        return self._address_list
+        Wrapper on both
+            - keeper.market.register
+            - metadata.publish_asset
 
-    @property
-    def gas_limit(self):
-        return self._gas_limit
+        :param asset:
+        :param asset_price:
+        :param publisher_acct:
+        :return:
+        """
 
-    @property
-    def keeper_path(self):
-        return self._keeper_path
+        # 1) Check that the asset is valid
+        assert asset.has_metadata
+        assert asset.is_valid_did
+        assert asset.ddo.is_valid
 
-    @property
-    def keeper_url(self):
-        return self._keeper_url
+        # 2) Check that the publisher is valid and has funds
+        self.update_accounts()
+        assert publisher_acct.address in self.accounts
 
-    @property
-    def provider_url(self):
-        return self._provider_url
+        # 3) Publish to metadata store
+        # Check if it's already registered first!
+        if asset.asset_id in self.metadata.list_assets()['assetsIds']:
+            #TODO: raise proper error
+            raise
 
-    @property
-    def network_name(self):
-        return self._network_name
+        self.metadata.publish_asset_metadata(asset)
 
-    @property
-    def accounts(self):
-        accounts = []
-        if self._helper and self._helper.accounts:
-            for account_address in self._helper.accounts:
-                accounts.append({
-                    'address': account_address,
-                    'ether': self.get_ether_balance(account_address),
-                    'token': self.get_token_balance(account_address)
-                })
-        return accounts
+        # 4) Register the asset onto blockchain
+        result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
 
-    @property
-    def helper(self):
-        return self._helper
 
-    # TODO: remove later from user space
-    @property
-    def metadata(self):
-        return self._metadata
+class Order:
+    def __init__(self):
+        pass
 
-    @property
-    def contracts(self):
-        return self._contracts
-
-    # Static methods
-    @staticmethod
-    def connect_web3(host, port='8545'):
-        """Establish a connexion using Web3 with the client."""
-        return Web3(HTTPProvider("{0}:{1}".format(host, port)))

@@ -18,41 +18,38 @@ class Web3Helper(object):
     def __init__(self, web3):
         self._web3 = web3
 
-    def load(self, contract_file, name, contract_path, contract_address):
-        """Retrieve a tuple with the concise contract and the contract definition."""
-        contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))
-        try:
-            valid_address = self._web3.toChecksumAddress(contract_address)
-        except ValueError as e:
-            raise OceanInvalidContractAddress("Invalid contract address for keeper contract '{}'".format(name))
-        except Exception as e:
-            raise e
-
-        with open(contract_filename, 'r') as abi_definition:
-            abi = json.load(abi_definition)
-            concise_cont = self._web3.eth.contract(
-                address=valid_address,
-                abi=abi['abi'],
-                ContractFactoryClass=ConciseContract)
-            contract = self._web3.eth.contract(
-                address=valid_address,
-                abi=abi['abi'])
-            return concise_cont, contract, contract_address
+    # def load(self, contract_file, name, contract_path, contract_address):
+    #     """Retrieve a tuple with the concise contract and the contract definition."""
+    #     contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))
+    #     try:
+    #         valid_address = self._web3.toChecksumAddress(contract_address)
+    #     except ValueError as e:
+    #         raise OceanInvalidContractAddress("Invalid contract address for keeper contract '{}'".format(name))
+    #     except Exception as e:
+    #         raise e
+    #
+    #     with open(contract_filename, 'r') as abi_definition:
+    #         abi = json.load(abi_definition)
+    #         concise_cont = self._web3.eth.contract(
+    #             address=valid_address,
+    #             abi=abi['abi'],
+    #             ContractFactoryClass=ConciseContract)
+    #         contract = self._web3.eth.contract(
+    #             address=valid_address,
+    #             abi=abi['abi'])
+    #         return concise_cont, contract, contract_address
 
     def sign(self, account_address, message):
         return self._web3.eth.sign(account_address, message)
 
-    def to_checksum_address(self, address):
-        """Validate the address provided."""
-        return self._web3.toChecksumAddress(address)
+    # def to_checksum_address(self, address):
+    #     """Validate the address provided."""
+    #     return self._web3.toChecksumAddress(address)
 
     def get_balance(self, account_address, block_identifier):
         return self._web3.eth.getBalance(account_address, block_identifier)
 
-    def get_tx_receipt(self, tx_hash):
-        """Get the receipt of the tx."""
-        self._web3.eth.waitForTransactionReceipt(tx_hash)
-        return self._web3.eth.getTransactionReceipt(tx_hash)
+
 
     def watch_event(self, contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest', filters=None, ):
         event_filter = self.install_filter(
@@ -74,8 +71,6 @@ class Web3Helper(object):
         )
         return event_filter
 
-    def to_32byte_hex(self, val):
-        return self._web3.toBytes(val).rjust(32, b'\0')
 
     def split_signature(self, signature):
         v = self._web3.toInt(signature[-1])

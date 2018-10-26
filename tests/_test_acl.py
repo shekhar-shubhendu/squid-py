@@ -23,9 +23,9 @@ def test_encode_decode():
 
 
 def test_encrypt_decrypt():
-    provider_keypair = generate_encoding_pair()
+    aquarius_keypair = generate_encoding_pair()
     consumer_keypair = generate_encryption_keys()
-    encoded = encode(token, provider_keypair.private_key)
+    encoded = encode(token, aquarius_keypair.private_key)
     encrypted = encrypt(encoded, consumer_keypair.public_key)
     decrypted = decrypt(encrypted, consumer_keypair.private_key)
     assert token == decode(decrypted)

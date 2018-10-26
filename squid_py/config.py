@@ -16,12 +16,12 @@ DEFAULT_KEEPER_PORT = 8545
 DEFAULT_KEEPER_URL = 'http://localhost:8545'
 DEFAULT_KEEPER_PATH = 'contracts'
 DEFAULT_GAS_LIMIT = 300000
-DEFAULT_NAME_PROVIDER_URL = 'http://localhost:5000'
+DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
 
 NAME_KEEPER_URL = 'keeper.url'
 NAME_KEEPER_PATH = 'keeper.path'
 NAME_GAS_LIMIT = 'gas_limit'
-NAME_PROVIDER_URL = 'provider.url'
+NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_MARKET_ADDRESS = 'market.address'
 NAME_AUTH_ADDRESS = 'auth.address'
 NAME_TOKEN_ADDRESS = 'token.address'
@@ -30,7 +30,7 @@ environ_names = {
     NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
     NAME_KEEPER_PATH: ['KEEPER_PATH', 'Path to the keeper contracts'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
-    NAME_PROVIDER_URL: ['PROVIDER_URL', 'Provider URL'],
+    NAME_AQUARIUS_URL: ['AQUARIUS_URL', 'Aquarius URL'],
     NAME_MARKET_ADDRESS: ['MARKET_ADDRESS', 'Market address'],
     NAME_AUTH_ADDRESS: ['AUTH_ADDRESS', 'Auth address'],
     NAME_TOKEN_ADDRESS: ['TOKEN_ADDRESS', 'Token address'],
@@ -41,7 +41,7 @@ config_defaults = {
         NAME_KEEPER_URL: DEFAULT_KEEPER_URL,
         NAME_KEEPER_PATH: DEFAULT_KEEPER_PATH,
         NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
-        NAME_PROVIDER_URL: DEFAULT_NAME_PROVIDER_URL,
+        NAME_AQUARIUS_URL: DEFAULT_NAME_AQUARIUS_URL,
         NAME_MARKET_ADDRESS: '',
         NAME_AUTH_ADDRESS: '',
         NAME_TOKEN_ADDRESS: '',
@@ -103,8 +103,8 @@ class Config(configparser.ConfigParser):
         return int(self.get(self._section_name, NAME_GAS_LIMIT))
 
     @property
-    def provider_url(self):
-        return self.get(self._section_name, NAME_PROVIDER_URL)
+    def aquarius_url(self):
+        return self.get(self._section_name, NAME_AQUARIUS_URL)
 
     @property
     def address_list(self):

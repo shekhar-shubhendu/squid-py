@@ -5,6 +5,3 @@ from .exceptions import (
     OceanInvalidContractAddress,
 )
 
-from .ocean import (
-    Ocean,
-)

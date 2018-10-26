@@ -2,6 +2,8 @@
     Test did_lib
 """
 import secrets
+import json
+import pathlib
 
 from did_ddo_lib import (
     did_generate,
@@ -14,6 +16,8 @@ from did_ddo_lib import (
     PUBLIC_KEY_STORE_TYPE_BASE64,
     PUBLIC_KEY_STORE_TYPE_BASE85,
 )
+
+from squid_py.ddo import DDO
 
 public_key_store_types = [
     PUBLIC_KEY_STORE_TYPE_PEM,
@@ -177,3 +181,24 @@ def test_creating_did_using_ddo():
 
     # check to see if did is valid against the old ddo
     assert did_validate(did, test_id, ddo)
+
+def test_load_ddo_json():
+    #TODO: Fix
+    SAMPLE_DDO_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'ddo' / 'ddo_sample1.json'
+    assert SAMPLE_DDO_PATH.exists(), "{} does not exist!".format(SAMPLE_METADATA_PATH)
+    with open(SAMPLE_DDO_PATH) as f:
+        SAMPLE_DDO_JSON_DICT = json.load(f)
+
+    SAMPLE_DDO_JSON_STRING = json.dumps(SAMPLE_DDO_JSON_DICT)
+
+    this_ddo = OceanDDO()
+    this_ddo.read_json(SAMPLE_DDO_JSON_STRING)
+
+def test_ddo_dict():
+    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo1 = DDO.from_json_file(sample_ddo_path)
+    assert ddo1.is_valid
+    assert len(ddo1.keys()) == 5
+    assert ddo1['id'] == 'did:op:123456789abcdefghi'
