@@ -139,15 +139,21 @@ class OceanDDO(object):
         if 'publicKey' in values:
             self._public_keys = []
             for value in values['publicKey']:
-                self._public_keys.append(OceanDDO.create_public_key_from_json(json.loads(value)))
+                if isinstance(value, str):
+                    value = json.loads(value)
+                self._public_keys.append(OceanDDO.create_public_key_from_json(value))
         if 'authentication' in values:
             self._authentications = []
             for value in values['authentication']:
-                self._authentications.append(OceanDDO.create_authentication_from_json(json.loads(value)))
+                if isinstance(value, str):
+                    value = json.loads(value)
+                self._authentications.append(OceanDDO.create_authentication_from_json(value))
         if 'service' in values:
             self._services = []
             for value in values['service']:
-                self.services.append(OceanDDO.create_service_from_json(json.loads(value)))
+                if isinstance(value, str):
+                    value = json.loads(value)
+                self.services.append(OceanDDO.create_service_from_json(value))
         if 'proof' in values:
             self._proof = values['proof']
 
