@@ -2,27 +2,28 @@
 """
 
 import logging
-import os
-from squid_py.ocean import Ocean
-from squid_py.asset import Asset
-from squid_py.ddo import DDO
-import json
 import pathlib
+
 import pytest
 
+from squid_py.asset import Asset
+from squid_py.ddo import DDO
+from squid_py.ocean import Ocean
 
 # Disable low level loggers
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
+
 def test_create_asset_simple():
     # An asset can be be created directly
-    asset1 = Asset(asset_id='TestID', publisher_id='TestPID', price = 0, ddo=None)
+    asset1 = Asset(asset_id='TestID', publisher_id='TestPID', price=0, ddo=None)
     assert not asset1.is_valid_did()
 
     # Can gen the DID locally BUT it requires a DDO!
     with pytest.raises(AttributeError):
         asset1.generate_did()
+
 
 def test_create_asset_ddo_file():
     # An asset can be created directly from a DDO .json file
@@ -37,6 +38,7 @@ def test_create_asset_ddo_file():
 
     assert asset1.has_metadata
     print(asset1.metadata)
+
 
 def test_register_data_asset_market():
     """
@@ -93,6 +95,7 @@ def test_register_data_asset_market():
     assert asset_price == chain_asset_price
     logging.info("chain_asset_price = {}".format(chain_asset_price))
 
+
 def test_publish_data_asset_aquarius():
     """
     Setup accounts and asset, register this asset on Aquarius (MetaData store)
@@ -146,13 +149,14 @@ def test_publish_data_asset_aquarius():
     with pytest.raises(ValueError):
         this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
-    #TODO: Ensure returned metadata equals sent!
+    # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
     published_metadata = ocean.metadata.get_asset_metadata(asset.asset_id)
-    
+
     # only compare top level keys
     assert sorted(list(asset.metadata['base'].keys())) == sorted(list(published_metadata['base'].keys()))
     # asset.metadata == published_metadata
+
 
 def test_ocean_publish():
     """
@@ -193,4 +197,4 @@ def test_ocean_publish():
     ##########################################################
     # Register using high-level interface
     ##########################################################
-    ocean.register(asset,100,publisher_acct)
+    ocean.register(asset, 100, publisher_acct)
