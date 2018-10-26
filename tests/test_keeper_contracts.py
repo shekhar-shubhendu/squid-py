@@ -1,7 +1,7 @@
 """
     Test Keeper Contracts 
     
-    This tests basic contract loading and one call to the smart contract to proof
+    This tests basic contract loading and one call to the smart contract to prove
     that the contact can be loaded and used
 
 """
@@ -17,7 +17,7 @@ def get_ocean_instance():
     ocean = Ocean(os.environ['CONFIG_FILE'])
     return ocean
     
-def test_auth():
+def test_auth_contract():
     
     ocean = get_ocean_instance()
     assert ocean
@@ -28,7 +28,7 @@ def test_auth():
     assert ocean.keeper.auth.get_order_status(test_id) == 0
     
 
-def test_didresitry():
+def test_didresitry_contract():
     
     ocean = get_ocean_instance()
     assert ocean
@@ -38,7 +38,7 @@ def test_didresitry():
     # contract call does not work with docker
     assert ocean.keeper.didregistry.get_update_at(test_id) == 0
 
-def test_market():
+def test_market_contract():
         
     ocean = get_ocean_instance()
     assert ocean
@@ -48,7 +48,7 @@ def test_market():
     assert ocean.keeper.market.verify_order_payment(test_id)
 
 
-def test_token():
+def test_token_contract():
         
     ocean = get_ocean_instance()
     assert ocean
