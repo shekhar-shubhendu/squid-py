@@ -147,9 +147,12 @@ def test_publish_data_asset_aquarius():
         this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
     #TODO: Ensure returned metadata equals sent!
+    # get_asset_metadata only returns 'base' key, is this correct?
     published_metadata = ocean.metadata.get_asset_metadata(asset.asset_id)
-    assert sorted(list(asset.metadata.keys())) in sorted(list(published_metadata.keys()))
-    asset.metadata == published_metadata
+    
+    # only compare top level keys
+    assert sorted(list(asset.metadata['base'].keys())) == sorted(list(published_metadata['base'].keys()))
+    # asset.metadata == published_metadata
 
 def test_ocean_publish():
     """
