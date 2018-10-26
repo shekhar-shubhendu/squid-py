@@ -27,6 +27,12 @@ class Asset:
         self.publisher_id = publisher_id
         self.price = price
         self.ddo = ddo
+    def assign_did_from_ddo(self):
+        """
+        #TODO: This is a temporary hack, need to clearly define how DID is assigned!
+        :return:
+        """
+        self.asset_id = self.ddo['id']
 
     @classmethod
     def from_ddo_json_file(cls,json_file_path):

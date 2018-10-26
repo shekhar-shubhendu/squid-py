@@ -37,7 +37,7 @@ class AquariusWrapper(object):
         return json.loads(requests.get(self._base_url + '/ddo').content)
 
     def publish_asset_metadata(self, asset):
-        response = requests.post(self._base_url + '/ddo', data=json.dumps(asset), headers=self._headers)
+        response = requests.post(self._base_url + '/ddo', data=json.dumps(asset.ddo), headers=self._headers)
         if response.status_code == 500:
             raise ValueError("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
         elif response.status_code == 400:

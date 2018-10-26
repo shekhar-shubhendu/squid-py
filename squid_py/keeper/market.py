@@ -70,6 +70,7 @@ class Market(ContractBase):
             price,
             transact={'from': publisher_address, 'gas': self._defaultGas}
         )
+
         self.get_tx_receipt(result)
         logging.info("Registered Asset {} into blockchain".format(asset.asset_id))
         return result
