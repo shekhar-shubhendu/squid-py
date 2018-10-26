@@ -65,8 +65,8 @@ def test_register_data_asset_market():
         ocean._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!
-    assert aquarius_acct.get_ocean_balance() > 0
-    assert consumer_acct.get_ocean_balance() > 0
+    assert aquarius_acct.ocean > 0
+    assert consumer_acct.ocean > 0
 
     ##########################################################
     # Create an Asset with valid metadata
