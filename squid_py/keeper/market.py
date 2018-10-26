@@ -2,6 +2,7 @@ import logging
 
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
+import string
 
 DEFAULT_GAS_LIMIT = 400000
 
@@ -64,6 +65,10 @@ class Market(ContractBase):
         :return:
         """
         assert asset.asset_id
+        assert len(asset.asset_id) == 32
+        assert all(c in string.hexdigits for c in asset.asset_id)
+
+
 
         result = self.contract_concise.register(
             asset.asset_id,
