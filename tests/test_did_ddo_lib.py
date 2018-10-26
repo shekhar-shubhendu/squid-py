@@ -203,4 +203,4 @@ def test_ddo_dict():
     ddo1 = DDO.from_json_file(sample_ddo_path)
     assert ddo1.is_valid
     assert len(ddo1.keys()) == 5
-    assert ddo1['id'] == 'did:op:123456789abcdefghi'
+    assert ddo1['id'] == 'did:op:12345678123456781234567812345678'
