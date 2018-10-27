@@ -196,7 +196,8 @@ def test_load_ddo_json():
     service = this_ddo.get_service('Metadata')
     assert service
     assert service.get_type() == 'Metadata'
-    
+    values = service.get_values()
+    assert values['metadata']
 
 
 def test_ddo_dict():
