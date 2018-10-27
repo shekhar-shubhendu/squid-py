@@ -1,4 +1,3 @@
-import json
 from squid_py.asset import Asset
 from squid_py.ocean import Ocean
 import pathlib

@@ -5,7 +5,6 @@ import json
 from .ddo import DDO
 import pathlib
 import re
-from web3 import Web3
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):

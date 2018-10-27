@@ -2,7 +2,6 @@ import logging
 
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
-import string
 from web3 import Web3
 
 DEFAULT_GAS_LIMIT = 400000
