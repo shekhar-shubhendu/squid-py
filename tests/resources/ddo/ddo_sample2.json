@@ -1,49 +1,49 @@
 {
   "@context": "https://w3id.org/future-method/v1",
-  "id": "did:op:abcdefghabcdefghabcdefghabcdefgh",
+  "id": "did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
   "publicKey": [
     {
-      "id": "did:op:123456789abcdefghi#keys-1",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2#keys-1",
       "type": "RsaVerificationKey2018",
-      "owner": "did:op:123456789abcdefghi",
+      "owner": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
     },
     {
-      "id": "did:op:123456789abcdefghi#keys-2",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2#keys-2",
       "type": "Ed25519VerificationKey2018",
-      "owner": "did:op:123456789abcdefghi",
+      "owner": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
     },
     {
-      "id": "did:op:123456789abcdefghi#keys-3",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2#keys-3",
       "type": "RsaPublicKeyExchangeKey2018",
-      "owner": "did:op:123456789abcdefghi",
+      "owner": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
     }
   ],
   "authentication": [
     {
       "type": "RsaSignatureAuthentication2018",
-      "publicKey": "did:op:123456789abcdefghi#keys-1"
+      "publicKey": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2#keys-1"
     },
     {
       "type": "ieee2410Authentication2018",
-      "publicKey": "did:op:123456789abcdefghi#keys-2"
+      "publicKey": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2#keys-2"
     }
   ],
   "service": [
     {
-      "id": "did:op:123456789abcdefghi",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "type": "Consume",
       "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/consume?pubKey=${pubKey}&serviceId={serviceId}&url={url}"
     },
     {
-      "id": "did:op:123456789abcdefghi",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "type": "Compute",
       "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/compute?pubKey=${pubKey}&serviceId={serviceId}&algo={algo}&container={container}"
     },
     {
-      "id": "did:op:123456789abcdefghi",
+      "id": "did:op:did:op:d75305ebc1617834339e64cdafb7fd542aa657c0f94dac0f4f84068f5f910ca2",
       "type": "Metadata",
       "serviceEndpoint": "http://myaquarius.org/api/v1/provider/assets/metadata/{did}",
       "metadata": {

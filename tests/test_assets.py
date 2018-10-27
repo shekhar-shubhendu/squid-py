@@ -133,7 +133,7 @@ def test_publish_data_asset_aquarius():
     asset = Asset.from_ddo_json_file(sample_ddo_path)
     # asset.generate_did()
     ######################
-    # the sample ddo does not contain the correct asset_id, so force it to a 
+    # the sample ddo does not contain the correct asset_id, so force it to a
     # new id...
     #asset.generate_did()
     
@@ -175,7 +175,7 @@ def test_ocean_publish():
     logging.debug("".format())
     ocean = Ocean('config_local.ini')
     asset_price = 100
-    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
+    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample2.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ##########################################################
@@ -196,14 +196,6 @@ def test_ocean_publish():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    
-    ######################
-    # the sample ddo does not contain the correct asset_id, so force it to a 
-    # new id...
-    #asset.generate_did()
-    
-    ## instead of v.
-    asset.ddo['id'] = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
 
     ######################
