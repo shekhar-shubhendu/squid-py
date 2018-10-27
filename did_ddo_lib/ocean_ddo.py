@@ -259,7 +259,7 @@ class OceanDDO(object):
                 return authentication
         return None
 
-    # return a service using 
+    # return a service using
     def get_service(self, service_type = None, service_id = None):
         for service in self._services:
             if service.get_id() == service_id and service_id:

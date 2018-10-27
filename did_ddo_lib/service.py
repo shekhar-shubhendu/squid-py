@@ -14,17 +14,17 @@ class Service(object):
         self._id = service_id
         self._endpoint = endpoint
         self._type = service_type
-        
+
         # assign the _values property to empty until they are used
         self._values = None
         reserved_names =  ['id', 'serviceEndpoint', 'type']
         if values:
-            for name, value in values.items():            
+            for name, value in values.items():
                 if name not in reserved_names:
                     if not self._values:
                         self._values = {}
                     self._values[name]= value
-                    
+
 
     def get_id(self):
         return self._id
@@ -41,7 +41,7 @@ class Service(object):
 
     def get_values(self):
         return self._values
-        
+
     def as_text(self):
         values = {
             'id': self._id,
