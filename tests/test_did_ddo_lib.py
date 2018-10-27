@@ -1,9 +1,9 @@
 """
     Test did_lib
 """
-import secrets
 import json
 import pathlib
+import secrets
 
 from did_ddo_lib import (
     did_generate,
@@ -16,7 +16,6 @@ from did_ddo_lib import (
     PUBLIC_KEY_STORE_TYPE_BASE64,
     PUBLIC_KEY_STORE_TYPE_BASE85,
 )
-
 from squid_py.ddo import DDO
 
 public_key_store_types = [
@@ -29,8 +28,8 @@ public_key_store_types = [
 TEST_SERVICE_TYPE = 'ocean-meta-storage'
 TEST_SERVICE_URL = 'http://localhost:8005'
 
-def test_did():
 
+def test_did():
     test_id = secrets.token_hex(32)
     test_path = 'test_path'
     test_fragment = 'test_fragment'
@@ -111,26 +110,26 @@ def test_creating_ddo():
         signature_key_id = '{0}#keys={1}'.format(did, index + 1)
         assert ddo.get_public_key(signature_key_id)
 
-   # test validating static proofs
+    # test validating static proofs
     for index, private_key in enumerate(private_keys):
         ddo.add_proof(index, private_key)
         ddo_text_proof = ddo.as_text()
         assert ddo.validate_proof()
         ddo_text_proof_hash = ddo.calculate_hash()
 
-
-    ddo = OceanDDO(ddo_text = ddo_text_proof)
+    ddo = OceanDDO(ddo_text=ddo_text_proof)
     assert ddo.validate()
     assert ddo.is_proof_defined()
     assert ddo.validate_proof()
     assert ddo.calculate_hash() == ddo_text_proof_hash
 
-    ddo = OceanDDO(ddo_text = ddo_text_no_proof)
+    ddo = OceanDDO(ddo_text=ddo_text_no_proof)
     assert ddo.validate()
     # valid proof should be false since no static proof provided
     assert not ddo.is_proof_defined()
     assert not ddo.validate_proof()
     assert ddo.calculate_hash() == ddo_text_no_proof_hash
+
 
 def test_creating_ddo_embedded_public_key():
     test_id = secrets.token_hex(32)
@@ -140,11 +139,11 @@ def test_creating_ddo_embedded_public_key():
     assert ddo
     private_keys = []
     for public_key_store_type in public_key_store_types:
-        private_keys.append(ddo.add_signature(public_key_store_type, is_embedded = True))
+        private_keys.append(ddo.add_signature(public_key_store_type, is_embedded=True))
 
     assert len(private_keys) == len(public_key_store_types)
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
-   # test validating static proofs
+    # test validating static proofs
     for index, private_key in enumerate(private_keys):
         ddo.add_proof(index, private_key)
         ddo_text_proof = ddo.as_text()
@@ -153,6 +152,7 @@ def test_creating_ddo_embedded_public_key():
         ddo_text_proof_hash = ddo.calculate_hash()
         assert ddo_text_proof_hash
 
+
 def test_creating_did_using_ddo():
     # create an empty ddo
     test_id = secrets.token_hex(32)
@@ -160,7 +160,7 @@ def test_creating_did_using_ddo():
     assert ddo
     private_keys = []
     for public_key_store_type in public_key_store_types:
-        private_keys.append(ddo.add_signature(public_key_store_type, is_embedded = True))
+        private_keys.append(ddo.add_signature(public_key_store_type, is_embedded=True))
     assert len(private_keys) == len(public_key_store_types)
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
     # add a proof to the first public_key/authentication
@@ -173,7 +173,7 @@ def test_creating_did_using_ddo():
     assert ddo_text_proof_hash
     did, assigned_ddo = did_generate_from_ddo(test_id, ddo)
 
-    assert(ddo.calculate_hash() == assigned_ddo.calculate_hash())
+    assert (ddo.calculate_hash() == assigned_ddo.calculate_hash())
     assert assigned_ddo.validate_proof()
 
     # check to see if did is valid against the new ddo
@@ -182,8 +182,9 @@ def test_creating_did_using_ddo():
     # check to see if did is valid against the old ddo
     assert did_validate(did, test_id, ddo)
 
+
 def test_load_ddo_json():
-    #TODO: Fix
+    # TODO: Fix
     SAMPLE_DDO_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'ddo' / 'ddo_sample1.json'
     assert SAMPLE_DDO_PATH.exists(), "{} does not exist!".format(SAMPLE_METADATA_PATH)
     with open(SAMPLE_DDO_PATH) as f:
@@ -194,6 +195,7 @@ def test_load_ddo_json():
     this_ddo = OceanDDO()
     this_ddo.read_json(SAMPLE_DDO_JSON_STRING)
 
+
 def test_ddo_dict():
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
@@ -201,4 +203,4 @@ def test_ddo_dict():
     ddo1 = DDO.from_json_file(sample_ddo_path)
     assert ddo1.is_valid
     assert len(ddo1.keys()) == 5
-    assert ddo1['id'] == 'did:op:123456789abcdefghi'
+    assert ddo1['id'] == 'did:op:3597a39818d598e5d60b83eabe29e337d37d9ed5af218b4af5e94df9f7d9783a'

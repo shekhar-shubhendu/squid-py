@@ -4,6 +4,7 @@ import logging
 import json
 from .ddo import DDO
 import pathlib
+import re
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
@@ -28,6 +29,21 @@ class Asset:
         self.price = price
         self.ddo = ddo
 
+    @property
+    def bare_did_string(self):
+        #TODO: This is temp, until the proper handling is implemented!
+        return self.asset_id.split(':')[-1]
+
+    def assign_did_from_ddo(self):
+        """
+        #TODO: This is a temporary hack, need to clearly define how DID is assigned!
+        :return:
+        """
+        did = self.ddo['id']
+        match = re.match('^did:op:([0-9a-f]+)', did)
+        if match:
+            self.asset_id = match.groups(1)[0]
+
     @classmethod
     def from_ddo_json_file(cls,json_file_path):
         this_asset = cls()
@@ -49,11 +65,11 @@ class Asset:
         metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
         return len(metadata_service) == 1
 
-    def is_valid_did(self,length=32):
+    def is_valid_did(self,length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
 
-    def generate_did(self,length=32):
+    def generate_did(self):
         """
         During development, the DID can be generated here for convenience.
         """
@@ -62,7 +78,7 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
+        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()
 
     def assign_metadata(self):
         pass
