@@ -1,5 +1,3 @@
-import logging
-
 from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 

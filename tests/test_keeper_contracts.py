@@ -6,7 +6,6 @@
 
 """
 import os
-import pytest
 import secrets
 
 from squid_py.ocean import Ocean
