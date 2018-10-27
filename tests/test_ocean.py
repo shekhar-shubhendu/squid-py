@@ -5,17 +5,17 @@
 
 import logging
 import os
+
 import pytest
-import time
-# from web3 import Web3, HTTPProvider
 
-# from squid_py.constants import KEEPER_CONTRACTS
-
-# from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
-
+from squid_py.config import Config
 # from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, convert_to_text
 from squid_py.ocean import Ocean
-from squid_py.config import Config
+
+
+# from web3 import Web3, HTTPProvider
+# from squid_py.constants import KEEPER_CONTRACTS
+# from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
 
 # from squid_py.keeper import Keeper
 
@@ -42,6 +42,7 @@ def test_ocean_instance():
 
     ocean.print_config()
 
+
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
@@ -53,6 +54,7 @@ def test_accounts():
     for address, account in ocean.accounts.items():
         assert account.ether >= 0
         assert account.ocean >= 0
+
 
 def test_token_request():
     ocean = Ocean('config_local.ini')
@@ -85,6 +87,7 @@ def test_token_request():
     # Confirm balance changes
     assert aquarius_current_eth < aquarius_start_eth
     assert aquarius_current_ocean == aquarius_start_ocean + amount
+
 
 def _test_ocean_contracts_legacy():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
@@ -120,7 +123,6 @@ def _test_convert():
     input_text = "my text"
     print("output %s" % convert_to_string(convert_to_bytes(input_text)))
     assert convert_to_text(convert_to_bytes(input_text)) == input_text
-
 
 
 def _test_legacy_accounts_legacy():
