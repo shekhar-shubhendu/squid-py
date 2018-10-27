@@ -4,6 +4,8 @@ import logging
 import json
 from .ddo import DDO
 import pathlib
+import re
+from web3 import Web3
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
@@ -38,7 +40,10 @@ class Asset:
         #TODO: This is a temporary hack, need to clearly define how DID is assigned!
         :return:
         """
-        self.asset_id = self.ddo['id']
+        did = self.ddo['id']
+        match = re.match('^did:op:([0-9a-f]+)', did)
+        if match:
+            self.asset_id = match.groups(1)[0]
 
     @classmethod
     def from_ddo_json_file(cls,json_file_path):
@@ -61,11 +66,11 @@ class Asset:
         metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
         return len(metadata_service) == 1
 
-    def is_valid_did(self,length=32):
+    def is_valid_did(self,length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
 
-    def generate_did(self,length=32):
+    def generate_did(self):
         """
         During development, the DID can be generated here for convenience.
         """
@@ -74,7 +79,7 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()[:length]
+        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()
 
     def assign_metadata(self):
         pass

@@ -9,6 +9,7 @@ import pytest
 from squid_py.asset import Asset
 from squid_py.ddo import DDO
 from squid_py.ocean import Ocean
+import secrets
 
 # Disable low level loggers
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -131,8 +132,15 @@ def test_publish_data_asset_aquarius():
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
     # asset.generate_did()
+    ######################
+    # the sample ddo does not contain the correct asset_id, so force it to a 
+    # new id...
+    #asset.generate_did()
+    
+    ## instead of v.
+    asset.ddo['id'] = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
-
+    
     ##########################################################
     # List currently published assets
     ##########################################################
@@ -188,8 +196,18 @@ def test_ocean_publish():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    # asset.generate_did()
+    
+    ######################
+    # the sample ddo does not contain the correct asset_id, so force it to a 
+    # new id...
+    #asset.generate_did()
+    
+    ## instead of v.
+    asset.ddo['id'] = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
+
+    ######################
+    
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
     if asset.asset_id in meta_data_assets['ids']:

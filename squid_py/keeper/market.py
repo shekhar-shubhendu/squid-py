@@ -3,6 +3,7 @@ import logging
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 import string
+from web3 import Web3
 
 DEFAULT_GAS_LIMIT = 400000
 
@@ -19,15 +20,17 @@ class Market(ContractBase):
         :param asset_id: ID of the asset to check for existance
         :return: Boolean
         """
-        return self.contract_concise.checkAsset(asset_id)
+        asset_id_bytes = Web3.toBytes(hexstr=asset_id)
+        return self.contract_concise.checkAsset(asset_id_bytes)
 
     def verify_order_payment(self, order_id):
         return self.contract_concise.verifyPaymentReceived(order_id)
 
     def get_asset_price(self, asset_id):
         """Return the price of an asset already registered."""
+        asset_id_bytes = Web3.toBytes(hexstr=asset_id)
         try:
-            return self.contract_concise.getAssetPrice(asset_id)
+            return self.contract_concise.getAssetPrice(asset_id_bytes)
         except Exception:
             logging.error("There are no assets registered with id: %s" % asset_id)
 
@@ -64,14 +67,13 @@ class Market(ContractBase):
         :param publisher_address:
         :return:
         """
-        assert asset.asset_id
-        assert len(asset.asset_id) == 32
-        assert all(c in string.hexdigits for c in asset.asset_id)
-
-
+        asset_id_bytes = Web3.toBytes(hexstr=asset.asset_id)
+        assert asset_id_bytes
+        assert len(asset_id_bytes) == 32
+        # assert all(c in string.hexdigits for c in asset.asset_id)
 
         result = self.contract_concise.register(
-            asset.asset_id,
+            asset_id_bytes,
             price,
             transact={'from': publisher_address, 'gas': self._defaultGas}
         )
@@ -81,7 +83,8 @@ class Market(ContractBase):
         return result
 
     def purchase_asset(self, asset_id, order, publisher_address, sender_address):
-        asset_price = self.contract.getAssetPrice(asset_id)
+        asset_id_bytes = Web3.toBytes(hexstr=asset_id)
+        asset_price = self.contract.getAssetPrice(asset_id_bytes)
         return self.contract.sendPayment(order.id, publisher_address, asset_price, order.timeout, {
             'from': sender_address,
             'gas': self._defaultGas
