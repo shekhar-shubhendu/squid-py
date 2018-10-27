@@ -192,8 +192,11 @@ def test_load_ddo_json():
 
     SAMPLE_DDO_JSON_STRING = json.dumps(SAMPLE_DDO_JSON_DICT)
 
-    this_ddo = OceanDDO()
-    this_ddo.read_json(SAMPLE_DDO_JSON_STRING)
+    this_ddo = OceanDDO(ddo_text = SAMPLE_DDO_JSON_STRING)
+    service = this_ddo.get_service('Metadata')
+    assert service
+    assert service.get_type() == 'Metadata'
+    
 
 
 def test_ddo_dict():
