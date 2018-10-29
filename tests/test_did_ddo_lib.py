@@ -3,6 +3,7 @@
 """
 import json
 import pathlib
+import pytest
 import secrets
 
 from did_ddo_lib import (
@@ -10,6 +11,7 @@ from did_ddo_lib import (
     did_generate_from_ddo,
     did_parse,
     did_validate,
+    is_did_valid,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
     PUBLIC_KEY_STORE_TYPE_HEX,
@@ -82,7 +84,18 @@ def test_did():
     # assert split offragment
     assert did_parse(valid_fragment_did)['fragment'] == test_fragment
 
-    assert did_valid(test_did)
+    # test is_did_valid
+    assert is_did_valid(valid_did)
+    assert not is_did_valid('did:op:{}'.format(all_id))
+    assert not is_did_valid('did:eth:{}'.format(test_id))
+    assert not is_did_valid('op:{}'.format(test_id))
+
+    with pytest.raises(TypeError):
+        is_did_valid(None)
+
+    # test invalid in bytes
+    with pytest.raises(TypeError):
+        assert is_did_valid(valid_did.encode())
 
 def test_creating_ddo():
     did_id = secrets.token_hex(32)

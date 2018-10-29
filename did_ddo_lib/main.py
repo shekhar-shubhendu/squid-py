@@ -55,6 +55,9 @@ def did_validate(did, did_id, ddo):
 # parse a DID into it's parts
 def did_parse(did):
     result = None
+    if not isinstance(did, str):
+        raise TypeError('DID must be a string')
+
     match = re.match('^did:([a-z0-9]+):([a-zA-Z0-9-.]+)(.*)', did)
     if match:
         result = {
@@ -71,7 +74,7 @@ def did_parse(did):
                 result['path'] = uri.path[1:]
     return result
 
-def did_valid(did):
+def is_did_valid(did):
     """
         Return True if the did is a valid DID with the method name 'op' and the id
         in the Ocean format
