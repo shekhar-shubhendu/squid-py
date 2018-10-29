@@ -84,6 +84,14 @@ def test_did():
     # assert split offragment
     assert did_parse(valid_fragment_did)['fragment'] == test_fragment
 
+    with pytest.raises(TypeError):
+        did_parse(None)
+
+    # test invalid in bytes
+    with pytest.raises(TypeError):
+        assert did_parse(valid_did.encode())
+
+
     # test is_did_valid
     assert is_did_valid(valid_did)
     assert not is_did_valid('did:op:{}'.format(all_id))
@@ -92,6 +100,7 @@ def test_did():
 
     with pytest.raises(TypeError):
         is_did_valid(None)
+
 
     # test invalid in bytes
     with pytest.raises(TypeError):
