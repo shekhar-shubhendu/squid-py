@@ -3,6 +3,7 @@
 
 """
 
+import binascii
 import re
 
 from web3 import (
@@ -83,3 +84,20 @@ def is_did_valid(did):
     if result:
         return result['method'] == 'op' and re.match('^[0-9A-Fa-f]{1,64}$', result['id'])
     return False
+
+
+def did_generate_from_id(did_id, method='op'):
+
+    if isinstance(did_id, bytes):
+        did_id = Web3.toHex(did_id)
+
+    # remove leading '0x' of a hex string
+    if isinstance(did_id, str):
+        did_id = re.sub('^0x', '', did_id)
+    else:
+        raise TypeError("did id must be a hex string or bytes")
+
+    # test for zero address
+    if Web3.toBytes(hexstr=did_id) == b'':
+        did_id = '0'
+    return 'did:{0}:{1}'.format(method, did_id)

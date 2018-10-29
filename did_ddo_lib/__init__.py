@@ -17,6 +17,7 @@ from did_ddo_lib.main import (
     did_validate,
     did_parse,
     is_did_valid,
+    did_generate_from_id,
 )
 
 from did_ddo_lib.ocean_ddo import (
