@@ -3,7 +3,6 @@
 
 """
 
-import binascii
 import re
 
 from web3 import (
