@@ -15,7 +15,7 @@ from urllib.parse import (
 
 
 # generate a DID based in it's id, path, fragment and method
-def did_generate(did_id, path = None, fragment = None, method = 'ocean'):
+def did_generate(did_id, path = None, fragment = None, method = 'op'):
 
     method = re.sub('[^a-z0-9]', '', method.lower())
     did_id = re.sub('[^a-zA-Z0-9-.]', '', did_id)
@@ -38,7 +38,7 @@ def did_generate_base_id(did_id, ddo):
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
 
 # generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned
-def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'ocean'):
+def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'op'):
     base_id = did_generate_base_id(did_id, ddo)
     did =  did_generate(base_id, method = method)
     assigned_ddo = ddo.create_new(did)
@@ -55,6 +55,9 @@ def did_validate(did, did_id, ddo):
 # parse a DID into it's parts
 def did_parse(did):
     result = None
+    if not isinstance(did, str):
+        raise TypeError('DID must be a string')
+
     match = re.match('^did:([a-z0-9]+):([a-zA-Z0-9-.]+)(.*)', did)
     if match:
         result = {
@@ -70,3 +73,37 @@ def did_parse(did):
             if len(uri.path) > 0:
                 result['path'] = uri.path[1:]
     return result
+
+def is_did_valid(did):
+    """
+        Return True if the did is a valid DID with the method name 'op' and the id
+        in the Ocean format
+    """
+    result = did_parse(did)
+    if result:
+        return result['method'] == 'op' and re.match('^[0-9A-Fa-f]{1,64}$', result['id'])
+    return False
+
+
+def did_generate_from_id(did_id, method='op'):
+
+    if isinstance(did_id, bytes):
+        did_id = Web3.toHex(did_id)
+
+    # remove leading '0x' of a hex string
+    if isinstance(did_id, str):
+        did_id = re.sub('^0x', '', did_id)
+    else:
+        raise TypeError("did id must be a hex string or bytes")
+
+    # test for zero address
+    if Web3.toBytes(hexstr=did_id) == b'':
+        did_id = '0'
+    return 'did:{0}:{1}'.format(method, did_id)
+
+def get_id_from_did(did):
+    if is_did_valid(did):
+        result = did_parse(did)
+        if result:
+            return re.sub('^0x', '', Web3.toHex(hexstr=result['id']))
+    return None

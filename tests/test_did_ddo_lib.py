@@ -3,13 +3,18 @@
 """
 import json
 import pathlib
+import pytest
 import secrets
+from web3 import Web3
 
 from did_ddo_lib import (
     did_generate,
     did_generate_from_ddo,
     did_parse,
     did_validate,
+    is_did_valid,
+    did_generate_from_id,
+    get_id_from_did,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
     PUBLIC_KEY_STORE_TYPE_HEX,
@@ -35,7 +40,7 @@ def test_did():
     test_fragment = 'test_fragment'
     test_method = 'abcdefghijklmnopqrstuvwxyz0123456789'
     all_id = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.'
-    valid_did = 'did:ocean:{0}'.format(test_id)
+    valid_did = 'did:op:{0}'.format(test_id)
 
     assert did_generate(test_id) == valid_did
     assert did_parse(valid_did)['id'] == test_id
@@ -62,13 +67,13 @@ def test_did():
     assert did_generate(all_id + '%^&*()_+=', method=test_method) == valid_id_method_did
 
     # path can be appended
-    valid_path_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
+    valid_path_did = 'did:op:{0}/{1}'.format(test_id, test_path)
     assert did_generate(test_id, test_path) == valid_path_did
 
     assert did_parse(valid_path_did)['path'] == test_path
 
     # append path and fragment
-    valid_path_fragment_did = 'did:ocean:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
+    valid_path_fragment_did = 'did:op:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
     assert did_generate(test_id, test_path, test_fragment) == valid_path_fragment_did
 
     # assert split of path and fragment
@@ -76,11 +81,54 @@ def test_did():
     assert did_parse(valid_path_fragment_did)['fragment'] == test_fragment
 
     # append fragment
-    valid_fragment_did = 'did:ocean:{0}#{1}'.format(test_id, test_fragment)
+    valid_fragment_did = 'did:op:{0}#{1}'.format(test_id, test_fragment)
     assert did_generate(test_id, fragment=test_fragment) == valid_fragment_did
 
     # assert split offragment
     assert did_parse(valid_fragment_did)['fragment'] == test_fragment
+
+    with pytest.raises(TypeError):
+        did_parse(None)
+
+    # test invalid in bytes
+    with pytest.raises(TypeError):
+        assert did_parse(valid_did.encode())
+
+
+    # test is_did_valid
+    assert is_did_valid(valid_did)
+    assert not is_did_valid('did:op:{}'.format(all_id))
+    assert not is_did_valid('did:eth:{}'.format(test_id))
+    assert not is_did_valid('op:{}'.format(test_id))
+
+    with pytest.raises(TypeError):
+        is_did_valid(None)
+
+
+    # test invalid in bytes
+    with pytest.raises(TypeError):
+        assert is_did_valid(valid_did.encode())
+
+
+    valid_did_text = 'did:op:{}'.format(test_id)
+    assert did_generate_from_id(test_id) == valid_did_text
+
+    # accept hex string from Web3 py
+    assert did_generate_from_id(Web3.toHex(hexstr=test_id)) == valid_did_text
+
+    #accepts binary value
+    assert did_generate_from_id(Web3.toBytes(hexstr=test_id)) == valid_did_text
+
+    with pytest.raises(TypeError):
+        did_generate_from_id(None)
+
+    with pytest.raises(TypeError):
+        did_generate_from_id({'bad': 'value'})
+
+    assert did_generate_from_id('') == 'did:op:0'
+    assert get_id_from_did(valid_did_text) == test_id
+    assert get_id_from_did('did:op1:011') == None
+    assert get_id_from_did('did:op:0') == '0'
 
 
 def test_creating_ddo():
