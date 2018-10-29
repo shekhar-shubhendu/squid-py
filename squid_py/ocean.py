@@ -83,8 +83,7 @@ class Ocean:
         Given an assetID, return the Asset
         :return: Asset object
         """
-        pass
-        return this_asset
+        return 'this_asset'
 
     def get_asset_ids(self):
         """
@@ -127,7 +126,7 @@ class Ocean:
         # Check if it's already registered first!
         if asset.asset_id in self.metadata.list_assets()['ids']:
             #TODO: raise proper error
-            raise
+            raise Exception('Asset already registered.')
 
         self.metadata.publish_asset_metadata(asset)
 
