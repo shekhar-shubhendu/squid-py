@@ -14,6 +14,7 @@ from did_ddo_lib import (
     did_validate,
     is_did_valid,
     did_generate_from_id,
+    get_id_from_did,
     OceanDDO,
     PUBLIC_KEY_STORE_TYPE_PEM,
     PUBLIC_KEY_STORE_TYPE_HEX,
@@ -125,6 +126,9 @@ def test_did():
         did_generate_from_id({'bad': 'value'})
 
     assert did_generate_from_id('') == 'did:op:0'
+    assert get_id_from_did(valid_did_text) == test_id
+    assert get_id_from_did('did:op1:011') == None
+    assert get_id_from_did('did:op:0') == '0'
 
 
 def test_creating_ddo():

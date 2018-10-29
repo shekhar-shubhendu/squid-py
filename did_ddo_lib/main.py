@@ -101,3 +101,10 @@ def did_generate_from_id(did_id, method='op'):
     if Web3.toBytes(hexstr=did_id) == b'':
         did_id = '0'
     return 'did:{0}:{1}'.format(method, did_id)
+
+def get_id_from_did(did):
+    if is_did_valid(did):
+        result = did_parse(did)
+        if result:
+            return re.sub('^0x', '', Web3.toHex(hexstr=result['id']))
+    return None
