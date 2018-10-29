@@ -102,17 +102,42 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
 
 ```
 
-## Code style
+## Development
+
+1. Set up a virtual environment.
+
+1. Install requirements.
+
+    ```
+    pip install -r requirements_dev.txt
+    ```
+
+1. Run Docker images as described in [the Prerequisites section](#prerequisites). Alternatively, setup an run some or all of the corresponding services locally.
+
+1. Create local config.
+
+    ```
+    cp config.init config_local.ini
+    ```
+    Fill in the configuration file with the keeper contract addresses.
+
+1. Run the unit tests.
+
+    ```
+    python3 setup.py test
+    ```
+
+#### Code style
 
 The information about code style in python is documented in this two links [python-developer-guide](https://github.com/oceanprotocol/dev-ocean/blob/master/doc/development/python-developer-guide.md)
 and [python-style-guide](https://github.com/oceanprotocol/dev-ocean/blob/master/doc/development/python-style-guide.md).
     
-## Testing
+#### Testing
 
 Automatic tests are setup via Travis, executing `tox`.
 Our test use pytest framework.
 
-## New Version
+#### New Version
 
 The `bumpversion.sh` script helps to bump the project version. You can execute the script using as first argument {major|minor|patch} to bump accordingly the version.
 
