@@ -27,7 +27,7 @@ flake8==3.5.0
 hexbytes==0.1.0
 humanfriendly==4.16.1
 idna==2.7
-keeper-contracts==0.1.1
+keeper-contracts==0.3.3a0
 lru-dict==1.1.6
 mccabe==0.6.1
 more-itertools==4.3.0
