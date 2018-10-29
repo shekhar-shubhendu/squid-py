@@ -35,7 +35,7 @@ def test_did():
     test_fragment = 'test_fragment'
     test_method = 'abcdefghijklmnopqrstuvwxyz0123456789'
     all_id = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.'
-    valid_did = 'did:ocean:{0}'.format(test_id)
+    valid_did = 'did:op:{0}'.format(test_id)
 
     assert did_generate(test_id) == valid_did
     assert did_parse(valid_did)['id'] == test_id
@@ -62,13 +62,13 @@ def test_did():
     assert did_generate(all_id + '%^&*()_+=', method=test_method) == valid_id_method_did
 
     # path can be appended
-    valid_path_did = 'did:ocean:{0}/{1}'.format(test_id, test_path)
+    valid_path_did = 'did:op:{0}/{1}'.format(test_id, test_path)
     assert did_generate(test_id, test_path) == valid_path_did
 
     assert did_parse(valid_path_did)['path'] == test_path
 
     # append path and fragment
-    valid_path_fragment_did = 'did:ocean:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
+    valid_path_fragment_did = 'did:op:{0}/{1}#{2}'.format(test_id, test_path, test_fragment)
     assert did_generate(test_id, test_path, test_fragment) == valid_path_fragment_did
 
     # assert split of path and fragment
@@ -76,7 +76,7 @@ def test_did():
     assert did_parse(valid_path_fragment_did)['fragment'] == test_fragment
 
     # append fragment
-    valid_fragment_did = 'did:ocean:{0}#{1}'.format(test_id, test_fragment)
+    valid_fragment_did = 'did:op:{0}#{1}'.format(test_id, test_fragment)
     assert did_generate(test_id, fragment=test_fragment) == valid_fragment_did
 
     # assert split offragment

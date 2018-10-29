@@ -12,10 +12,10 @@ did_id = secret.token_hex(32)
 did = did_generate(did_id)
 print(did)
 
-    did:ocean:03e6764478d61ce1d74945b6a99e870dcfdd6048a7caa435afdf7f0c8b4bf6fd
+    did:op:03e6764478d61ce1d74945b6a99e870dcfdd6048a7caa435afdf7f0c8b4bf6fd
 ```
 
-2. Create a DDO 
+2. Create a DDO
 
 load in the libraries
 ```python
@@ -62,13 +62,13 @@ ddo = OceanDDO(ddo_text = json_text)
 
 check to see if it's valid
 ```python
-if ddo.validate(): 
+if ddo.validate():
     print('DDO has a valid structure and data')
 ```
 
 check to see if there is a static proof included in the DDO
 ```python
-if ddo.is_proof_defined(): 
+if ddo.is_proof_defined():
     print('DDO has a static proof')
     if ddo.validate_proof():
         print('DDO has a valid proof')
@@ -103,5 +103,3 @@ Originally the idea was to use do the following process to generate a DID:
 At the moment this does not seem to work so well. In theroy we can create the same DDO with or without key Ids, and get the same hash and validation.
 
 So I think maybe the best way is to just hash the JSON text returned from the DDO.as_text() method.
-
-
