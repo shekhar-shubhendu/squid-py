@@ -70,3 +70,13 @@ def did_parse(did):
             if len(uri.path) > 0:
                 result['path'] = uri.path[1:]
     return result
+
+def did_valid(did):
+    """
+        Return True if the did is a valid DID with the method name 'op' and the id
+        in the Ocean format
+    """
+    result = did_parse(did)
+    if result:
+        return result['method'] == 'op' and re.match('^[0-9A-Fa-f]{1,64}$', result['id'])
+    return False

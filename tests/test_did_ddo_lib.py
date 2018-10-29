@@ -82,6 +82,7 @@ def test_did():
     # assert split offragment
     assert did_parse(valid_fragment_did)['fragment'] == test_fragment
 
+    assert did_valid(test_did)
 
 def test_creating_ddo():
     did_id = secrets.token_hex(32)
