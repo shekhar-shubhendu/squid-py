@@ -15,7 +15,7 @@ from urllib.parse import (
 
 
 # generate a DID based in it's id, path, fragment and method
-def did_generate(did_id, path = None, fragment = None, method = 'ocean'):
+def did_generate(did_id, path = None, fragment = None, method = 'op'):
 
     method = re.sub('[^a-z0-9]', '', method.lower())
     did_id = re.sub('[^a-zA-Z0-9-.]', '', did_id)
@@ -38,7 +38,7 @@ def did_generate_base_id(did_id, ddo):
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
 
 # generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned
-def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'ocean'):
+def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'op'):
     base_id = did_generate_base_id(did_id, ddo)
     did =  did_generate(base_id, method = method)
     assigned_ddo = ddo.create_new(did)
