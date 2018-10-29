@@ -90,9 +90,9 @@ class Config(configparser.ConfigParser):
         if os.path.exists(path):
             pass
         elif os.getenv('VIRTUAL_ENV'):
-            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
+            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
         else:
-            path = os.path.join(site.PREFIXES[0], 'contracts')
+            path = os.path.join(site.PREFIXES[0], 'artifacts')
         return path
 
     # properties
