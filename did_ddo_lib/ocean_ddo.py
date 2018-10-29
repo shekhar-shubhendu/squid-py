@@ -91,13 +91,13 @@ class OceanDDO(object):
         return private_key_pem
 
     # add a service to the list of services on the DDO
-    def add_service(self, service_type, service_endpoint = None, service_id = None):
+    def add_service(self, service_type, service_endpoint = None, service_id = None, values = None):
         if isinstance(service_type, Service):
             service = service_type
         else:
             if service_id == None:
                 service_id = self._did
-            service = Service(service_id, service_endpoint, service_type)
+            service = Service(service_id, service_endpoint, service_type, values)
         self._services.append(service)
 
     # return the DDO as a JSON text
@@ -259,6 +259,14 @@ class OceanDDO(object):
                 return authentication
         return None
 
+    # return a service using
+    def get_service(self, service_type = None, service_id = None):
+        for service in self._services:
+            if service.get_id() == service_id and service_id:
+                return service
+            if service.get_type() == service_type and service_type:
+                return service
+        return None
 
     # validate the ddo data structure
     def validate(self):
@@ -420,7 +428,7 @@ class OceanDDO(object):
             raise IndexError
         if not 'type' in values:
             raise IndexError
-        service = Service(values['id'], values['serviceEndpoint'], values['type'])
+        service = Service(values['id'], values['serviceEndpoint'], values['type'], values)
         return service
 
     @staticmethod
