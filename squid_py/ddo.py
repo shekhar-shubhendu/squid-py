@@ -1,6 +1,7 @@
-import os
 import json
 import logging
+import os
+
 
 class DDO(dict):
     def __init__(self):
@@ -13,7 +14,7 @@ class DDO(dict):
         super().__init__()
 
     @classmethod
-    def from_json_file(cls,json_file_path):
+    def from_json_file(cls, json_file_path):
         """
         Load a DDO file as a dictionary-like object
         :param json_file_path: path to a DDO json file
@@ -38,7 +39,7 @@ class DDO(dict):
         return this_ddo
 
     @classmethod
-    def from_json_string(cls,json_string):
+    def from_json_string(cls, json_string):
         """
         Load a DDO string as a dictionary-like object
         :param json_string: json string
@@ -54,4 +55,3 @@ class DDO(dict):
     @property
     def raw_string(self):
         return json.dumps(self)
-

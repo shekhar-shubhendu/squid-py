@@ -1,5 +1,3 @@
-import logging
-
 from squid_py.constants import OCEAN_TOKEN_CONTRACT
 from squid_py.keeper.contract_base import (
     ContractBase,
@@ -30,4 +28,3 @@ class Token(ContractBase):
 
     def get_ether_balance(self, account_address, block_identifier='latest'):
         return self.web3.eth.getBalance(account_address, block_identifier)
-
