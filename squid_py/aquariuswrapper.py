@@ -1,10 +1,9 @@
 import ast
 import json
+import logging
 
 import requests
 
-from squid_py.asset import Asset
-import logging
 
 class AquariusWrapper(object):
 
@@ -43,7 +42,7 @@ class AquariusWrapper(object):
         elif response.status_code == 400:
             raise Exception("400 ERROR Full error: \n{}".format(response.text))
         elif response.status_code != 201:
-            raise Exception("{} ERROR Full error: \n{}".format(response.status_code,response.text))
+            raise Exception("{} ERROR Full error: \n{}".format(response.status_code, response.text))
         elif response.status_code == 201:
             response = json.loads(response.content)
             logging.debug("Published {}".format(asset))
@@ -53,9 +52,21 @@ class AquariusWrapper(object):
 
     def update_asset_metadata(self, asset):
         return json.loads(
-            requests.put(self._base_url + '/ddo/%s' % asset.ddo['id'], data=json.dumps(asset.ddo), headers=self._headers).content)
+            requests.put(self._base_url + '/ddo/%s' % asset.ddo['id'], data=json.dumps(asset.ddo),
+                         headers=self._headers).content)
 
-    def search(self, search_query):
+    def text_search(self, text, sort=None, offset=100, page=0):
+        payload = {"text": text, "sort": sort, "offset": offset, "page": page}
+        request = json.loads(
+            requests.get(self._base_url + '/ddo/query',
+                         params=payload,
+                         headers=self._headers).content)
+        if request is None:
+            return {}
+        else:
+            return ast.literal_eval(request)
+
+    def query_search(self, search_query):
         return ast.literal_eval(json.loads(
             requests.post(self._base_url + '/ddo/query', data=json.dumps(search_query),
                           headers=self._headers).content))
