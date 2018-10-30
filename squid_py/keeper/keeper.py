@@ -3,11 +3,12 @@
 
 """
 
+import logging
+
 from squid_py.keeper.auth import Auth
+from squid_py.keeper.didregistry import DIDRegistry
 from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
-from squid_py.keeper.didregistry import DIDRegistry
-import logging
 
 
 class Keeper(object):

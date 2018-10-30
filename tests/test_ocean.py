@@ -7,27 +7,11 @@ import logging
 import os
 
 import pytest
+from web3 import Web3
 
 from squid_py.config import Config
-# from squid_py.utils import Web3Helper, convert_to_bytes, convert_to_string, convert_to_text
 from squid_py.ocean import Ocean
-
-
-# from web3 import Web3, HTTPProvider
-# from squid_py.constants import KEEPER_CONTRACTS
-# from squid_py import Ocean, Ocean_Legacy, OceanInvalidContractAddress
-
-# from squid_py.keeper import Keeper
-
-
-# def get_keeper_path(path=''):
-#     if os.path.exists(path):
-#         pass
-#     elif os.getenv('VIRTUAL_ENV'):
-#         path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
-#     else:
-#         path = os.path.join(site.PREFIXES[0], 'contracts')
-#     return path
+from squid_py.utils import utilities
 
 
 def test_ocean_instance():
@@ -110,19 +94,18 @@ def _test_ocean_contracts_with_conf(caplog):
     assert ocean.aquarius_url == 'http://localhost:5000'
 
 
-def _test_split_signature():
-    ocean = Ocean_Legacy(keeper_url='http://0.0.0.0:8545', config_file='config_local.ini')
+def test_split_signature():
     signature = b'\x19\x15!\xecwnX1o/\xdeho\x9a9\xdd9^\xbb\x8c2z\x88!\x95\xdc=\xe6\xafc\x0f\xe9\x14\x12\xc6\xde\x0b\n\xa6\x11\xc0\x1cvv\x9f\x99O8\x15\xf6f\xe7\xab\xea\x982Ds\x0bX\xd9\x94\xa42\x01'
-    split_signature = ocean.helper.split_signature(signature=signature)
+    split_signature = utilities.split_signature(Web3, signature=signature)
     assert split_signature.v == 28
     assert split_signature.r == b'\x19\x15!\xecwnX1o/\xdeho\x9a9\xdd9^\xbb\x8c2z\x88!\x95\xdc=\xe6\xafc\x0f\xe9'
     assert split_signature.s == b'\x14\x12\xc6\xde\x0b\n\xa6\x11\xc0\x1cvv\x9f\x99O8\x15\xf6f\xe7\xab\xea\x982Ds\x0bX\xd9\x94\xa42'
 
 
-def _test_convert():
+def test_convert():
     input_text = "my text"
-    print("output %s" % convert_to_string(convert_to_bytes(input_text)))
-    assert convert_to_text(convert_to_bytes(input_text)) == input_text
+    print("output %s" % utilities.convert_to_string(Web3, utilities.convert_to_bytes(Web3, input_text)))
+    assert utilities.convert_to_text(Web3, utilities.convert_to_bytes(Web3, input_text)) == input_text
 
 
 def _test_legacy_accounts_legacy():

@@ -3,17 +3,19 @@
 
     All keeper contract inherit from this base class
 """
-import os
-import logging
 import json
-from web3 import Web3
+import logging
+import os
+
 from web3.contract import ConciseContract
-# from ..utils.web3_helper_module import convert_to_bytes, convert_to_string, convert_to_text
+from squid_py.exceptions import OceanInvalidContractAddress
+
 
 class ContractBase(object):
     """
     Base class for all contract objects.
     """
+
     def __init__(self, web3, contract_name, name, contract_path, address):
         self.web3 = web3
 
@@ -58,17 +60,5 @@ class ContractBase(object):
         self.web3.eth.waitForTransactionReceipt(tx_hash)
         return self.web3.eth.getTransactionReceipt(tx_hash)
 
-    def to_32byte_hex(self, val):
-        return self.web3.toBytes(val).rjust(32, b'\0')
-
     def __str__(self):
         return "{} at {}".format(self.name, self.address)
-
-    def convert_to_bytes(self, data):
-        return Web3.toBytes(text=data)
-
-    def convert_to_string(self,data):
-        return Web3.toHex(data)
-
-    def convert_to_text(self, data):
-        return Web3.toText(data)
