@@ -15,11 +15,11 @@ def test_aquarius():
     ocean_provider.metadata.retire_asset_metadata(asset1.asset_id)
 
     # Ensure there are no matching assets before publishing
-    for match in ocean_provider.metadata.search(search_query={"text": "Office"}):
+    for match in ocean_provider.metadata.text_search(text='Office'):
         ocean_provider.metadata.retire_asset_metadata(match['id'])
 
     this_metadata = ocean_provider.metadata.publish_asset_metadata(asset1)
-    assert len(ocean_provider.metadata.search(search_query={"text": "Office"})) == 1
+    assert len(ocean_provider.metadata.text_search(text="Office")) == 1
 
 
     sample_ddo_path2 = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample2.json'
@@ -27,11 +27,8 @@ def test_aquarius():
     asset2 = Asset.from_ddo_json_file(sample_ddo_path2)
     asset2.assign_did_from_ddo()
 
-    ########################
-    ## TODO - this crashes aquarius
-    #####
-#    ocean_provider.metadata.update_asset_metadata(asset2)
-#    this_metadata = ocean_provider.metadata.get_asset_metadata(asset2.asset_id)
+    ocean_provider.metadata.update_asset_metadata(asset2)
+    this_metadata = ocean_provider.metadata.get_asset_metadata(asset2.ddo['id'])
 
-#    assert this_metadata['authentication'] == asset2.ddo['authentication']
-#    ocean_provider.metadata.retire_asset_metadata(asset2.asset_id)
+    assert this_metadata['authentication'] == asset2.ddo['authentication']
+    ocean_provider.metadata.retire_asset_metadata(asset2.ddo['id'])

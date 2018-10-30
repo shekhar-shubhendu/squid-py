@@ -1,10 +1,9 @@
-import os
 import hashlib
 import logging
-import json
-from .ddo import DDO
-import pathlib
 import re
+
+from .ddo import DDO
+
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
@@ -31,7 +30,7 @@ class Asset:
 
     @property
     def bare_did_string(self):
-        #TODO: This is temp, until the proper handling is implemented!
+        # TODO: This is temp, until the proper handling is implemented!
         return self.asset_id.split(':')[-1]
 
     def assign_did_from_ddo(self):
@@ -45,7 +44,7 @@ class Asset:
             self.asset_id = match.groups(1)[0]
 
     @classmethod
-    def from_ddo_json_file(cls,json_file_path):
+    def from_ddo_json_file(cls, json_file_path):
         this_asset = cls()
         this_asset.ddo = DDO.from_json_file(json_file_path)
         this_asset.asset_id = this_asset.ddo['id']
@@ -65,7 +64,7 @@ class Asset:
         metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
         return len(metadata_service) == 1
 
-    def is_valid_did(self,length=64):
+    def is_valid_did(self, length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
 
@@ -141,7 +140,4 @@ class Asset:
         pass
 
     def __str__(self):
-        return "Asset {}, price: {}, publisher: {}".format(self.asset_id, self.price,self.publisher_id)
-
-
-
+        return "Asset {}, price: {}, publisher: {}".format(self.asset_id, self.price, self.publisher_id)
