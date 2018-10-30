@@ -72,13 +72,13 @@ class Web3Helper(object):
         return event_filter
 
 
-    def split_signature(self, signature):
-        v = self._web3.toInt(signature[-1])
-        r = self.to_32byte_hex(int.from_bytes(signature[:32], 'big'))
-        s = self.to_32byte_hex(int.from_bytes(signature[32:64], 'big'))
-        if v != 27 and v != 28:
-            v = 27 + v % 2
-        return Signature(v, r, s)
+    # def split_signature(self, signature):
+    #     v = self._web3.toInt(signature[-1])
+    #     r = self.to_32byte_hex(int.from_bytes(signature[:32], 'big'))
+    #     s = self.to_32byte_hex(int.from_bytes(signature[32:64], 'big'))
+    #     if v != 27 and v != 28:
+    #         v = 27 + v % 2
+    #     return Signature(v, r, s)
 
     # properties
 
@@ -95,18 +95,18 @@ class Web3Helper(object):
     def web3(self):
         return self._web3
 
-    @property
-    def network_name(self):
-        """Give the network name."""
-        network_id = self._web3.version.network
-        switcher = {
-            1: 'Main',
-            2: 'orden',
-            3: 'Ropsten',
-            4: 'Rinkeby',
-            42: 'Kovan',
-        }
-        return switcher.get(network_id, 'development')
+    # @property
+    # def network_name(self):
+    #     """Give the network name."""
+    #     network_id = self._web3.version.network
+    #     switcher = {
+    #         1: 'Main',
+    #         2: 'orden',
+    #         3: 'Ropsten',
+    #         4: 'Rinkeby',
+    #         42: 'Kovan',
+    #     }
+    #     return switcher.get(network_id, 'development')
 
     # static methods
     @staticmethod

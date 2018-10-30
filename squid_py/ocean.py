@@ -59,6 +59,7 @@ class Ocean:
         print("Ocean.config.address_list.market: {}".format(self.config.address_list['market']))
         print("Ocean.config.address_list.token: {}".format(self.config.address_list['token']))
         print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
+        print("Ocean.config.address_list.didregistry: {}".format(self.config.address_list['didregistry']))
 
     def update_accounts(self):
         """
