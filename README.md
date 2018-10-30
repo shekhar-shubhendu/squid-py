@@ -104,9 +104,9 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
 
 ## Development
 
-1. Set up a virtual environment.
+1. Set up a virtual environment
 
-1. Install requirements.
+1. Install requirements
 
     ```
     pip install -r requirements_dev.txt
@@ -114,14 +114,24 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
 
 1. Run Docker images as described in [the Prerequisites section](#prerequisites). Alternatively, setup an run some or all of the corresponding services locally.
 
-1. Create local config.
-
+1. Create local configuration file
+    
+    A `config_local.ini` file is required to hold contract addresses and other parameters. 
+    
+    A bash script is available to copy these addresses into this file directly from a running docker image. This script needs to run in the root of the project. 
+    
+    ```
+    source ./script/deploy.sh
+    ```
+    
+    Alternatively, you can manually enter the parameters in this file.
+    
     ```
     cp config.init config_local.ini
     ```
     Fill in the configuration file with the keeper contract addresses.
 
-1. Run the unit tests.
+1. Run the unit tests
 
     ```
     python3 setup.py test
