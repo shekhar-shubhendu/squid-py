@@ -12,6 +12,12 @@ from web3 import (
     Web3,
 )
 
+from squid_py.exceptions import ( 
+    OceanDIDCircularReference,
+    OceanDIDNotFound,
+    OceanDIDUnknownValueType
+)
+
 DIDREGISTRY_EVENT_NAME = 'DIDAttributeRegistered'
 
 VALUE_TYPE_DID =        0
@@ -19,18 +25,6 @@ VALUE_TYPE_DID_REF =    1
 VALUE_TYPE_URL =        2
 VALUE_TYPE_DDO =        3
 
-
-# Raised when an DID attribute is assigned to a DID in the same chain of DIDs
-class OceanDIDCircularReference(Exception):
-    pass
-
-# raised when a requested DID or a DID in the chain cannot be found
-class OceanDIDNotFound(Exception):
-    pass
-
-# raised when a requested DID or a DID in the chain cannot be found
-class OceanDIDUnknownValueType(Exception):
-    pass
 
 logger = logging.getLogger()
 
@@ -45,7 +39,7 @@ class DIDResolver():
         # TODO: FIX ME!
         # the current ABI is out of sync with the keeper-contract build
         # so hard coding the signature !
-        self._event_signature = Web3.sha3(text="DIDAttributeRegistered(bytes32,address,uint8,bytes32,string,uint256)").hex()
+        self._event_signature = Web3.sha3(text="{}(bytes32,address,uint8,bytes32,string,uint256)".format(DIDREGISTRY_EVENT_NAME)).hex()
         # self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
         if not self._event_signature:
             raise ValueError('Cannot find Event {} signature'.format(DIDREGISTRY_EVENT_NAME))

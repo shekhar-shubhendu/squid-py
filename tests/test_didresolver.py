@@ -25,6 +25,12 @@ from squid_py.didresolver import (
     OceanDIDUnknownValueType,
 )
 
+from squid_py.exceptions import ( 
+    OceanDIDCircularReference,
+    OceanDIDNotFound,
+    OceanDIDUnknownValueType
+)
+
 from did_ddo_lib import (
     did_generate,
     did_generate_from_ddo,
