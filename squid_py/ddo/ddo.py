@@ -18,7 +18,7 @@ from .public_key_base import PublicKeyBase, PUBLIC_KEY_STORE_TYPE_PEM
 from .public_key_rsa import PublicKeyRSA, AUTHENTICATION_TYPE_RSA, PUBLIC_KEY_TYPE_RSA
 from .service import Service
 
-class OceanDDO(object):
+class DDO(object):
 
     def __init__(self, did = '', ddo_text = None , created = None):
         self.clear()
