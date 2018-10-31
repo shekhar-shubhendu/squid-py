@@ -28,7 +28,6 @@ from squid_py.exceptions import (
 )
 
 from did_ddo_lib import (
-    did_generate,
     did_parse,
     did_validate,
     OceanDDO,
