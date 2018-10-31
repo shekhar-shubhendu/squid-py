@@ -21,7 +21,14 @@ from .service import Service
 class DDO(object):
 
     def __init__(self, did = '', json_text = None, json_filename = None , created = None):
-        self.clear()
+        """ clear the DDO data values """
+        self._did = ''
+        self._public_keys = []
+        self._authentications = []
+        self._services = []
+        self._proof = None
+        self._created = None
+
         self._did = did
         if created == None:
             self._created = DDO.get_timestamp()
@@ -35,22 +42,13 @@ class DDO(object):
         if json_text:
             self.__read_json(json_text)
 
-    # clear the DDO data values
-    def clear(self):
-        self._did = ''
-        self._public_keys = []
-        self._authentications = []
-        self._services = []
-        self._proof = None
-        self._created = None
 
-
-    # add a public key object to the list of public keys
     def add_public_key(self, public_key):
+        """add a public key object to the list of public keys"""
         self._public_keys.append(public_key)
 
-    # add a authentication public key id and type to the list of authentications
     def add_authentication(self, key_id, authentication_type = None):
+        """add a authentication public key id and type to the list of authentications"""
         if isinstance(key_id, Authentication):
             # adding an authentication object
             authentication = key_id
@@ -66,9 +64,9 @@ class DDO(object):
 
         self._authentications.append(authentication)
 
-    # add a signature with a public key and authentication entry for validating this DDO
-    # returns the private key as part of the private/public key pair
     def add_signature(self, public_key_store_type = PUBLIC_KEY_STORE_TYPE_PEM, is_embedded = False):
+        """add a signature with a public key and authentication entry for validating this DDO
+        returns the private key as part of the private/public key pair"""
 
         key_pair = RSA.generate(KEY_PAIR_MODULUS_BIT, e=65537)
         public_key_raw = key_pair.publickey()
@@ -94,8 +92,8 @@ class DDO(object):
 
         return private_key_pem
 
-    # add a service to the list of services on the DDO
     def add_service(self, service_type, service_endpoint = None, service_id = None, values = None):
+        """add a service to the list of services on the DDO"""
         if isinstance(service_type, Service):
             service = service_type
         else:
@@ -104,9 +102,9 @@ class DDO(object):
             service = Service(service_id, service_endpoint, service_type, values)
         self._services.append(service)
 
-    # return the DDO as a JSON text
-    # if is_proof == False then do not include the 'proof' element
     def as_text(self, is_proof = True, is_pretty = False):
+        """return the DDO as a JSON text
+        if is_proof == False then do not include the 'proof' element"""
         if self._created == None:
             self._created = DDO.get_timestamp()
 
@@ -138,8 +136,8 @@ class DDO(object):
 
         return json.dumps(data)
 
-    # import a JSON text into this DDO
     def __read_json(self, ddo_json):
+        """import a JSON text into this DDO"""
         values = json.loads(ddo_json)
         self._did = values['id']
         self._created = values.get('created', None)
@@ -164,9 +162,10 @@ class DDO(object):
         if 'proof' in values:
             self._proof = values['proof']
 
-    # add a proof to the DDO, based on the public_key id/index and signed with the private key
     def add_proof(self, authorisation_index, private_key = None):
-        # add a static proof to the DDO, based on one of the public keys
+        """add a proof to the DDO, based on the public_key id/index and signed with the private key
+        add a static proof to the DDO, based on one of the public keys"""
+        
         # find the key using an index, or key name
         if isinstance(authorisation_index, dict):
             self._proof = authorisation_index
@@ -198,9 +197,9 @@ class DDO(object):
         }
 
 
-    # validate the static proof created with this DDO, return True if valid
-    # if no static proof exists then return False
     def validate_proof(self, signature_text = None):
+        """validate the static proof created with this DDO, return True if valid
+        if no static proof exists then return False"""
 
         if not signature_text:
             signature_text = self.as_text(is_proof = False)
@@ -212,12 +211,12 @@ class DDO(object):
             return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
         return False
 
-    # return true if a static proof exists in this DDO
     def is_proof_defined(self):
+        """return true if a static proof exists in this DDO"""
         return not self._proof == None
 
-    # validate a signature based on a given public_key key_id/name
     def validate_from_key(self, key_id, signature_text, signature_value):
+        """validate a signature based on a given public_key key_id/name"""
 
         public_key = self.get_public_key(key_id, True)
         if public_key == None:
@@ -236,8 +235,8 @@ class DDO(object):
 
         return DDO.validate_signature(signature_text, key_value, signature_value, authentication.get_type())
 
-    # key_id can be a string, or int. If int then the index in the list of keys
     def get_public_key(self, key_id, is_search_embedded = False):
+        """key_id can be a string, or int. If int then the index in the list of keys"""
         if isinstance(key_id, int):
             return self._public_keys[key_id]
 
@@ -251,23 +250,23 @@ class DDO(object):
                     return authentication.get_public_key()
         return None
 
-    # return the count of public keys in the list and embedded
     def get_public_key_count(self):
+        """return the count of public keys in the list and embedded"""
         index = len(self._public_keys)
         for authentication in self._authentications:
             if authentication.is_public_key():
                 index += 1
         return index
 
-    # return the authentication based on it's id
     def get_authentication_from_public_key_id(self, key_id):
+        """return the authentication based on it's id"""
         for authentication in self._authentications:
             if authentication.is_key_id(key_id):
                 return authentication
         return None
 
-    # return a service using
     def get_service(self, service_type = None, service_id = None):
+        """return a service using"""
         for service in self._services:
             if service.get_id() == service_id and service_id:
                 return service
@@ -275,8 +274,8 @@ class DDO(object):
                 return service
         return None
 
-    # validate the ddo data structure
     def validate(self):
+        """validate the ddo data structure"""
         if self._public_keys and self._authentications:
             for authentication in self._authentications:
                 if not authentication.is_valid():
@@ -294,9 +293,9 @@ class DDO(object):
                     return False
         return True
 
-    # return a sha3 hash of important bits of the DDO, excluding any DID portion,
-    # as this hash can be used to generate the DID
     def calculate_hash(self, include_service_values = False):
+        """return a sha3 hash of important bits of the DDO, excluding any DID portion,
+        as this hash can be used to generate the DID"""
         hash_text = []
         if self._created:
             hash_text.append(self._created)
@@ -343,9 +342,9 @@ class DDO(object):
     def get_created_time(self):
         return self._created
 
-    # method to copy a DDO and assign a new did to all of the keys to an empty/non DID assigned DDO.
-    # we assume that this ddo has been created as empty ( no did )
     def create_new(self, did):
+        """method to copy a DDO and assign a new did to all of the keys to an empty/non DID assigned DDO.
+        we assume that this ddo has been created as empty ( no did )"""
 
         if self.is_did_assigend():
             raise Exception('Cannot assign a DID to a completed DDO object')
@@ -420,9 +419,9 @@ class DDO(object):
         except (ValueError, TypeError):
             return False
 
-    # create a public key object based on the values from the JSON record
     @staticmethod
     def create_public_key_from_json(values):
+        """create a public key object based on the values from the JSON record"""
         # currently we only support RSA public keys
         public_key = PublicKeyRSA(values['id'], owner = values.get('owner', None))
         public_key.set_key_value(values)
