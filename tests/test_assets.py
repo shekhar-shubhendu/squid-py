@@ -138,7 +138,7 @@ def test_publish_data_asset_aquarius():
     #asset.generate_did()
     
     ## instead of v.
-    asset.ddo['id'] = 'did:op:{}'.format(secrets.token_hex(32))
+    # asset.ddo.did = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
     
     ##########################################################

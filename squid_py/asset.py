@@ -38,7 +38,7 @@ class Asset:
         #TODO: This is a temporary hack, need to clearly define how DID is assigned!
         :return:
         """
-        did = self.ddo['id']
+        did = self.ddo.did
         match = re.match('^did:op:([0-9a-f]+)', did)
         if match:
             self.asset_id = match.groups(1)[0]
@@ -46,23 +46,29 @@ class Asset:
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
         this_asset = cls()
-        this_asset.ddo = DDO.from_json_file(json_file_path)
-        this_asset.asset_id = this_asset.ddo['id']
+        this_asset.ddo = DDO(json_filename=json_file_path)
+        this_asset.asset_id = this_asset.ddo.did
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
     @property
     def metadata(self):
         assert self.has_metadata
-        metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
-        assert len(metadata_service) == 1
-        metadata_service = metadata_service[0]
-        return metadata_service['metadata']
-
+        metadata_service = self.ddo.get_service('Metadata')
+        if metadata_service:
+            values = metadata_service.get_values()
+            if 'metadata' in values:
+                return values['metadata']
+            
+        return None
+        
     @property
     def has_metadata(self):
-        metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
-        return len(metadata_service) == 1
+        values = []
+        metadata_service = self.ddo.get_service('Metadata')
+        if metadata_service:
+            values = metadata_service.get_values()
+        return len(values) == 1
 
     def is_valid_did(self, length=64):
         """The Asset.asset_id must conform to the specification"""
@@ -77,7 +83,7 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()
+        self.asset_id = hashlib.sha256(self.ddo.calculate_hash()).hexdigest()
 
     def assign_metadata(self):
         pass
