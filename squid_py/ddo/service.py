@@ -42,7 +42,7 @@ class Service(object):
     def get_values(self):
         return self._values
 
-    def as_text(self):
+    def as_text(self, is_pretty = False):
         values = {
             'id': self._id,
             'type': self._type,
@@ -52,7 +52,23 @@ class Service(object):
             # add extra service values to the dictonairy
             for name, value in self._values.items():
                 values[name] = value
+
+        if is_pretty:
+            return json.dumps(values, indent=4, separators=(',', ': '))
+
         return json.dumps(values)
+
+    def as_dictionary(self):
+        values = {
+            'id': self._id,
+            'type': self._type,
+            'serviceEndpoint': self._endpoint
+        }
+        if self._values:
+            # add extra service values to the dictonairy
+            for name, value in self._values.items():
+                values[name] = value
+        return values
 
     def is_valid(self):
         return self._endpoint != None and self._type != None

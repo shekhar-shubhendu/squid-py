@@ -43,16 +43,30 @@ class Authentication(object):
     def get_public_key(self):
         return self._public_key
 
-    def as_text(self):
+    def as_text(self, is_pretty = False):
         values = {
             'type': self._type
         }
         if self._public_key:
-            values['publicKey'] = self._public_key.as_text()
+            values['publicKey'] = self._public_key.as_text(is_pretty)
         elif self._public_key_id:
             values['publicKey'] = self._public_key_id
+
+        if is_pretty:
+            return json.dumps(values, indent=4, separators=(',', ': '))
+
         return json.dumps(values)
 
+    def as_dictionary(self):
+        values = {
+            'type': self._type
+        }
+        if self._public_key:
+            values['publicKey'] = self._public_key.as_dictionary()
+        elif self._public_key_id:
+            values['publicKey'] = self._public_key_id
+
+        return values
 
     def is_valid(self):
         return self.get_public_key_id() != None and self._type != None

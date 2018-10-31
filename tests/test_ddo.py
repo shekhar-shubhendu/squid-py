@@ -2,6 +2,7 @@
     Test did_lib
 """
 import json
+import os
 import pathlib
 import pytest
 import secrets
@@ -31,6 +32,115 @@ public_key_store_types = [
 TEST_SERVICE_TYPE = 'ocean-meta-storage'
 TEST_SERVICE_URL = 'http://localhost:8005'
 
+TEST_METADATA = """
+{
+   "base": {
+     "name": "UK Weather information 2011",
+     "type": "dataset",
+     "description": "Weather information of UK including temperature and humidity",
+     "size": "3.1gb",
+     "dateCreated": "2012-10-10T17:00:000Z",
+     "author": "Met Office",
+     "license": "CC-BY",
+     "copyrightHolder": "Met Office",
+     "encoding": "UTF-8",
+     "compression": "zip",
+     "contentType": "text/csv",
+     "workExample": "423432fsd,51.509865,-0.118092,2011-01-01T10:55:11+00:00,7.2,68",
+     "contentUrls": [
+       "https://testocnfiles.blob.core.windows.net/testfiles/testzkp.zip"
+     ],
+     "links": [
+       { "name": "Sample of Asset Data", "type": "sample", "url": "https://foo.com/sample.csv" },
+       { "name": "Data Format Definition", "type": "format", "AssetID": "4d517500da0acb0d65a716f61330969334630363ce4a6a9d39691026ac7908ea" }
+     ],
+     "inLanguage": "en",
+     "tags": "weather, uk, 2011, temperature, humidity",
+     "price": 10
+   },
+   "curation": {
+     "rating": 0.93,
+     "numVotes": 123,
+     "schema": "Binary Voting"
+   },
+   "additionalInformation": {
+     "updateFrequency": "yearly",
+     "structuredMarkup": [
+       {
+         "uri": "http://skos.um.es/unescothes/C01194/jsonld",
+         "mediaType": "application/ld+json"
+       },
+       {
+         "uri": "http://skos.um.es/unescothes/C01194/turtle",
+         "mediaType": "text/turtle"
+       }
+     ]
+   }
+}
+"""
+
+TEST_SERVICES =  [
+    { "type": "OpenIdConnectVersion1.0Service",
+      "serviceEndpoint": "https://openid.example.com/"
+    },
+    {
+      "type": "CredentialRepositoryService",
+      "serviceEndpoint": "https://repository.example.com/service/8377464"
+    },
+    {
+      "type": "XdiService",
+      "serviceEndpoint": "https://xdi.example.com/8377464"
+    },
+    {
+      "type": "HubService",
+      "serviceEndpoint": "https://hub.example.com/.identity/did:op:0123456789abcdef/"
+    },
+    {
+      "type": "MessagingService",
+      "serviceEndpoint": "https://example.com/messages/8377464"
+    },
+    {
+      "type": "SocialWebInboxService",
+      "serviceEndpoint": "https://social.example.com/83hfh37dj",
+      "values": {
+          "description": "My public social inbox",
+          "spamCost": {
+            "amount": "0.50",
+            "currency": "USD"
+            }
+       }
+    },
+    {
+      "type": "BopsService",
+      "serviceEndpoint": "https://bops.example.com/enterprise/"
+    },
+    {
+      "type": "Consume",
+      "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/consume?pubKey=${pubKey}&serviceId={serviceId}&url={url}"
+    },
+    {
+      "type": "Compute",
+      "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/compute?pubKey=${pubKey}&serviceId={serviceId}&algo={algo}&container={container}"
+    },
+]
+
+def generate_sample_ddo():
+    did_id = secrets.token_hex(32)
+    did = did_generate(did_id)
+    assert did
+    ddo = DDO(did)
+    assert ddo
+    private_key = ddo.add_signature()
+
+    metadata = json.loads(TEST_METADATA)
+    ddo.add_service("Metadata", "http://myaquarius.org/api/v1/provider/assets/metadata/{did}", values={ 'metadata': metadata})
+    for test_service in TEST_SERVICES:
+        values = None
+        if 'values' in test_service:
+            values = test_service['values']
+
+        ddo.add_service(test_service['type'], test_service['serviceEndpoint'], values = values)
+    return ddo, private_key
 
 def test_creating_ddo():
     did_id = secrets.token_hex(32)
@@ -157,3 +267,15 @@ def test_ddo_dict():
     assert ddo1.is_valid
     assert len(ddo1.public_keys) == 3
     assert ddo1.did == 'did:op:3597a39818d598e5d60b83eabe29e337d37d9ed5af218b4af5e94df9f7d9783a'
+
+
+def test_generate_test_ddo_files():
+    for index in range(1, 3):
+        ddo, private_key = generate_sample_ddo()
+        json_output_filename = os.path.join(pathlib.Path.cwd(), 'tests/resources/ddo/ddo_sample_generated_{}.json'.format(index))
+        with open(json_output_filename, 'w') as fp:
+            fp.write(ddo.as_text(is_pretty=True))
+
+        private_output_filename = os.path.join(pathlib.Path.cwd(), 'tests/resources/ddo/ddo_sample_generated_{}_private_key.pem'.format(index))
+        with open(private_output_filename, 'w') as fp:
+            fp.write(private_key.decode('utf-8'))

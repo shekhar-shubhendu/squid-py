@@ -100,7 +100,7 @@ class PublicKeyBase(object):
     def get_value(self):
         return self._value
 
-    def as_text(self):
+    def as_text(self, is_pretty = False):
         values = {
             'id': self._id,
             'type': self._type,
@@ -108,8 +108,22 @@ class PublicKeyBase(object):
         values[self._store_type] = self._value
         if self._owner:
             values['owner'] = self._owner
+
+        if is_pretty:
+            return json.dumps(values, indent=4, separators=(',', ': '))
+
         return json.dumps(values)
 
+    def as_dictionary(self):
+        values = {
+            'id': self._id,
+            'type': self._type,
+        }
+        values[self._store_type] = self._value
+        if self._owner:
+            values['owner'] = self._owner
+        return values
+        
     def is_valid(self):
         return self._id and self._type
 

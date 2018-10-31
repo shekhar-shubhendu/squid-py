@@ -31,7 +31,7 @@ class DDO(object):
         if json_filename:
             with open(json_filename, 'r') as fp:
                 json_text = fp.read()
-        
+
         if json_text:
             self.__read_json(json_text)
 
@@ -106,7 +106,7 @@ class DDO(object):
 
     # return the DDO as a JSON text
     # if is_proof == False then do not include the 'proof' element
-    def as_text(self, is_proof = True):
+    def as_text(self, is_proof = True, is_pretty = False):
         if self._created == None:
             self._created = DDO.get_timestamp()
 
@@ -118,20 +118,23 @@ class DDO(object):
         if len(self._public_keys) > 0:
             values = []
             for public_key in self._public_keys:
-                values.append(public_key.as_text())
+                values.append(public_key.as_dictionary())
             data['publicKey'] = values
         if len(self._authentications) > 0:
             values = []
             for authentication in self._authentications:
-                values.append(authentication.as_text())
+                values.append(authentication.as_dictionary())
             data['authentication'] = values
         if len(self._services) > 0:
             values = []
             for service in self._services:
-                values.append(service.as_text())
+                values.append(service.as_dictionary())
             data['service'] = values
         if self._proof and is_proof == True:
             data['proof'] = self._proof
+
+        if is_pretty:
+            return json.dumps(data, indent=4, separators=(',', ': '))
 
         return json.dumps(data)
 
@@ -301,7 +304,7 @@ class DDO(object):
         if self._public_keys:
             for public_key in self._public_keys:
                 if public_key.get_type():
-                    hash_text.append(public_key.get_type())                    
+                    hash_text.append(public_key.get_type())
                 if public_key.get_value():
                     hash_text.append(public_key.get_value())
 
@@ -369,7 +372,7 @@ class DDO(object):
     @property
     def did(self):
         return self._did
-        
+
     @property
     def public_keys(self):
         return self._public_keys
@@ -389,7 +392,7 @@ class DDO(object):
     @property
     def is_valid(self):
         return self.validate()
-        
+
     @staticmethod
     def sign_text(text, private_key, sign_type = PUBLIC_KEY_TYPE_RSA):
         signed_text = None
