@@ -61,7 +61,7 @@ def test_did_resolver_raw_test():
 
     calc_signature = Web3.sha3(text="DIDAttributeRegistered(bytes32,address,uint8,bytes32,string,uint256)").hex()
     # print('Calc signature', Web3.toHex(calc_signature))
-
+    
     assert actual_signature == calc_signature
 
     # TODO: fix sync with keeper-contracts
@@ -222,7 +222,6 @@ def test_did_resolver_library():
     # resolve to get the error
     with pytest.raises(TypeError):
         didresolver.resolve(did_id_bytes)
-
 
     # test value type error on a linked DID_REF
     register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID_REF, key_test, value_test, register_account)
