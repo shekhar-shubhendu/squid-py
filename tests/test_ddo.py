@@ -132,6 +132,9 @@ def generate_sample_ddo():
     assert ddo
     private_key = ddo.add_signature()
 
+    # add a proof signed with the private key
+    ddo.add_proof(0, private_key)
+    
     metadata = json.loads(TEST_METADATA)
     ddo.add_service("Metadata", "http://myaquarius.org/api/v1/provider/assets/metadata/{did}", values={ 'metadata': metadata})
     for test_service in TEST_SERVICES:
@@ -140,6 +143,7 @@ def generate_sample_ddo():
             values = test_service['values']
 
         ddo.add_service(test_service['type'], test_service['serviceEndpoint'], values = values)
+            
     return ddo, private_key
 
 def test_creating_ddo():
@@ -272,6 +276,7 @@ def test_ddo_dict():
 def test_generate_test_ddo_files():
     for index in range(1, 3):
         ddo, private_key = generate_sample_ddo()
+
         json_output_filename = os.path.join(pathlib.Path.cwd(), 'tests', 'resources', 'ddo', 'ddo_sample_generated_{}.json'.format(index))
         with open(json_output_filename, 'w') as fp:
             fp.write(ddo.as_text(is_pretty=True))
