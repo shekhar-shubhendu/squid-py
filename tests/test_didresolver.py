@@ -2,7 +2,6 @@ import logging
 import math
 import pytest
 import secrets
-import time
 
 from web3 import (
     Web3,
@@ -20,12 +19,9 @@ from squid_py.didresolver import (
     VALUE_TYPE_DID_REF,
     VALUE_TYPE_URL,
     VALUE_TYPE_DDO,
-    OceanDIDCircularReference,
-    OceanDIDNotFound,
-    OceanDIDUnknownValueType,
 )
 
-from squid_py.exceptions import ( 
+from squid_py.exceptions import (
     OceanDIDCircularReference,
     OceanDIDNotFound,
     OceanDIDUnknownValueType
@@ -33,7 +29,6 @@ from squid_py.exceptions import (
 
 from did_ddo_lib import (
     did_generate,
-    did_generate_from_ddo,
     did_parse,
     did_validate,
     OceanDDO,
@@ -55,7 +50,7 @@ def test_did_resolver_raw_test():
     value_test = 'http://localhost:5000'
     register_did = didregistry.register_attribute(did_hash, value_type, key_test, value_test, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
-    
+
     block_number = didregistry.get_update_at(did_hash)
     assert block_number > 0
 
@@ -70,22 +65,22 @@ def test_did_resolver_raw_test():
     # print('Calc signature', Web3.toHex(calc_signature))
 
     assert actual_signature == calc_signature
-    
+
     # TODO: fix sync with keeper-contracts
     # at the moment assign the calc signature, since the loadad ABI sig is incorret
-    
+
     event_signature = calc_signature
-    
+
     # transaction_count = ocean._web3.eth.getBlockTransactionCount(block_number)
     # for index in range(0, transaction_count):
         # transaction = ocean._web3.eth.getTransactionByBlock(block_number, index)
         # print('transaction', transaction)
         # receipt = ocean._web3.eth.getTransactionReceipt(transaction['hash'])
         # print('receipt', receipt)
-    
+
     # because createFilter does not return any log events
-    filter = ocean._web3.eth.filter({'fromBlock': block_number, 'topics': [event_signature, Web3.toHex(did_hash)]})
-    log_items = filter.get_all_entries()
+    test_filter = ocean._web3.eth.filter({'fromBlock': block_number, 'topics': [event_signature, Web3.toHex(did_hash)]})
+    log_items = test_filter.get_all_entries()
     assert log_items
 
     assert len(log_items) > 0
@@ -115,10 +110,10 @@ def test_did_resolver_library():
     receipt = didregistry.get_tx_receipt(register_did)
 
     with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
-        didresolver(did_test)
+        didresolver.resolve(did_test)
 
     with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
-        didresolver(did_id)
+        didresolver.resolve(did_id)
 
     result = didresolver.resolve(did_id_bytes)
     assert result == value_test
@@ -149,6 +144,8 @@ def test_did_resolver_library():
     ddo.add_service('meta-store', value_test)
     did_id = secrets.token_hex(32)
     did_id_bytes = Web3.toBytes(hexstr=did_id)
+    value_type = VALUE_TYPE_DDO
+
 
     register_did = didregistry.register_attribute(did_id_bytes, value_type, key_test, ddo.as_text(), register_account)
     receipt = didregistry.get_tx_receipt(register_did)
@@ -163,13 +160,15 @@ def test_did_resolver_library():
     # clear the cache to build the chain
     didresolver.clear_cache()
 
+    value_type = VALUE_TYPE_URL
     # resolve chain of direct DID IDS to URL
     chain_length = 10
     ids = []
     for i in range(0, chain_length):
         ids.append(secrets.token_hex(32))
 
-    for i in range(0, len(ids)):
+    
+    for i in range(0, chain_length):
         did_id_bytes = Web3.toBytes(hexstr=ids[i])
         if i < len(ids) - 1:
             next_did_id = Web3.toHex(hexstr=ids[i + 1])
@@ -222,16 +221,16 @@ def test_did_resolver_library():
     # test value type error on a linked DID
     register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID, key_test, value_test, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
-    
+
     # resolve to get the error
     with pytest.raises(TypeError):
         didresolver.resolve(did_id_bytes)
-    
+
 
     # test value type error on a linked DID_REF
     register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID_REF, key_test, value_test, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
-    
+
     # resolve to get the error
     with pytest.raises(TypeError):
         didresolver.resolve(did_id_bytes)
