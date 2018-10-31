@@ -24,7 +24,6 @@ from squid_py.didresolver import (
 from squid_py.exceptions import (
     OceanDIDCircularReference,
     OceanDIDNotFound,
-    OceanDIDUnknownValueType
 )
 
 from did_ddo_lib import (
@@ -166,7 +165,6 @@ def test_did_resolver_library():
     for i in range(0, chain_length):
         ids.append(secrets.token_hex(32))
 
-    
     for i in range(0, chain_length):
         did_id_bytes = Web3.toBytes(hexstr=ids[i])
         if i < len(ids) - 1:
