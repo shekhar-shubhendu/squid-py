@@ -11,6 +11,12 @@ from eth_abi import (
     decode_single,
 )
 
+from did_ddo_lib import (
+    did_parse,
+    did_validate,
+    OceanDDO,
+)
+
 from squid_py.ocean import Ocean
 
 from squid_py.didresolver import (
@@ -24,12 +30,6 @@ from squid_py.didresolver import (
 from squid_py.exceptions import (
     OceanDIDCircularReference,
     OceanDIDNotFound,
-)
-
-from did_ddo_lib import (
-    did_parse,
-    did_validate,
-    OceanDDO,
 )
 
 logger = logging.getLogger()
@@ -61,7 +61,7 @@ def test_did_resolver_raw_test():
 
     calc_signature = Web3.sha3(text="DIDAttributeRegistered(bytes32,address,uint8,bytes32,string,uint256)").hex()
     # print('Calc signature', Web3.toHex(calc_signature))
-    
+
     assert actual_signature == calc_signature
 
     # TODO: fix sync with keeper-contracts
