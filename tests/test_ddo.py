@@ -260,7 +260,7 @@ def test_load_ddo_json():
 
 
 def test_ddo_dict():
-    sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
+    sample_ddo_path = pathlib.Path.cwd() / 'tests' / 'resources' / 'ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ddo1 = DDO(json_filename=sample_ddo_path)
@@ -272,10 +272,10 @@ def test_ddo_dict():
 def test_generate_test_ddo_files():
     for index in range(1, 3):
         ddo, private_key = generate_sample_ddo()
-        json_output_filename = os.path.join(pathlib.Path.cwd(), 'tests/resources/ddo/ddo_sample_generated_{}.json'.format(index))
+        json_output_filename = os.path.join(pathlib.Path.cwd(), 'tests', 'resources', 'ddo', 'ddo_sample_generated_{}.json'.format(index))
         with open(json_output_filename, 'w') as fp:
             fp.write(ddo.as_text(is_pretty=True))
 
-        private_output_filename = os.path.join(pathlib.Path.cwd(), 'tests/resources/ddo/ddo_sample_generated_{}_private_key.pem'.format(index))
+        private_output_filename = os.path.join(pathlib.Path.cwd(), 'tests', 'resources', 'ddo', 'ddo_sample_generated_{}_private_key.pem'.format(index))
         with open(private_output_filename, 'w') as fp:
             fp.write(private_key.decode('utf-8'))

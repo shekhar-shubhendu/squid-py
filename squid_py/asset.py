@@ -59,9 +59,9 @@ class Asset:
             values = metadata_service.get_values()
             if 'metadata' in values:
                 return values['metadata']
-            
+
         return None
-        
+
     @property
     def has_metadata(self):
         values = []
@@ -83,7 +83,7 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.calculate_hash()).hexdigest()
+        self.asset_id = hashlib.sha256(self.ddo.as_text()).hexdigest()
 
     def assign_metadata(self):
         pass

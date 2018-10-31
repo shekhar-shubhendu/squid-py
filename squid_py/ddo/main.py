@@ -134,7 +134,7 @@ class DDO(object):
             data['proof'] = self._proof
 
         if is_pretty:
-            return json.dumps(data, indent=4, separators=(',', ': '))
+            return json.dumps(data, indent=2, separators=(',', ': '))
 
         return json.dumps(data)
 
@@ -296,7 +296,7 @@ class DDO(object):
 
     # return a sha3 hash of important bits of the DDO, excluding any DID portion,
     # as this hash can be used to generate the DID
-    def calculate_hash(self):
+    def calculate_hash(self, include_service_values = False):
         hash_text = []
         if self._created:
             hash_text.append(self._created)
@@ -321,6 +321,8 @@ class DDO(object):
             for service in self._services:
                 hash_text.append(service.get_type())
                 hash_text.append(service.get_endpoint())
+                if include_service_values:
+                    hash_text.append(service.get_values())
 
         # if no data can be found to hash then raise an error
         if len(hash_text) == 0:
