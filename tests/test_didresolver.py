@@ -11,11 +11,7 @@ from eth_abi import (
     decode_single,
 )
 
-from did_ddo_lib import (
-    did_parse,
-    did_validate,
-    OceanDDO,
-)
+from did_ddo_lib import OceanDDO
 
 from squid_py.ocean import Ocean
 
