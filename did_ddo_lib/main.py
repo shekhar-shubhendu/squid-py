@@ -14,8 +14,8 @@ from urllib.parse import (
 )
 
 
-# generate a DID based in it's id, path, fragment and method
 def did_generate(did_id, path = None, fragment = None, method = 'op'):
+    """generate a DID based in it's id, path, fragment and method"""
 
     method = re.sub('[^a-z0-9]', '', method.lower())
     did_id = re.sub('[^a-zA-Z0-9-.]', '', did_id)
@@ -28,8 +28,8 @@ def did_generate(did_id, path = None, fragment = None, method = 'op'):
         did.append(fragment)
     return "".join(did)
 
-# generate a base did-id, using user defined id, and ddo
 def did_generate_base_id(did_id, ddo):
+    """generate a base did-id, using user defined id, and ddo"""
     values = []
     values.append(did_id)
     # remove the leading '0x' on the DDO hash
@@ -37,23 +37,23 @@ def did_generate_base_id(did_id, ddo):
     # return the hash as a string with no leading '0x'
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
 
-# generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned
 def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'op'):
+    """generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned"""
     base_id = did_generate_base_id(did_id, ddo)
     did =  did_generate(base_id, method = method)
     assigned_ddo = ddo.create_new(did)
     return did_generate(base_id, path, fragment, method), assigned_ddo
 
-# validate a DID and check to see it matches the user defined 'id', and DDO
 def did_validate(did, did_id, ddo):
+    """validate a DID and check to see it matches the user defined 'id', and DDO"""
     base_id = did_generate_base_id(did_id, ddo)
     did_items = did_parse(did)
     if did_items:
         return did_items['id'] == base_id
     return False
 
-# parse a DID into it's parts
 def did_parse(did):
+    """parse a DID into it's parts"""
     result = None
     if not isinstance(did, str):
         raise TypeError('DID must be a string')
