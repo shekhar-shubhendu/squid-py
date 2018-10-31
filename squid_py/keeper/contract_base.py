@@ -60,5 +60,15 @@ class ContractBase(object):
         self.web3.eth.waitForTransactionReceipt(tx_hash)
         return self.web3.eth.getTransactionReceipt(tx_hash)
 
+    def get_event_signature(self, name):
+        """Return the event signature from a named event. """
+        signature = None
+        for item in self.contract.abi:
+            if 'name' in item and item['name'] == name and item['type'] == 'event':
+                signature = item['signature']
+                break
+
+        return signature
+
     def __str__(self):
         return "{} at {}".format(self.name, self.address)
