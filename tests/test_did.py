@@ -120,25 +120,23 @@ def test_did():
     assert get_id_from_did('did:op:0') == '0'
 
 
-
-
 def test_did_to_bytes():
     id_test = secrets.token_hex(32)
     did_test = 'did:op:{}'.format(id_test)
     id_bytes = Web3.toBytes(hexstr=id_test)
-    
+
     assert did_to_id_bytes(did_test) == id_bytes
     assert did_to_id_bytes(id_bytes) == id_bytes
-    
+
     with pytest.raises(ValueError):
         assert did_to_id_bytes(id_test) == id_bytes
-        
+
     with pytest.raises(ValueError):
         assert did_to_id_bytes('0x' + id_test)
-    
+
     with pytest.raises(ValueError):
         did_to_id_bytes('did:opx:{}'.format(id_test))
-    
+
     with pytest.raises(ValueError):
         did_to_id_bytes('did:opx:Somebadtexstwithnohexvalue0x123456789abcdecfg')
 

@@ -84,7 +84,7 @@ def test_did_resolver_raw_test():
     assert decode_value.decode('utf8') == value_test
 
 def test_did_resitry_register():
-    
+
     ocean = Ocean(config_file='config_local.ini')
 
     register_account = list(ocean.accounts)[1]
@@ -94,7 +94,7 @@ def test_did_resitry_register():
     value_type = VALUE_TYPE_URL
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
-    
+
 
     # register DID-> URL
     didregistry.register(did_test, url=value_test, account=register_account)
@@ -113,14 +113,14 @@ def test_did_resitry_register():
     did_id_new = secrets.token_hex(32)
     did_test_new = 'did:op:' + did_id_new
     didregistry.register(did_test, did=did_test_new, account=register_account)
-    
+
     # register DID-> DID bytes
     didregistry.register(did_test, did=Web3.toBytes(hexstr=did_id_new), account=register_account)
-    
+
     # test circular ref
     with pytest.raises(OceanDIDCircularReference):
         didregistry.register(did_test, did=did_test, account=register_account)
-    
+
     # No account provided
     with pytest.raises(ValueError):
         didregistry.register(did_test, url=value_test)
@@ -201,7 +201,7 @@ def test_did_resolver_library():
 
     value_type = VALUE_TYPE_URL
     # resolve chain of direct DID IDS to URL
-    chain_length = 10
+    chain_length = 4
     ids = []
     for i in range(0, chain_length):
         ids.append(secrets.token_hex(32))

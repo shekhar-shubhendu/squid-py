@@ -74,7 +74,7 @@ def did_parse(did):
             result['fragment'] = uri.fragment
             if len(uri.path) > 0:
                 result['path'] = uri.path[1:]
-                
+
         if result['method'] == OCEAN_DID_METHOD and re.match('^[0-9A-Fa-f]{1,64}$', result['id']):
             result['id_hex'] = Web3.toHex(hexstr=result['id'])
 
@@ -130,4 +130,4 @@ def did_to_id_bytes(did):
     else:
         raise ValueError('{} must be a valid DID to register'.format(did))
     return id_bytes
-    
+
