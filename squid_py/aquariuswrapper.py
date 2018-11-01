@@ -1,4 +1,3 @@
-import ast
 import json
 import logging
 
@@ -64,10 +63,10 @@ class AquariusWrapper(object):
         if request is None:
             return {}
         else:
-            return ast.literal_eval(request)
+            return json.loads(request)
 
     def query_search(self, search_query):
-        return ast.literal_eval(json.loads(
+        return json.loads(json.loads(
             requests.post(self._base_url + '/ddo/query', data=json.dumps(search_query),
                           headers=self._headers).content))
 
