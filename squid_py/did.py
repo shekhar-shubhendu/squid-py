@@ -13,8 +13,9 @@ from urllib.parse import (
     urlparse,
 )
 
+OCEAN_DID_METHOD = 'op'
 
-def did_generate(did_id, path = None, fragment = None, method = 'op'):
+def did_generate(did_id, path = None, fragment = None, method = OCEAN_DID_METHOD):
     """generate a DID based in it's id, path, fragment and method"""
 
     method = re.sub('[^a-z0-9]', '', method.lower())
@@ -37,7 +38,7 @@ def did_generate_base_id(did_id, ddo):
     # return the hash as a string with no leading '0x'
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
 
-def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'op'):
+def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = OCEAN_DID_METHOD):
     """generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned"""
     base_id = did_generate_base_id(did_id, ddo)
     did =  did_generate(base_id, method = method)
@@ -64,7 +65,8 @@ def did_parse(did):
             'method' : match.group(1),
             'id': match.group(2),
             'path': None,
-            'fragment': None
+            'fragment': None,
+            'id_hex': None
         }
         uri_text = match.group(3)
         if uri_text and len(uri_text) > 0:
@@ -72,6 +74,10 @@ def did_parse(did):
             result['fragment'] = uri.fragment
             if len(uri.path) > 0:
                 result['path'] = uri.path[1:]
+                
+        if result['method'] == OCEAN_DID_METHOD and re.match('^[0-9A-Fa-f]{1,64}$', result['id']):
+            result['id_hex'] = Web3.toHex(hexstr=result['id'])
+
     return result
 
 def is_did_valid(did):
@@ -81,7 +87,7 @@ def is_did_valid(did):
     """
     result = did_parse(did)
     if result:
-        return result['method'] == 'op' and re.match('^[0-9A-Fa-f]{1,64}$', result['id'])
+        return result['id_hex'] != None
     return False
 
 
@@ -102,8 +108,23 @@ def did_generate_from_id(did_id, method='op'):
     return 'did:{0}:{1}'.format(method, did_id)
 
 def get_id_from_did(did):
-    if is_did_valid(did):
-        result = did_parse(did)
-        if result:
-            return re.sub('^0x', '', Web3.toHex(hexstr=result['id']))
+    result = did_parse(did)
+    if result and result['id_hex']:
+        return re.sub('^0x', '', result['id_hex'])
     return None
+
+def did_to_id_bytes(did):
+    id_bytes = None
+    if isinstance(did, str):
+        did_result = did_parse(did)
+        if not did_result:
+            raise ValueError('{} is not a valid did'.format(did))
+        if not did_result['id_hex']:
+            raise ValueError('{} is not a valid ocean did'.format(did))
+        id_bytes = Web3.toBytes(hexstr=did_result['id_hex'])
+    elif isinstance(did_source, bytes):
+        id_bytes = did
+    else:
+        raise ValueError('{} must be a valid DID to register'.format(did))
+    return id_bytes
+    
