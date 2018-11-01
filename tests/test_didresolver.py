@@ -226,3 +226,4 @@ def test_did_resolver_library():
     # resolve to get the error
     with pytest.raises(TypeError):
         didresolver.resolve(did_id_bytes)
+
