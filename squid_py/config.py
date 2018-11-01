@@ -25,6 +25,7 @@ NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_MARKET_ADDRESS = 'market.address'
 NAME_AUTH_ADDRESS = 'auth.address'
 NAME_TOKEN_ADDRESS = 'token.address'
+NAME_SERVICE_AGREEMENT_ADDRESS = 'service_agreement.address'
 
 environ_names = {
     NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
@@ -34,6 +35,7 @@ environ_names = {
     NAME_MARKET_ADDRESS: ['MARKET_ADDRESS', 'Market address'],
     NAME_AUTH_ADDRESS: ['AUTH_ADDRESS', 'Auth address'],
     NAME_TOKEN_ADDRESS: ['TOKEN_ADDRESS', 'Token address'],
+    NAME_SERVICE_AGREEMENT_ADDRESS: ['SERVICE_AGREEMENT_ADDRESS', 'Service agreement address']
 }
 
 config_defaults = {
@@ -45,6 +47,7 @@ config_defaults = {
         NAME_MARKET_ADDRESS: '',
         NAME_AUTH_ADDRESS: '',
         NAME_TOKEN_ADDRESS: '',
+        NAME_SERVICE_AGREEMENT_ADDRESS: '',
     }
 }
 
@@ -112,6 +115,7 @@ class Config(configparser.ConfigParser):
             'market': self.get(self._section_name, NAME_MARKET_ADDRESS),
             'auth': self.get(self._section_name, NAME_AUTH_ADDRESS),
             'token': self.get(self._section_name, NAME_TOKEN_ADDRESS),
+            'service_agreement': self.get(self._section_name, NAME_SERVICE_AGREEMENT_ADDRESS),
         }
 
     # static methods

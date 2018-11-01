@@ -2,7 +2,7 @@
     Collection of Keeper contracts
 
 """
-
+from squid_py.keeper.ServiceAgreement import ServiceAgreement
 from squid_py.keeper.auth import Auth
 from squid_py.keeper.market import Market
 from squid_py.keeper.token import Token
@@ -29,5 +29,6 @@ class Keeper(object):
         self.market = Market(web3, contract_path, address_list['market'])
         self.auth = Auth(web3, contract_path, address_list['auth'])
         self.token = Token(web3, contract_path, address_list['token'])
+        self.service_agreement = ServiceAgreement(web3, contract_path, address_list['service_agreement'])
 
         logging.debug("Keeper instantiated with {} contracts".format(len(self.address_list)))

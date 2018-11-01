@@ -53,8 +53,8 @@
                         "functionName": "grantAccess",
                         "version": "0.1"
                     }]
-                },
-            },
+                }
+            }
         }, {
             "name": "releasePayment",
             "timeout": 0,
@@ -74,8 +74,8 @@
                         "functionName": "fulfillAgreement",
                         "version": "0.1"
                     }]
-                },
-            },
+                }
+            }
         }, {
             "name": "grantAccess",
             "timeout": 0,
@@ -95,8 +95,8 @@
                         "functionName": "consumeService",
                         "version": "0.1"
                     }]
-                },
-            },
+                }
+            }
 
         }, {
             "name": "refundPayment",
@@ -117,10 +117,9 @@
                         "functionName": "fulfillAgreement",
                         "version": "0.1"
                     }]
-                },
-            },
-
-        },
+                }
+            }
+        }
     ]
     }, {
     "type": "Compute",
