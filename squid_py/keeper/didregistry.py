@@ -4,11 +4,16 @@ from web3 import Web3
 from urllib.parse import urlparse
 
 from squid_py.did import did_to_id_bytes
+from squid_py.ddo import DDO
 
 from squid_py.didresolver import (
     VALUE_TYPE_DID,
     VALUE_TYPE_URL,
     VALUE_TYPE_DDO,    
+)
+
+from squid_py.exceptions import (
+    OceanDIDCircularReference,
 )
 
 from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
@@ -56,10 +61,14 @@ class DIDRegistry(ContractBase):
                 raise ValueError('Invalid DDO {0} to register for DID {1}'.format(ddo, did))
             
         if did:
-            value_type = VALUE_TYPE_DDO
+            value_type = VALUE_TYPE_DID
             id_bytes = did_to_id_bytes(did)
             if not id_bytes:
                 raise ValueError('Invalid DID {}'.format(did))
+                
+            if did_source_id == id_bytes:
+                raise OceanDIDCircularReference('Cannot have the same DID that points to itself')
+                
             value = re.sub('^0x', '', Web3.toHex(id_bytes))
         
         if isinstance(key, str):
@@ -74,7 +83,6 @@ class DIDRegistry(ContractBase):
         if account == None:
             raise ValueError('You must provide an account address to use to register a DID')
             
-        print(did_source_id, value_type, key, value, account)
         transaction = self.register_attribute(did_source_id, value_type, key, value, account)
         receipt = self.get_tx_receipt(transaction)
         

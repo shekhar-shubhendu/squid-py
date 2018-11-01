@@ -116,13 +116,16 @@ def get_id_from_did(did):
 def did_to_id_bytes(did):
     id_bytes = None
     if isinstance(did, str):
-        did_result = did_parse(did)
-        if not did_result:
-            raise ValueError('{} is not a valid did'.format(did))
-        if not did_result['id_hex']:
-            raise ValueError('{} is not a valid ocean did'.format(did))
-        id_bytes = Web3.toBytes(hexstr=did_result['id_hex'])
-    elif isinstance(did_source, bytes):
+        if re.match('^[0x]?[0-9A-Za-z]+$', did):
+            id_bytes = Web3.toBytes(hexstr=did)
+        else:
+            did_result = did_parse(did)
+            if not did_result:
+                raise ValueError('{} is not a valid did'.format(did))
+            if not did_result['id_hex']:
+                raise ValueError('{} is not a valid ocean did'.format(did))
+            id_bytes = Web3.toBytes(hexstr=did_result['id_hex'])
+    elif isinstance(did, bytes):
         id_bytes = did
     else:
         raise ValueError('{} must be a valid DID to register'.format(did))
