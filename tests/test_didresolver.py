@@ -11,7 +11,7 @@ from eth_abi import (
     decode_single,
 )
 
-from did_ddo_lib import OceanDDO
+from squid_py.ddo import DDO
 
 from squid_py.ocean import Ocean
 
@@ -133,7 +133,7 @@ def test_did_resolver_library():
     assert result == value_test_new
 
     # resolve DDO from a direct DID ID value
-    ddo = OceanDDO(did_test)
+    ddo = DDO(did_test)
     ddo.add_signature()
     ddo.add_service('meta-store', value_test)
     did_id = secrets.token_hex(32)
@@ -146,7 +146,7 @@ def test_did_resolver_library():
     gas_used_ddo = receipt['gasUsed']
 
     result = didresolver.resolve(did_id_bytes)
-    resolved_ddo = OceanDDO(ddo_text = result)
+    resolved_ddo = DDO(json_text = result)
     assert ddo.calculate_hash() == resolved_ddo.calculate_hash()
 
     logger.info('gas used URL: %d, DDO: %d, DDO +%d extra', gas_used_url, gas_used_ddo, gas_used_ddo - gas_used_url)
