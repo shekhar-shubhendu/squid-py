@@ -71,9 +71,9 @@ class DIDResolver():
             :rasies OceanDIDNotFound    - if no DID can be found to resolve.
 
         """
-        
+
         did_bytes = did_to_id_bytes(did)
-        
+
         if not isinstance(did_bytes, bytes):
             raise TypeError('You must provide a 32 Byte value')
 
