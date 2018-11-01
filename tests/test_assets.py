@@ -149,9 +149,9 @@ def test_publish_data_asset_aquarius():
         print("Currently registered assets:")
         print(meta_data_assets['ids'])
 
-    if asset.asset_id in meta_data_assets['ids']:
-        ocean.metadata.get_asset_metadata(asset.asset_id)
-        ocean.metadata.retire_asset_metadata(asset.asset_id)
+    if asset.ddo.did in meta_data_assets['ids']:
+        ocean.metadata.get_asset_metadata(asset.ddo.did)
+        ocean.metadata.retire_asset_metadata(asset.ddo.did)
     # Publish the metadata
     this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
@@ -202,9 +202,9 @@ def test_ocean_publish():
     
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
-    if asset.ddo['id'] in meta_data_assets['ids']:
-        ocean.metadata.get_asset_metadata(asset.ddo['id'])
-        ocean.metadata.retire_asset_metadata(asset.ddo['id'])
+    if asset.ddo.did in meta_data_assets['ids']:
+        ocean.metadata.get_asset_metadata(asset.ddo.did)
+        ocean.metadata.retire_asset_metadata(asset.ddo.did)
 
     ##########################################################
     # Register using high-level interface

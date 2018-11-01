@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 import re
 
@@ -54,22 +55,21 @@ class Asset:
     @property
     def metadata(self):
         assert self.has_metadata
+        return self._get_metadata()
+
+    @property
+    def has_metadata(self):
+        return not self._get_metadata() == None
+
+    def _get_metadata(self):
+        result = None
         metadata_service = self.ddo.get_service('Metadata')
         if metadata_service:
             values = metadata_service.get_values()
             if 'metadata' in values:
-                return values['metadata']
-
-        return None
-
-    @property
-    def has_metadata(self):
-        values = []
-        metadata_service = self.ddo.get_service('Metadata')
-        if metadata_service:
-            values = metadata_service.get_values()
-        return len(values) == 1
-
+                result = values['metadata']
+        return result
+        
     def is_valid_did(self, length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
@@ -83,7 +83,14 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.as_text()).hexdigest()
+        metadata = self._get_metadata()
+        if not metadata:
+            raise ValueError("No metedata in {}".format(self))
+            
+        if not 'base' in metadata:
+            raise ValueError("Invalid metedata in {}".format(self))
+            
+        self.asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
 
     def assign_metadata(self):
         pass

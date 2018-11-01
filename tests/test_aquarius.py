@@ -1,5 +1,6 @@
 from squid_py.asset import Asset
 from squid_py.ocean import Ocean
+from squid_py.ddo import DDO
 import pathlib
 import secrets
 import json
@@ -18,13 +19,11 @@ def test_aquarius():
 
     # Ensure there are no matching assets before publishing
     for match in ocean_provider.metadata.text_search(text='Office'):
-        print('match', match)
         ocean_provider.metadata.retire_asset_metadata(match['id'])
 
     this_metadata = ocean_provider.metadata.publish_asset_metadata(asset1)
 
     this_metadata = ocean_provider.metadata.get_asset_metadata(asset1.ddo.did)
-    print('metadata', this_metadata)
 
     assert len(ocean_provider.metadata.text_search(text='Office')) == 1
 
@@ -37,5 +36,7 @@ def test_aquarius():
     ocean_provider.metadata.update_asset_metadata(asset2)
     this_metadata = ocean_provider.metadata.get_asset_metadata(asset2.ddo.did)
 
-    assert this_metadata['authentication'] == asset2.ddo['authentication']
+    # basic test to compare authentication records in the DDO
+    ddo = DDO(json_text = json.dumps(this_metadata))
+    assert ddo.authentications[0].as_text() == asset2.ddo.authentications[0].as_text()
     ocean_provider.metadata.retire_asset_metadata(asset2.ddo.did)
