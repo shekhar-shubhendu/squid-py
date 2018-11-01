@@ -100,8 +100,9 @@ def test_did_resolver_library():
     # resolve URL from a direct DID ID value
     did_id_bytes = Web3.toBytes(hexstr=did_id)
 
-    register_did = didregistry.register_attribute(did_id_bytes, value_type, key_test, value_test, register_account)
-    receipt = didregistry.get_tx_receipt(register_did)
+    didregistry.register(did_test, url=value_test, account=register_account)
+#    register_did = didregistry.register_attribute(did_id_bytes, value_type, key_test, value_test, register_account)
+#    receipt = didregistry.get_tx_receipt(register_did)
 
     with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
         didresolver.resolve(did_test)

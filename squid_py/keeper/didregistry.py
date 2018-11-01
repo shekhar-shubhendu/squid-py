@@ -1,4 +1,6 @@
 import re
+from web3 import Web3
+
 from urllib.parse import urlparse
 
 from squid_py.did import did_to_id_bytes
@@ -22,11 +24,11 @@ class DIDRegistry(ContractBase):
         """
         Register or update a DID on the block chain using the DIDRegistry smart contract
             
-        :param did: DID to register/update, can be a 32 byte or hexstring
+        :param did_source: DID to register/update, can be a 32 byte or hexstring
         :param url: URL of the resolved DID
         :param ddo: DDO string or DDO object to resolve too
         :param did: DID to resovlve too, can be a 32 byte value or 64 hex string
-        :param key: Option 32 byte key ( 64 char hex )  
+        :param key: Optional 32 byte key ( 64 char hex )  
         :param account: Ethereum account to use to register/update the DID
         :
         """
@@ -42,7 +44,7 @@ class DIDRegistry(ContractBase):
             value_type = VALUE_TYPE_URL
             value = url
             if not urlparse(url):
-                raise ValueError('Invalid URL {0} to register for DID {1}',format(url, did))
+                raise ValueError('Invalid URL {0} to register for DID {1}'.format(url, did))
             
         if ddo:
             value_type = VALUE_TYPE_DDO
@@ -51,7 +53,7 @@ class DIDRegistry(ContractBase):
             elif isinstance(ddo, str):
                 value = ddo
             else:
-                raise ValueError('Invalid DDO {0} to register for DID {1}',format(ddo, did))
+                raise ValueError('Invalid DDO {0} to register for DID {1}'.format(ddo, did))
             
         if did:
             value_type = VALUE_TYPE_DDO
@@ -60,7 +62,20 @@ class DIDRegistry(ContractBase):
                 raise ValueError('Invalid DID {}'.format(did))
             value = re.sub('^0x', '', Web3.toHex(id_bytes))
         
-        transaction = self.register_attribute(did, value_type, key, value, account)
+        if isinstance(key, str):
+            key = Web3.sha3(text = key)
+
+        if key == None:
+            key = Web3.toBytes(0)
+            
+        if not isinstance(key, bytes):
+            raise ValueError('Invalid key value {}, must be bytes or string'.format(key))
+            
+        if account == None:
+            raise ValueError('You must provide an account address to use to register a DID')
+            
+        print(did_source_id, value_type, key, value, account)
+        transaction = self.register_attribute(did_source_id, value_type, key, value, account)
         receipt = self.get_tx_receipt(transaction)
         
     def register_attribute(self, did_hash, value_type, key, value, account_address):
