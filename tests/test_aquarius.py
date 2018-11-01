@@ -15,7 +15,7 @@ def test_aquarius():
 
 #    print(asset1.ddo.as_text())
     # Ensure the asset it not already in database
-    ocean_provider.metadata.retire_asset_metadata('did:op:{}'.format(asset1.asset_id))
+    ocean_provider.metadata.retire_asset_metadata(asset1.ddo.did)
 
     # Ensure there are no matching assets before publishing
     for match in ocean_provider.metadata.text_search(text='Office'):
