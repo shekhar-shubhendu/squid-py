@@ -149,10 +149,9 @@ def test_did_resolver_library():
 
     didregistry.register(did_test, url=value_test, account=register_account)
 
-    with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
-        didresolver.resolve(did_test)
+    assert didresolver.resolve(did_test) == value_test
 
-    with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
+    with pytest.raises(ValueError):
         didresolver.resolve(did_id)
 
     result = didresolver.resolve(did_id_bytes)
