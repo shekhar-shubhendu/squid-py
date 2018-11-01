@@ -131,14 +131,6 @@ def test_publish_data_asset_aquarius():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    # asset.generate_did()
-    ######################
-    # the sample ddo does not contain the correct asset_id, so force it to a
-    # new id...
-    #asset.generate_did()
-    
-    ## instead of v.
-    # asset.ddo.did = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
     
     ##########################################################
