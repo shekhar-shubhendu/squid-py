@@ -117,7 +117,7 @@ def did_to_id_bytes(did):
     id_bytes = None
     if isinstance(did, str):
         if re.match('^[0x]?[0-9A-Za-z]+$', did):
-            id_bytes = Web3.toBytes(hexstr=did)
+            raise ValueError('{} must be a DID not a hex string'.format(did))
         else:
             did_result = did_parse(did)
             if not did_result:

@@ -40,6 +40,7 @@ class DIDRegistry(ContractBase):
         
         value_type = VALUE_TYPE_DID
         value = None
+        
         did_source_id = did_to_id_bytes(did_source)
         
         if not did_source_id:

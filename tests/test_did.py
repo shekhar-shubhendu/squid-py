@@ -129,8 +129,12 @@ def test_did_to_bytes():
     
     assert did_to_id_bytes(did_test) == id_bytes
     assert did_to_id_bytes(id_bytes) == id_bytes
-    assert did_to_id_bytes(id_test) == id_bytes
-    assert did_to_id_bytes('0x' + id_test) == id_bytes
+    
+    with pytest.raises(ValueError):
+        assert did_to_id_bytes(id_test) == id_bytes
+        
+    with pytest.raises(ValueError):
+        assert did_to_id_bytes('0x' + id_test)
     
     with pytest.raises(ValueError):
         did_to_id_bytes('did:opx:{}'.format(id_test))
