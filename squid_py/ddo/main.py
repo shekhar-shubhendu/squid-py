@@ -291,6 +291,11 @@ class DDO(object):
             for service in self._services:
                 if not service.is_valid():
                     return False
+                    
+        # validate if proof defined in this DDO
+        if self.is_proof_defined:
+            if not self.validate_proof:
+                return False
         return True
 
     def calculate_hash(self, include_service_values = False):

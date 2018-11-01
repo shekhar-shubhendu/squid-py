@@ -1,24 +1,24 @@
 {
   "@context": "https://w3id.org/did/v1",
-  "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
-  "created": "2018-11-01 07:30:40.769302",
+  "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
+  "created": "2018-11-01 08:25:53.544460",
   "publicKey": [
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9#keys=1",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359#keys=1",
       "type": "RsaSignatureAuthentication2018",
-      "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDYjLmBXycGOvRSEGObyLMiE/K\njiWaZc3uhsUoxF8GHE/Dq5dH6uTG/ehatPrIpugP5HsLqXp1aJZ0FLVAMi0noBV0\ncmOuzkNTtSbAd77L6if/IOf7k3WjEHPxev5L9bXhYAhTxG3r9r3AikweO+cYR2td\nJ+McKIOanL0Ap9boWQIDAQAB\n-----END PUBLIC KEY-----",
-      "owner": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9#keys=1"
+      "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBt/HnqXGiW7la0JiK66LnQ94B\n2fDCVqdEYH8aDTFlj4IG0DepUU0CqQThWBqJoMTI2Ghn9lx5CfbsRWqy/ESb0oJ1\nNc78ne1lLiRXDiUk6GnA3SpmXr+GO5yMWpoRkr224+igav65ANnjYV/RKZb2imwR\n50yh/3WW+YZ+Yikw2QIDAQAB\n-----END PUBLIC KEY-----",
+      "owner": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359#keys=1"
     }
   ],
   "authentication": [
     {
       "type": "RsaVerificationKey2018",
-      "publicKey": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9#keys=1"
+      "publicKey": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359#keys=1"
     }
   ],
   "service": [
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "Metadata",
       "serviceEndpoint": "http://myaquarius.org/api/v1/provider/assets/metadata/{did}",
       "metadata": {
@@ -75,32 +75,32 @@
       }
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "OpenIdConnectVersion1.0Service",
       "serviceEndpoint": "https://openid.example.com/"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "CredentialRepositoryService",
       "serviceEndpoint": "https://repository.example.com/service/8377464"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "XdiService",
       "serviceEndpoint": "https://xdi.example.com/8377464"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "HubService",
       "serviceEndpoint": "https://hub.example.com/.identity/did:op:0123456789abcdef/"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "MessagingService",
       "serviceEndpoint": "https://example.com/messages/8377464"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "SocialWebInboxService",
       "serviceEndpoint": "https://social.example.com/83hfh37dj",
       "description": "My public social inbox",
@@ -110,25 +110,25 @@
       }
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "BopsService",
       "serviceEndpoint": "https://bops.example.com/enterprise/"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "Consume",
       "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/consume?pubKey=${pubKey}&serviceId={serviceId}&url={url}"
     },
     {
-      "id": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9",
+      "id": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359",
       "type": "Compute",
       "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/compute?pubKey=${pubKey}&serviceId={serviceId}&algo={algo}&container={container}"
     }
   ],
   "proof": {
     "type": "RsaSignatureAuthentication2018",
-    "created": "2018-11-01 07:30:40.921473",
-    "creator": "did:op:494cb6c17b173097bb96ed91eeb31785c483908d0c03291386966aedb4dc88b9#keys=1",
-    "signatureValue": "b'ZM3ZFEyyjuzyv/c/q1wwrjwOo40TGfeI2K1kggM4iMa9MqqHqy9WteGpqa8dp/LbfQId4fCfXLzoWXtcOrUtvT7ty7BdTgmfnGOUvkk+xozEm81UfEiC/1TPd1lmBcpnuGTZYw4i5pWM6/D60LuERrbG6Jy1W2QotmP4zS6hGDs='"
+    "created": "2018-11-01 08:25:53.717778",
+    "creator": "did:op:fccb0bd237a077e68e3f024a03d084258af075e612e61fc10ddc548fc7366359#keys=1",
+    "signatureValue": "b'NXz5cPXIa++7ieOjTidpI4JGsblfuIRv2viSlQ9zirdydbw8fjy0mcDXxxjV96PjLJ1l1dAlhlePcX2MnaDw+bMvGj6Rz7nzyLnLXBrwreDoNbQnsOvp+XiecsPy2tOSb7sPE8rLz1kuF8tXyK++g9J7Le4UBuL7IXezbtQNA/s='"
   }
 }
