@@ -33,11 +33,12 @@ class DIDResolver():
     DID Resolver class
     Resolve DID to a URL/DDO
     """
-    def __init__(self, ocean):
-        self._web3 = ocean._web3
-        self._didregistry = ocean.keeper.didregistry
+    def __init__(self, web3, didregistry):
+        self._web3 = web3
+        self._didregistry = didregistry
+
         if not self._didregistry:
-            raise ValueError('Cannot load didregistry contract object')
+            raise ValueError('No didregistry contract object provided')
 
         self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
         if not self._event_signature:

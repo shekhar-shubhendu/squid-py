@@ -99,7 +99,7 @@ def test_did_resolver_library():
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
 
-    didresolver = DIDResolver(ocean)
+    didresolver = DIDResolver(ocean._web3, ocean.keeper.didregistry)
 
     # resolve URL from a direct DID ID value
     did_id_bytes = Web3.toBytes(hexstr=did_id)
