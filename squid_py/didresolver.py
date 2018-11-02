@@ -20,17 +20,20 @@ from squid_py.exceptions import (
 
 DIDREGISTRY_EVENT_NAME = 'DIDAttributeRegistered'
 
-VALUE_TYPE_DID =        0
-VALUE_TYPE_DID_REF =    1
-VALUE_TYPE_URL =        2
-VALUE_TYPE_DDO =        3
+VALUE_TYPE_DID = 0
+VALUE_TYPE_DID_REF = 1
+VALUE_TYPE_URL = 2
+VALUE_TYPE_DDO = 3
 
 
 logger = logging.getLogger()
 
 class DIDResolver():
-
-    def __init__(self, ocean, is_cache = True):
+    """
+    DID Resolver class
+    Resolve DID to a URL/DDO
+    """
+    def __init__(self, ocean, is_cache=True):
         self._web3 = ocean._web3
         self._didregistry = ocean.keeper.didregistry
         if not self._didregistry:
@@ -45,22 +48,23 @@ class DIDResolver():
             self._cache = {}
 
     def clear_cache(self):
+        """Clear the internal cache"""
         if self._cache:
             self._cache = {}
 
-    def resolve(self, did, max_hop_count = 0):
+    def resolve(self, did, max_hop_count=0):
         """
-            Resolve a DID to an URL/DDO or later an internal/extrenal DID
+        Resolve a DID to an URL/DDO or later an internal/extrenal DID
 
-            :param did:             32 byte value to resolver, this is part of the ocean DID did:op:<32 byte value>
-            :param max_hop_count:   max number of hops allowed to find the destination URL/DDO
-            :return string URL or DDO of the resolved DID
-            :return None if the DID cannot be resolved
+        :param did: 32 byte value to resolver, this is part of the ocean DID did:op:<32 byte value>
+        :param max_hop_count: max number of hops allowed to find the destination URL/DDO
+        :return string URL or DDO of the resolved DID
+        :return None if the DID cannot be resolved
 
-            :raises TypeError - on non 32byte value as the DID
-            :raises TypeError - on any of the resolved values are not string/DID bytes.
-            :raises OceanDIDCircularReference - on the chain being pointed back to itself.
-            :rasies OceanDIDNotFound    - if no DID can be found to resolve.
+        :raises TypeError - on non 32byte value as the DID
+        :raises TypeError - on any of the resolved values are not string/DID bytes.
+        :raises OceanDIDCircularReference - on the chain being pointed back to itself.
+        :rasies OceanDIDNotFound    - if no DID can be found to resolve.
 
         """
         if not isinstance(did, bytes):
@@ -72,7 +76,7 @@ class DIDResolver():
         # resolve a DID to a URL or DDO
         data = self.get_did(did)
         hop_count = 0
-        while data and ( max_hop_count == 0 or hop_count < max_hop_count):
+        while data and (max_hop_count == 0 or hop_count < max_hop_count):
             if data['value_type'] == VALUE_TYPE_URL or data['value_type'] == VALUE_TYPE_DDO:
                 logger.info('found did {0} -> {1}'.format(Web3.toHex(did), data['value']))
                 if data['value']:
@@ -113,8 +117,8 @@ class DIDResolver():
 
 
     def get_did(self, did):
-        # return a did value and value type from the block chain event record using 'did'
-        # if the cache is enabled, then get this from the cache if available
+        """return a did value and value type from the block chain event record using 'did'
+        if the cache is enabled, then get this from the cache if available"""
         result = None
 
         if self._cache:
@@ -133,7 +137,8 @@ class DIDResolver():
         log_items = block_filter.get_all_entries()
         if log_items and len(log_items) > 0:
             log_item = log_items[len(log_items) - 1]
-            value, value_type, block_number = decode_single('(string,uint8,uint256)', Web3.toBytes(hexstr=log_item['data']))
+            value, value_type, block_number = decode_single('(string,uint8,uint256)', \
+                Web3.toBytes(hexstr=log_item['data']))
             result = {
                 'value_type': value_type,
                 'value': value
