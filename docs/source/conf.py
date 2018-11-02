@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'squid-py'
-copyright = '2018, Bill'
-author = 'Bill'
+copyright = '2018, OceanProtocol'
+author = 'OceanProtocol'
 
 # The short X.Y version
 version = '0.1 Beta'
@@ -136,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Squid-py.tex', 'OceanProtocol Documentation',
-     'Bill', 'manual'),
+     'OceanProtocol', 'manual'),
 ]
 
 
