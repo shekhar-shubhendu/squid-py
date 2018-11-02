@@ -37,11 +37,10 @@
         {
             "name": "lockPayment",
             "timeout": 0,
-            "conditionKey": {
-                "contractAddress": "0x...",
-                "fingerprint": "0x...",
-                "functionName": "lockPayment"
-            },
+            "conditionKey": "0x...",
+            "contractAddress": "0x...",
+            "fingerprint": "0x...",
+            "functionName": "lockPayment",
             "parameters": [
               {
                 "name": "assetId",
@@ -71,11 +70,10 @@
         }, {
             "name": "grantAccess",
             "timeout": 0,
-            "conditionKey": {
-                "contractAddress": "0x...",
-                "fingerprint": "0xXXXXXXXX",
-                "functionName": "grantAccess"
-            },
+            "conditionKey": "0x...",
+            "contractAddress": "0x...",
+            "fingerprint": "0x...",
+            "functionName": "grantAccess",
             "parameters": [
               {
                 "name": "assetId",
@@ -105,11 +103,10 @@
         }, {
             "name": "releasePayment",
             "timeout": 0,
-            "conditionKey": {
-                "contractAddress": "0x...",
-                "fingerprint": "0xXXXXXXXX",
-                "functionName": "releasePayment"
-            },
+            "conditionKey": "0x...",
+            "contractAddress": "0x...",
+            "fingerprint": "0x...",
+            "functionName": "releasePayment",
             "parameters": [
               {
                 "name": "assetId",
@@ -139,11 +136,10 @@
         }, {
             "name": "refundPayment",
             "timeout": 1,
-            "conditionKey": {
-                "contractAddress": "0x...",
-                "fingerprint": "0xXXXXXXXX",
-                "functionName": "refundPayment"
-            },
+            "conditionKey": "0x...",
+            "contractAddress": "0x...",
+            "fingerprint": "0x...",
+            "functionName": "refundPayment",
             "parameters": [
               {
                 "name": "assetId",
