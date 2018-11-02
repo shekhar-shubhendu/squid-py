@@ -30,6 +30,7 @@ from squid_py.exceptions import (
 
 logger = logging.getLogger()
 
+"""
 def test_did_resolver_raw_test():
 
     # test basic didregistry , contract loading and register a DID
@@ -84,6 +85,7 @@ def test_did_resolver_raw_test():
     assert decode_value_type == value_type
     assert decode_value.decode('utf8') == value_test
     assert decode_block_number == block_number
+"""
 
 def test_did_resolver_library():
 
@@ -228,4 +230,3 @@ def test_did_resolver_library():
     # resolve to get the error
     with pytest.raises(TypeError):
         didresolver.resolve(did_id_bytes)
-
