@@ -14,7 +14,7 @@ from squid_py.constants import (
 DEFAULT_KEEPER_HOST = 'localhost'
 DEFAULT_KEEPER_PORT = 8545
 DEFAULT_KEEPER_URL = 'http://localhost:8545'
-DEFAULT_KEEPER_PATH = 'contracts'
+DEFAULT_KEEPER_PATH = 'artifacts'
 DEFAULT_GAS_LIMIT = 300000
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
 
@@ -90,9 +90,9 @@ class Config(configparser.ConfigParser):
         if os.path.exists(path):
             pass
         elif os.getenv('VIRTUAL_ENV'):
-            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'contracts')
+            path = os.path.join(os.getenv('VIRTUAL_ENV'), DEFAULT_KEEPER_PATH)
         else:
-            path = os.path.join(site.PREFIXES[0], 'contracts')
+            path = os.path.join(site.PREFIXES[0], DEFAULT_KEEPER_PATH)
         return path
 
     # properties
