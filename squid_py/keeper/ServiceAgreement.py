@@ -12,7 +12,7 @@ class ServiceAgreement(ContractBase):
         ContractBase.__init__(self, web3, SERVICE_AGREEMENT_CONTRACT, 'service_agreement', contract_path, address)
         self._defaultGas = DEFAULT_GAS_LIMIT
 
-    def setupAgreementTemplate(self, contracts, fingerprints, dependencies_bits, service_description):
+    def setup_agreement_template(self, contracts, fingerprints, dependencies_bits, service_description):
         assert isinstance(service_description, str) and service_description.strip() != '', 'bad service description.'
         assert contracts and isinstance(contracts, list), 'contracts arg: expected list, got {0}'.format(type(contracts))
         assert fingerprints and isinstance(fingerprints, list), 'fingerprints arg: expected list, got {0}'.format(type(fingerprints))
@@ -21,38 +21,37 @@ class ServiceAgreement(ContractBase):
         service_hash = Web3.toHex(Web3.sha3(text=service_description))
         self.contract_concise.setupAgreementTemplate(contracts, fingerprints, dependencies_bits, service_hash)
 
-    def executeServiceAgreement(self, ddo, consumer, service_definition_id, timeout, values_per_condition):
+    def execute_service_agreement(self, ddo, consumer, service_definition_id, timeout, values_per_condition):
         sa_id, templateId, publisher, status = (None,) * 4
 
-        sa_id = ''
         return sa_id
 
-    def fulfillAgreement(self, service_agreement_id):
+    def fulfill_agreement(self, service_agreement_id):
         self.contract_concise.fulfillAgreement(service_agreement_id)
 
-    def getTemplateStatus(self, sa_template_id):
+    def get_template_status(self, sa_template_id):
         return self.contract_concise.getTemplateStatus(sa_template_id)
 
-    def revokeAgreementTemplate(self, sa_template_id):
+    def revoke_agreement_template(self, sa_template_id):
         self.contract_concise.revokeAgreementTemplate(sa_template_id)
         return True
 
-    def getTemplateOwner(self, sa_template_id):
+    def get_template_owner(self, sa_template_id):
         return self.contract_concise.getTemplateOwner(sa_template_id)
 
-    def getTemplateId(self, service_agreement_id):
+    def get_template_id(self, service_agreement_id):
         return self.contract_concise.getTemplateId(service_agreement_id)
 
-    def getAgreementStatus(self, service_agreement_id):
+    def get_agreement_status(self, service_agreement_id):
         return self.contract_concise.getAgreementStatus(service_agreement_id)
 
-    def getServiceAgreementPublisher(self, service_agreement_id):
+    def get_service_agreement_publisher(self, service_agreement_id):
         return self.contract_concise.getAgreementPublisher(service_agreement_id)
 
-    def getServiceAgreementConsumer(self, service_agreement_id):
+    def get_service_agreement_consumer(self, service_agreement_id):
         return self.contract_concise.getServiceAgreementConsumer(service_agreement_id)
 
-    def getConditionByFingerprint(self, service_agreement_id, contract_address, function_fingerprint):
+    def get_condition_by_fingerprint(self, service_agreement_id, contract_address, function_fingerprint):
         return self.contract_concise.getConditionByFingerprint(service_agreement_id, contract_address, function_fingerprint)
 
     @staticmethod

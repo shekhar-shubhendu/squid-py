@@ -49,3 +49,6 @@ class Auth(ContractBase):
 
     def get_encrypted_access_token(self, order_id, sender_address):
         return self.contract_concise.getEncryptedAccessToken(order_id, call={'from': sender_address})
+
+    def get_event(self, event):
+        return

@@ -9,11 +9,10 @@ from squid_py.log import setup_logging
 from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.account import Account
 
-from squid_py.utils import Web3Helper
-
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 setup_logging()
+
 
 class Ocean:
     def __init__(self, config_file):
@@ -35,14 +34,14 @@ class Ocean:
         # For development, we use the HTTPProvider Web3 interface
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
-         # With the interface loaded, the Keeper node is connected with all contracts
+        # With the interface loaded, the Keeper node is connected with all contracts
         self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
 
         # Add the Metadata store to the interface
         if self.config.aquarius_url:
             self.metadata = AquariusWrapper(self.config.aquarius_url)
-        else: self.metadata = None
-
+        else:
+            self.metadata = None
 
         # Collect the accounts
         self.accounts = self.get_accounts()

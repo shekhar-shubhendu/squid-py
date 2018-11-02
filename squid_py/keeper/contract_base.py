@@ -27,6 +27,10 @@ class ContractBase(object):
 
         logging.debug("Loaded {}".format(self))
 
+    @property
+    def events(self):
+        return self.contract.events
+
     def load(self, contract_file, name, contract_path, contract_address):
         """Retrieve a tuple with the concise contract and the contract definition."""
         contract_filename = os.path.join(contract_path, "{}.json".format(contract_file))

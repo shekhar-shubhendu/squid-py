@@ -81,10 +81,17 @@ class Market(ContractBase):
         logging.info("Registered Asset {} into blockchain".format(asset.asset_id))
         return result
 
+    def pay_order(self, order_id, publisher_address, price, timeout, sender_address, gas_amount=None):
+        tx_hash = self.contract_concise.sendPayment(order_id, publisher_address, price, timeout, {
+            'from': sender_address,
+            'gas': gas_amount if gas_amount else self._defaultGas
+        })
+        return self.get_tx_receipt(tx_hash)
+
     def purchase_asset(self, asset_id, order, publisher_address, sender_address):
         asset_id_bytes = Web3.toBytes(hexstr=asset_id)
-        asset_price = self.contract.getAssetPrice(asset_id_bytes)
-        return self.contract.sendPayment(order.id, publisher_address, asset_price, order.timeout, {
+        asset_price = self.contract_concise.getAssetPrice(asset_id_bytes)
+        return self.contract_concise.sendPayment(order.id, publisher_address, asset_price, order.timeout, {
             'from': sender_address,
             'gas': self._defaultGas
         })
