@@ -21,3 +21,5 @@ sed -i -e "/token.address =/c token.address = ${token}" $CONF_FILE
 sed -i -e "/market.address =/c market.address = ${market}" $CONF_FILE
 sed -i -e "/auth.address =/c auth.address = ${auth}" $CONF_FILE
 #sed -i -e "/aquarius.address =/c aquarius.address=" $CONF_FILE
+
+docker cp docker_keeper-contracts_1:/keeper-contracts/artifacts ./artifacts
