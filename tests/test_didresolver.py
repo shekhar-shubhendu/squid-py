@@ -55,10 +55,11 @@ def test_did_resolver_raw_test():
     # print('Actual Signature', actual_signature)
     # print('event ABI', event_signature)
 
-    calc_signature = Web3.sha3(text="DIDAttributeRegistered(bytes32,address,uint8,bytes32,string,uint256)").hex()
+    calc_signature = Web3.sha3(text="DIDAttributeRegistered(bytes32,address,bytes32,string,uint8,uint256)").hex()
     # print('Calc signature', Web3.toHex(calc_signature))
 
     assert actual_signature == calc_signature
+    assert actual_signature == event_signature
 
     # TODO: fix sync with keeper-contracts
     # at the moment assign the calc signature, since the loadad ABI sig is incorret
@@ -79,9 +80,10 @@ def test_did_resolver_raw_test():
 
     assert len(log_items) > 0
     log_item = log_items[len(log_items) - 1]
-    decode_value_type, decode_value = decode_single('(uint,string)', Web3.toBytes(hexstr=log_item['data']))
+    decode_value, decode_value_type, decode_block_number = decode_single('(string,uint8,uint256)', Web3.toBytes(hexstr=log_item['data']))
     assert decode_value_type == value_type
     assert decode_value.decode('utf8') == value_test
+    assert decode_block_number == block_number
 
 def test_did_resolver_library():
 

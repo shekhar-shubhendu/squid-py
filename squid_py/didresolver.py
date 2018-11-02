@@ -36,11 +36,7 @@ class DIDResolver():
         if not self._didregistry:
             raise ValueError('Cannot load didregistry contract object')
 
-        # TODO: FIX ME!
-        # the current ABI is out of sync with the keeper-contract build
-        # so hard coding the signature !
-        self._event_signature = Web3.sha3(text="{}(bytes32,address,uint8,bytes32,string,uint256)".format(DIDREGISTRY_EVENT_NAME)).hex()
-        # self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
+        self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
         if not self._event_signature:
             raise ValueError('Cannot find Event {} signature'.format(DIDREGISTRY_EVENT_NAME))
 
@@ -137,10 +133,7 @@ class DIDResolver():
         log_items = block_filter.get_all_entries()
         if log_items and len(log_items) > 0:
             log_item = log_items[len(log_items) - 1]
-
-            # TODO: The contract currently has a different event variable sequence, we will need to change this to ..
-            # value, value_type, block_number = '(string,uint8,uint256)'
-            value_type, value, block_number = decode_single('(uint8,string,uint256)', Web3.toBytes(hexstr=log_item['data']))
+            value, value_type, block_number = decode_single('(string,uint8,uint256)', Web3.toBytes(hexstr=log_item['data']))
             result = {
                 'value_type': value_type,
                 'value': value
