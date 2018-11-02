@@ -33,7 +33,7 @@ class DIDResolver():
     DID Resolver class
     Resolve DID to a URL/DDO
     """
-    def __init__(self, ocean, is_cache=True):
+    def __init__(self, ocean):
         self._web3 = ocean._web3
         self._didregistry = ocean.keeper.didregistry
         if not self._didregistry:
@@ -42,15 +42,6 @@ class DIDResolver():
         self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
         if not self._event_signature:
             raise ValueError('Cannot find Event {} signature'.format(DIDREGISTRY_EVENT_NAME))
-
-        self._cache = None
-        if is_cache:
-            self._cache = {}
-
-    def clear_cache(self):
-        """Clear the internal cache"""
-        if self._cache:
-            self._cache = {}
 
     def resolve(self, did, max_hop_count=0):
         """
@@ -117,13 +108,8 @@ class DIDResolver():
 
 
     def get_did(self, did):
-        """return a did value and value type from the block chain event record using 'did'
-        if the cache is enabled, then get this from the cache if available"""
+        """return a did value and value type from the block chain event record using 'did'"""
         result = None
-
-        if self._cache:
-            if did in self._cache:
-                return self._cache[did]
 
         block_number = self._didregistry.get_update_at(did)
         if block_number == 0:
@@ -143,6 +129,4 @@ class DIDResolver():
                 'value_type': value_type,
                 'value': value
             }
-        if self._cache:
-            self._cache[did] = result
         return result

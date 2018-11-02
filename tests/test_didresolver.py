@@ -125,10 +125,6 @@ def test_did_resolver_library():
     result = didresolver.resolve(did_hash)
     assert result == value_test
 
-
-    # clear the cache to get next DID update
-    didresolver.clear_cache()
-
     # test update of an already assigned DID
     value_test_new = 'http://aquarius:5000'
     register_did = didregistry.register_attribute(did_hash, value_type, key_test, value_test_new, register_account)
@@ -155,9 +151,6 @@ def test_did_resolver_library():
 
     logger.info('gas used URL: %d, DDO: %d, DDO +%d extra', gas_used_url, gas_used_ddo, gas_used_ddo - gas_used_url)
 
-    # clear the cache to build the chain
-    didresolver.clear_cache()
-
     value_type = VALUE_TYPE_URL
     # resolve chain of direct DID IDS to URL
     chain_length = 10
@@ -181,9 +174,6 @@ def test_did_resolver_library():
     assert result == value_test
 
 
-    # clear the cache to re-build the chain
-    didresolver.clear_cache()
-
     # test circular chain
 
     # get the did at the end of the chain
@@ -198,9 +188,6 @@ def test_did_resolver_library():
     with pytest.raises(OceanDIDCircularReference):
         didresolver.resolve(did_id_bytes)
 
-    # clear the cache to test hop count
-    didresolver.clear_cache()
-
     # test hop count
     hop_count = math.floor(len(ids) / 2)
     result = didresolver.resolve(did_id_bytes, hop_count)
@@ -211,9 +198,6 @@ def test_did_resolver_library():
     did_id_bytes = Web3.toBytes(hexstr=did_id)
     with pytest.raises(OceanDIDNotFound):
         didresolver.resolve(did_id_bytes)
-
-    # clear the cache to test unknown value
-    didresolver.clear_cache()
 
     # test value type error on a linked DID
     register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID, key_test, value_test, register_account)
