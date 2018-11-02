@@ -6,9 +6,9 @@ import pathlib
 
 import pytest
 
-from squid_py.asset import Asset
+from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
-from squid_py.ocean import Ocean
+from squid_py.ocean.ocean import Ocean
 import secrets
 
 # Disable low level loggers
@@ -186,7 +186,7 @@ def test_ocean_publish():
 
     # ensure Ocean token balance
     if publisher_acct.ocean == 0:
-        rcpt = aquarius_acct.request_tokens(200)
+        rcpt = publisher_acct.request_tokens(200)
         ocean._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!

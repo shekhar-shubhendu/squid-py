@@ -2,7 +2,7 @@ import logging
 
 from web3 import Web3, HTTPProvider
 
-from squid_py.account import Account
+from squid_py.ocean.account import Account
 from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
 from squid_py.keeper import Keeper
@@ -59,31 +59,18 @@ class Ocean:
         print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
         print("Ocean.config.address_list.didregistry: {}".format(self.config.address_list['didregistry']))
 
-    def update_accounts(self):
-        """
-        Using the Web3 driver, get all account addresses
-        This is used for development to get an overview of all accounts
-        For each address, instantiate a new Account object
-        :return: List of Account instances
-        """
-        logging.debug("Updating accounts")
+    def get_accounts(self):
         accounts_dict = dict()
         for account_address in self._web3.eth.accounts:
-            accounts_dict[account_address] = Account(self.keeper, account_address)
+            accounts_dict[account_address] = Account('name', self.keeper, account_address)
+        return accounts_dict
 
-        self.accounts = accounts_dict
-
-    def get_accounts(self):
-        self.update_accounts()
-        return self.accounts
-
-    def get_asset(self):
+    def get_asset(self, asset_did):
         """
-        Given an assetID, return the Asset
+        Given an asset_did, return the Asset
         :return: Asset object
         """
-        pass
-        return this_asset
+        return self.metadata.get_asset_metadata(asset_did)
 
     def get_asset_ids(self):
         """
@@ -92,12 +79,16 @@ class Ocean:
         """
         pass
 
-    def search_assets(self):
+    def search_assets(self, text, sort=None, offset=100, page=0):
         """
-
-        :return:
+        Search an asset in oceanDB using aquarius.
+        :param text
+        :param sort
+        :param offset
+        :param page
+        :return: List of assets that match with the query.
         """
-        pass
+        return self.metadata.text_search(text=text, sort=sort, offset=offset, page=page)
 
     def register(self, asset, asset_price, publisher_acct):
         """
@@ -119,7 +110,6 @@ class Ocean:
         assert asset.ddo.is_valid
 
         # 2) Check that the publisher is valid and has funds
-        self.update_accounts()
         assert publisher_acct.address in self.accounts
 
         # 3) Publish to metadata store
@@ -131,8 +121,3 @@ class Ocean:
 
         # 4) Register the asset onto blockchain
         result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
-
-
-class Order:
-    def __init__(self):
-        pass

@@ -1,7 +1,7 @@
-from squid_py.asset import Asset
-from squid_py.ocean import Ocean
+from squid_py.ocean.asset import Asset
+from squid_py.ocean.ocean import Ocean
 import pathlib
-import secrets
+
 
 def test_aquarius():
     ocean_provider = Ocean(config_file='config_local.ini')

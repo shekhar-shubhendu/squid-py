@@ -1,21 +1,27 @@
-
+from .ocean_base import OceanBase
+from .balance import Balance
 
 class Account:
-    def __init__(self, keeper, address):
+# class Account(OceanBase):
+
+    def __init__(self, name, keeper, address):
         """
         Hold account address, and update balances of Ether and Ocean token
 
         :param keeper: The instantiated Keeper
         :param address: The address of this account
         """
+        # OceanBase.__init__(id)
+        self.name = name
         self.keeper = keeper
         self.address = address
+        self.balance = self.get_balance()
 
-    def request_tokens(self,amount):
-        return self.keeper.market.request_tokens(amount,self.address)
+    def request_tokens(self, amount):
+        return self.keeper.market.request_tokens(amount, self.address)
 
     def get_balance(self):
-        pass
+        return Balance(self.ether, self.ocean)
 
     def __str__(self):
         return "Account {} with {} Eth, {} Ocean".format(self.address, self.ether, self.ocean)

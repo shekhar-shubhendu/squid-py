@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 
-from .ddo import DDO
+from squid_py.ddo import DDO
 
 
 class Asset:
@@ -128,7 +128,7 @@ class Asset:
         pass
 
     def get_metadata(self):
-        pass
+        return self.metadata
 
     def update_metadata(self):
         pass

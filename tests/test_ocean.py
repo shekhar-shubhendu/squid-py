@@ -10,7 +10,8 @@ import pytest
 from web3 import Web3
 
 from squid_py.config import Config
-from squid_py.ocean import Ocean
+from squid_py.ocean.ocean import Ocean
+from squid_py.ocean.balance import Balance
 from squid_py.utils import utilities
 
 
@@ -30,7 +31,7 @@ def test_ocean_instance():
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
-    ocean.update_accounts()
+    # ocean.update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
 
@@ -46,7 +47,7 @@ def test_token_request():
     amount = 2000
 
     # Get the current accounts, assign 2
-    ocean.update_accounts()
+    # ocean.update_accounts()
     aquarius_address = list(ocean.accounts)[0]
     consumer_address = list(ocean.accounts)[1]
 
@@ -62,13 +63,15 @@ def test_token_request():
 
     # Update and print balances
     # Ocean.accounts is a dict address: account
-    ocean.update_accounts()
+    # ocean.update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
     aquarius_current_eth = ocean.accounts[aquarius_address].ether
     aquarius_current_ocean = ocean.accounts[aquarius_address].ocean
 
     # Confirm balance changes
+    assert ocean.accounts[aquarius_address].get_balance().eth == aquarius_current_eth
+    assert ocean.accounts[aquarius_address].get_balance().ocn == aquarius_current_ocean
     assert aquarius_current_eth < aquarius_start_eth
     assert aquarius_current_ocean == aquarius_start_ocean + amount
 
