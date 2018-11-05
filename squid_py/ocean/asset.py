@@ -3,6 +3,7 @@ import logging
 import re
 
 from squid_py.ddo import DDO
+from squid_py.ocean.ocean_base import OceanBase
 
 
 class Asset:
@@ -23,7 +24,7 @@ class Asset:
         :param ddo: DDO instance
         """
 
-        self.asset_id = asset_id
+        self.asset_id =asset_id
         self.publisher_id = publisher_id
         self.price = price
         self.ddo = ddo

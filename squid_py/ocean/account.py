@@ -1,5 +1,5 @@
 from .ocean_base import OceanBase
-from .balance import Balance
+from squid_py.models.balance import Balance
 
 class Account:
 # class Account(OceanBase):
@@ -11,7 +11,6 @@ class Account:
         :param keeper: The instantiated Keeper
         :param address: The address of this account
         """
-        # OceanBase.__init__(id)
         self.name = name
         self.keeper = keeper
         self.address = address

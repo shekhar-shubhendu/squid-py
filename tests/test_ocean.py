@@ -11,7 +11,6 @@ from web3 import Web3
 
 from squid_py.config import Config
 from squid_py.ocean.ocean import Ocean
-from squid_py.ocean.balance import Balance
 from squid_py.utils import utilities
 
 
