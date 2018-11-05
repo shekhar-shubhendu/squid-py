@@ -19,7 +19,10 @@ from .public_key_rsa import PublicKeyRSA, AUTHENTICATION_TYPE_RSA, PUBLIC_KEY_TY
 from .service import Service
 
 class DDO():
+    """
+    DDO class to create, import, export, validate DDO objects.
 
+    """
     def __init__(self, did='', json_text=None, json_filename=None, created=None):
         """ clear the DDO data values """
         self._did = ''
@@ -162,7 +165,7 @@ class DDO():
         if 'proof' in values:
             self._proof = values['proof']
 
-    def add_proof(self, authorisation_index, private_key=None):
+    def add_proof(self, authorisation_index, private_key=None, signature_text=None):
         """add a proof to the DDO, based on the public_key id/index and signed with the private key
         add a static proof to the DDO, based on one of the public keys"""
 
@@ -184,30 +187,37 @@ class DDO():
 
         if sign_key is None:
             raise IndexError
+
+        # get the signature text if not provided
+
+        if signature_text is None:
+            hash_text_list = self.hash_text_list()
+            signature_text = "".join(hash_text_list)
+
         # just incase clear out the current static proof property
         self._proof = None
-        # get the complete DDO as jSON text without the static proof field
-        signature = DDO.sign_text(self.as_text(False), private_key, sign_key.get_type())
+
+        signature = DDO.sign_text(signature_text, private_key, sign_key.get_type())
 
         self._proof = {
             'type': sign_key.get_type(),
             'created': DDO.get_timestamp(),
             'creator': sign_key.get_id(),
-            'signatureValue': str(b64encode(signature))
+            'signatureValue': b64encode(signature).decode('utf-8'),
         }
-
 
     def validate_proof(self, signature_text=None):
         """validate the static proof created with this DDO, return True if valid
         if no static proof exists then return False"""
 
         if not signature_text:
-            signature_text = self.as_text(is_proof=False)
+            hash_text_list = self.hash_text_list()
+            signature_text = "".join(hash_text_list)
         if self._proof is None:
             return False
         if not isinstance(self._proof, dict):
             return False
-        if 'type' in self._proof and 'creator' in self._proof and 'signatureValue' in self._proof:
+        if 'creator' in self._proof and 'signatureValue' in self._proof:
             return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
         return False
 
@@ -216,7 +226,7 @@ class DDO():
         return not self._proof is None
 
     def validate_from_key(self, key_id, signature_text, signature_value):
-        """validate a signature based on a given public_key key_id/name"""
+        """validate a signature based on a given public_key key_id/name """
 
         public_key = self.get_public_key(key_id, True)
         if public_key is None:
@@ -298,9 +308,8 @@ class DDO():
                 return False
         return True
 
-    def calculate_hash(self, include_service_values=False):
-        """return a sha3 hash of important bits of the DDO, excluding any DID portion,
-        as this hash can be used to generate the DID"""
+    def hash_text_list(self, include_service_values=False):
+        """return a list of all of the hash text"""
         hash_text = []
         if self._created:
             hash_text.append(self._created)
@@ -331,9 +340,16 @@ class DDO():
         # if no data can be found to hash then raise an error
         if not hash_text:
             raise ValueError
-        return Web3.sha3(text="".join(hash_text))
+        return hash_text
+
+    def calculate_hash(self, include_service_values=False):
+        """return a sha3 hash of important bits of the DDO, excluding any DID portion,
+        as this hash can be used to generate the DID"""
+        hash_text_list = self.hash_text_list()
+        return Web3.sha3(text="".join(hash_text_list))
 
     def is_empty(self):
+        """return True if this DDO object is empty"""
         return self._did == ''                          \
                 and len(self._public_keys) == 0         \
                 and len(self._authentications) == 0     \
@@ -342,9 +358,11 @@ class DDO():
                 and self._created is None
 
     def is_did_assigend(self):
+        """return true if a DID is assigned to this DDO"""
         return self._did != ''
 
     def get_created_time(self):
+        """return the DDO created time, can be None"""
         return self._created
 
     def create_new(self, did):
@@ -377,34 +395,42 @@ class DDO():
 
     @property
     def did(self):
+        """ get the DID """
         return self._did
 
     @property
     def public_keys(self):
+        """get the list of public keys"""
         return self._public_keys
 
     @property
     def authentications(self):
+        """get the list authentication records"""
         return self._authentications
 
     @property
     def services(self):
+        """get the list of services"""
         return self._services
 
     @property
     def proof(self):
+        """ get the static proof, or None """
         return self._proof
 
     @property
     def is_valid(self):
+        """return True if this DDO is valid"""
         return self.validate()
 
     @staticmethod
     def sign_text(text, private_key, sign_type=PUBLIC_KEY_TYPE_RSA):
+        """Sign some text using the private key provided"""
         signed_text = None
         if sign_type == PUBLIC_KEY_TYPE_RSA:
             signer = PKCS1_v1_5.new(RSA.import_key(private_key))
-            text_hash = SHA256.new(text.encode())
+            text_hash = SHA256.new(text.encode('utf-8'))
+            print('sign', text_hash.hexdigest())
             signed_text = signer.sign(text_hash)
         else:
             raise NotImplementedError
@@ -412,13 +438,15 @@ class DDO():
 
     @staticmethod
     def validate_signature(text, key, signature, sign_type=AUTHENTICATION_TYPE_RSA):
+        """validate a signature based on some text, priavte/public key and signature"""
         result = False
         try:
             if sign_type == AUTHENTICATION_TYPE_RSA:
                 rsa_key = RSA.import_key(key)
-                validater = PKCS1_v1_5.new(rsa_key)
-                text_hash = SHA256.new(text.encode())
-                result = validater.verify(text_hash, signature)
+                verifier = PKCS1_v1_5.new(rsa_key)
+                text_hash = SHA256.new(text.encode('utf-8'))
+                print('valid', text_hash.hexdigest())
+                result = verifier.verify(text_hash, signature)
             else:
                 raise NotImplementedError
         except (ValueError, TypeError):
@@ -437,6 +465,7 @@ class DDO():
 
     @staticmethod
     def create_authentication_from_json(values):
+        """create authentitaciton object from a JSON string"""
         key_id = values['publicKey']
         authentication_type = values['type']
         if isinstance(key_id, dict):
@@ -449,6 +478,7 @@ class DDO():
 
     @staticmethod
     def create_service_from_json(values):
+        """create a service object from a JSON string"""
         if not 'id' in values:
             raise IndexError
         if not 'serviceEndpoint' in values:
@@ -460,4 +490,5 @@ class DDO():
 
     @staticmethod
     def get_timestamp():
+        """return the current system timestamp"""
         return str(datetime.datetime.now())

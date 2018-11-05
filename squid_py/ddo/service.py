@@ -64,7 +64,7 @@ class Service():
 
         if is_pretty:
             return json.dumps(values, indent=4, separators=(',', ': '))
-
+  
         return json.dumps(values)
 
     def as_dictionary(self):
