@@ -213,7 +213,6 @@ def test_creating_ddo_embedded_public_key():
         ddo_text_proof_hash = ddo.calculate_hash()
         assert ddo_text_proof_hash
 
-
 def test_creating_did_using_ddo():
     # create an empty ddo
     test_id = secrets.token_hex(32)
