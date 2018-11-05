@@ -12,7 +12,7 @@ def watch_service_agreement_events(web3helper, config, service_agreement_id, ser
         The service definition format is described in OEP-11.
     """
 
-    filters = {'serviceAgreementId': service_agreement_id}
+    filters = {'serviceId': service_agreement_id.encode()}
     for condition in service_definition['conditions']:
         for event in condition['events']:
             if event['actor_type'] != actor_type:

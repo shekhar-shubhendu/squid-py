@@ -33,3 +33,7 @@ def get_fingerprint_by_name(abi, name):
             return item['signature']
 
     raise ValueError('{} not found in the given ABI'.format(name))
+
+
+def hexstr_to_bytes(web3, hexstr):
+    return web3.toBytes(int(hexstr, 16))
