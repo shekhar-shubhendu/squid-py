@@ -314,7 +314,7 @@ class DDO():
                 return False
         return True
 
-    def hash_text_list(self, include_service_values=False):
+    def hash_text_list(self):
         """return a list of all of the hash text"""
         hash_text = []
         if self._created:
@@ -340,15 +340,13 @@ class DDO():
             for service in self._services:
                 hash_text.append(service.get_type())
                 hash_text.append(service.get_endpoint())
-                if include_service_values:
-                    hash_text.append(service.get_values())
 
         # if no data can be found to hash then raise an error
         if not hash_text:
             raise ValueError
         return hash_text
 
-    def calculate_hash(self, include_service_values=False):
+    def calculate_hash(self):
         """return a sha3 hash of important bits of the DDO, excluding any DID portion,
         as this hash can be used to generate the DID"""
         hash_text_list = self.hash_text_list()
