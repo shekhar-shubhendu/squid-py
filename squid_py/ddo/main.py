@@ -5,7 +5,10 @@
 import datetime
 import json
 import re
-from base64 import b64encode
+from base64 import (
+    b64encode,
+    b64decode,
+)
 
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
@@ -217,8 +220,11 @@ class DDO():
             return False
         if not isinstance(self._proof, dict):
             return False
+
+
         if 'creator' in self._proof and 'signatureValue' in self._proof:
-            return self.validate_from_key(self._proof['creator'], signature_text, self._proof['signatureValue'])
+            signature = b64decode(self._proof['signatureValue'])
+            return self.validate_from_key(self._proof['creator'], signature_text, signature)
         return False
 
     def is_proof_defined(self):
@@ -430,7 +436,6 @@ class DDO():
         if sign_type == PUBLIC_KEY_TYPE_RSA:
             signer = PKCS1_v1_5.new(RSA.import_key(private_key))
             text_hash = SHA256.new(text.encode('utf-8'))
-            print('sign', text_hash.hexdigest())
             signed_text = signer.sign(text_hash)
         else:
             raise NotImplementedError
@@ -438,15 +443,15 @@ class DDO():
 
     @staticmethod
     def validate_signature(text, key, signature, sign_type=AUTHENTICATION_TYPE_RSA):
-        """validate a signature based on some text, priavte/public key and signature"""
+        """validate a signature based on some text, public key and signature"""
         result = False
         try:
             if sign_type == AUTHENTICATION_TYPE_RSA:
                 rsa_key = RSA.import_key(key)
                 verifier = PKCS1_v1_5.new(rsa_key)
-                text_hash = SHA256.new(text.encode('utf-8'))
-                print('valid', text_hash.hexdigest())
-                result = verifier.verify(text_hash, signature)
+                if verifier:
+                    text_hash = SHA256.new(text.encode('utf-8'))
+                    result = verifier.verify(text_hash, signature)
             else:
                 raise NotImplementedError
         except (ValueError, TypeError):
