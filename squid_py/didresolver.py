@@ -20,51 +20,43 @@ from squid_py.exceptions import (
 
 DIDREGISTRY_EVENT_NAME = 'DIDAttributeRegistered'
 
-VALUE_TYPE_DID =        0
-VALUE_TYPE_DID_REF =    1
-VALUE_TYPE_URL =        2
-VALUE_TYPE_DDO =        3
+VALUE_TYPE_DID = 0
+VALUE_TYPE_DID_REF = 1
+VALUE_TYPE_URL = 2
+VALUE_TYPE_DDO = 3
 
 
 logger = logging.getLogger()
 
 class DIDResolver():
+    """
+    DID Resolver class
+    Resolve DID to a URL/DDO
+    """
+    def __init__(self, web3, didregistry):
+        self._web3 = web3
+        self._didregistry = didregistry
 
-    def __init__(self, ocean, is_cache = True):
-        self._web3 = ocean._web3
-        self._didregistry = ocean.keeper.didregistry
         if not self._didregistry:
-            raise ValueError('Cannot load didregistry contract object')
+            raise ValueError('No didregistry contract object provided')
 
-        # TODO: FIX ME!
-        # the current ABI is out of sync with the keeper-contract build
-        # so hard coding the signature !
-        self._event_signature = Web3.sha3(text="{}(bytes32,address,uint8,bytes32,string,uint256)".format(DIDREGISTRY_EVENT_NAME)).hex()
-        # self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
+        self._event_signature = self._didregistry.get_event_signature(DIDREGISTRY_EVENT_NAME)
         if not self._event_signature:
             raise ValueError('Cannot find Event {} signature'.format(DIDREGISTRY_EVENT_NAME))
 
-        self._cache = None
-        if is_cache:
-            self._cache = {}
-
-    def clear_cache(self):
-        if self._cache:
-            self._cache = {}
-
-    def resolve(self, did, max_hop_count = 0):
+    def resolve(self, did, max_hop_count=0):
         """
-            Resolve a DID to an URL/DDO or later an internal/extrenal DID
+        Resolve a DID to an URL/DDO or later an internal/extrenal DID
 
-            :param did:             32 byte value to resolver, this is part of the ocean DID did:op:<32 byte value>
-            :param max_hop_count:   max number of hops allowed to find the destination URL/DDO
-            :return string URL or DDO of the resolved DID
-            :return None if the DID cannot be resolved
+        :param did: 32 byte value to resolver, this is part of the ocean DID did:op:<32 byte value>
+        :param max_hop_count: max number of hops allowed to find the destination URL/DDO
+        :return string URL or DDO of the resolved DID
+        :return None if the DID cannot be resolved
 
-            :raises TypeError - on non 32byte value as the DID
-            :raises TypeError - on any of the resolved values are not string/DID bytes.
-            :raises OceanDIDCircularReference - on the chain being pointed back to itself.
-            :rasies OceanDIDNotFound    - if no DID can be found to resolve.
+        :raises TypeError - on non 32byte value as the DID
+        :raises TypeError - on any of the resolved values are not string/DID bytes.
+        :raises OceanDIDCircularReference - on the chain being pointed back to itself.
+        :rasies OceanDIDNotFound    - if no DID can be found to resolve.
 
         """
         if not isinstance(did, bytes):
@@ -76,7 +68,7 @@ class DIDResolver():
         # resolve a DID to a URL or DDO
         data = self.get_did(did)
         hop_count = 0
-        while data and ( max_hop_count == 0 or hop_count < max_hop_count):
+        while data and (max_hop_count == 0 or hop_count < max_hop_count):
             if data['value_type'] == VALUE_TYPE_URL or data['value_type'] == VALUE_TYPE_DDO:
                 logger.info('found did {0} -> {1}'.format(Web3.toHex(did), data['value']))
                 if data['value']:
@@ -117,13 +109,8 @@ class DIDResolver():
 
 
     def get_did(self, did):
-        # return a did value and value type from the block chain event record using 'did'
-        # if the cache is enabled, then get this from the cache if available
+        """return a did value and value type from the block chain event record using 'did'"""
         result = None
-
-        if self._cache:
-            if did in self._cache:
-                return self._cache[did]
 
         block_number = self._didregistry.get_update_at(did)
         if block_number == 0:
@@ -137,14 +124,10 @@ class DIDResolver():
         log_items = block_filter.get_all_entries()
         if log_items and len(log_items) > 0:
             log_item = log_items[len(log_items) - 1]
-
-            # TODO: The contract currently has a different event variable sequence, we will need to change this to ..
-            # value, value_type, block_number = '(string,uint8,uint256)'
-            value_type, value, block_number = decode_single('(uint8,string,uint256)', Web3.toBytes(hexstr=log_item['data']))
+            value, value_type, block_number = decode_single('(string,uint8,uint256)', \
+                Web3.toBytes(hexstr=log_item['data']))
             result = {
                 'value_type': value_type,
                 'value': value
             }
-        if self._cache:
-            self._cache[did] = result
         return result
