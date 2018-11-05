@@ -202,9 +202,9 @@ def test_ocean_publish():
     
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
-    if asset.asset_id in meta_data_assets['ids']:
-        ocean.metadata.get_asset_metadata(asset.asset_id)
-        ocean.metadata.retire_asset_metadata(asset.asset_id)
+    if asset.ddo['id'] in meta_data_assets['ids']:
+        ocean.metadata.get_asset_metadata(asset.ddo['id'])
+        ocean.metadata.retire_asset_metadata(asset.ddo['id'])
 
     ##########################################################
     # Register using high-level interface
