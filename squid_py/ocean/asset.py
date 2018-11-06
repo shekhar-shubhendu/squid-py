@@ -138,17 +138,8 @@ class Asset:
     def get_DID(self):
         pass
 
-    def publish_metadata(self):
-        pass
-
     def get_metadata(self):
         return self.metadata
-
-    def update_metadata(self):
-        pass
-
-    def retire_metadata(self):
-        pass
 
     def get_service_agreements(self):
         pass

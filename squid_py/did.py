@@ -5,16 +5,16 @@
 
 import re
 
-from web3 import (
-    Web3
-)
-
 from urllib.parse import (
     urlparse,
 )
 
+from web3 import (
+    Web3
+)
 
-def did_generate(did_id, path = None, fragment = None, method = 'op'):
+
+def did_generate(did_id, path=None, fragment=None, method='op'):
     """generate a DID based in it's id, path, fragment and method"""
 
     method = re.sub('[^a-z0-9]', '', method.lower())
@@ -28,6 +28,7 @@ def did_generate(did_id, path = None, fragment = None, method = 'op'):
         did.append(fragment)
     return "".join(did)
 
+
 def did_generate_base_id(did_id, ddo):
     """generate a base did-id, using user defined id, and ddo"""
     values = []
@@ -37,12 +38,17 @@ def did_generate_base_id(did_id, ddo):
     # return the hash as a string with no leading '0x'
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
 
-def did_generate_from_ddo(did_id, ddo, path = None, fragment = None, method = 'op'):
-    """generate a new DID from a configured DDO, returns the new DID, and a new DDO with the id values already assigned"""
+
+def did_generate_from_ddo(did_id, ddo, path=None, fragment=None, method='op'):
+    """
+    generate a new DID from a configured DDO, returns the new DID, and a
+    new DDO with the id values already assigned
+    """
     base_id = did_generate_base_id(did_id, ddo)
-    did =  did_generate(base_id, method = method)
+    did = did_generate(base_id, method=method)
     assigned_ddo = ddo.create_new(did)
     return did_generate(base_id, path, fragment, method), assigned_ddo
+
 
 def did_validate(did, did_id, ddo):
     """validate a DID and check to see it matches the user defined 'id', and DDO"""
@@ -51,6 +57,7 @@ def did_validate(did, did_id, ddo):
     if did_items:
         return did_items['id'] == base_id
     return False
+
 
 def did_parse(did):
     """parse a DID into it's parts"""
@@ -61,18 +68,19 @@ def did_parse(did):
     match = re.match('^did:([a-z0-9]+):([a-zA-Z0-9-.]+)(.*)', did)
     if match:
         result = {
-            'method' : match.group(1),
+            'method': match.group(1),
             'id': match.group(2),
             'path': None,
             'fragment': None
         }
         uri_text = match.group(3)
-        if uri_text and len(uri_text) > 0:
+        if uri_text:
             uri = urlparse(uri_text)
             result['fragment'] = uri.fragment
-            if len(uri.path) > 0:
+            if uri.path:
                 result['path'] = uri.path[1:]
     return result
+
 
 def is_did_valid(did):
     """
@@ -86,7 +94,9 @@ def is_did_valid(did):
 
 
 def did_generate_from_id(did_id, method='op'):
-
+    """
+    generate a DID from a hex id, this at the moment is a valid asset_id
+    """
     if isinstance(did_id, bytes):
         did_id = Web3.toHex(did_id)
 
@@ -101,7 +111,9 @@ def did_generate_from_id(did_id, method='op'):
         did_id = '0'
     return 'did:{0}:{1}'.format(method, did_id)
 
+
 def get_id_from_did(did):
+    """return an id extracted from a DID string"""
     if is_did_valid(did):
         result = did_parse(did)
         if result:

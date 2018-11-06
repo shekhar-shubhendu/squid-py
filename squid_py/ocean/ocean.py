@@ -48,6 +48,8 @@ class Ocean:
 
         assert self.accounts
 
+        self.did_resolver = DIDResolver(self._web3, self.keeper.didregistry)
+
     def print_config(self):
         # TODO: Cleanup
         print("Ocean object configuration:".format())
@@ -118,4 +120,4 @@ class Ocean:
         result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
 
     def resolve_did(self, did):
-        DIDResolver.resolve(did)
+        self.did_resolver.resolve(did)
