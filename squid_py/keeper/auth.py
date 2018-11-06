@@ -33,8 +33,8 @@ class Auth(ContractBase):
                                                          access_agreement_ref,
                                                          accesss_agreement_type,
                                                          transact={
-                                                              'from': sender_address,
-                                                              'gas': gas_amount}
+                                                             'from': sender_address,
+                                                             'gas': gas_amount}
                                                          )
 
     def deliver_access_token(self, order_id, enc_jwt, sender_address):
@@ -42,7 +42,7 @@ class Auth(ContractBase):
         return self.contract_concise.deliverAccessToken(order_id,
                                                         enc_jwt,
                                                         transact={'from': sender_address,
-                                                                   'gas': 4000000})
+                                                                  'gas': 4000000})
 
     def get_order_status(self, order_id):
         return self.contract_concise.statusOfAccessRequest(order_id)

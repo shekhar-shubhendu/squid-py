@@ -1,13 +1,12 @@
 import logging
-import os
 
 from web3 import Web3, HTTPProvider
 
+from squid_py.account import Account
+from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
-from squid_py.aquariuswrapper import AquariusWrapper
-from squid_py.account import Account
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -49,7 +48,7 @@ class Ocean:
         assert self.accounts
 
     def print_config(self):
-        #TODO: Cleanup
+        # TODO: Cleanup
         print("Ocean object configuration:".format())
         print("Ocean.config.keeper_path: {}".format(self.config.keeper_path))
         print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
@@ -58,6 +57,7 @@ class Ocean:
         print("Ocean.config.address_list.market: {}".format(self.config.address_list['market']))
         print("Ocean.config.address_list.token: {}".format(self.config.address_list['token']))
         print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
+        print("Ocean.config.address_list.didregistry: {}".format(self.config.address_list['didregistry']))
 
     def update_accounts(self):
         """
@@ -136,4 +136,3 @@ class Ocean:
 class Order:
     def __init__(self):
         pass
-

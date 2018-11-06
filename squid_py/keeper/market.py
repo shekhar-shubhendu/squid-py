@@ -1,9 +1,11 @@
 import logging
 
+from web3 import Web3
+
 from squid_py.config import DEFAULT_GAS_LIMIT
 from squid_py.constants import OCEAN_MARKET_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
-from web3 import Web3
+
 
 
 class Market(ContractBase):
@@ -38,10 +40,10 @@ class Market(ContractBase):
         """Request an amount of tokens for a particular address."""
         try:
             receipt = self.contract_concise.requestTokens(amount, transact={'from': address})
-            logging.info("{} requests {} tokens, returning receipt".format(address,amount))
+            logging.info("{} requests {} tokens, returning receipt".format(address, amount))
             return receipt
         except:
-            #TODO: Specify error
+            # TODO: Specify error
             raise
             return False
 
@@ -60,8 +62,7 @@ class Market(ContractBase):
                 return true;
             }
 
-        :param name:
-        :param description:
+        :param asset:
         :param price:
         :param publisher_address:
         :return:

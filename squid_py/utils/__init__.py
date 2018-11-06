@@ -1,11 +1,13 @@
-
-
-from .web3_helper_module import (
-    convert_to_bytes,
+from .utilities import (
+    watcher,
+    watch_event,
+    install_filter,
     convert_to_string,
+    convert_to_bytes,
     convert_to_text,
-)
-
-from .web3_helper import (
-    Web3Helper,
+    to_32byte_hex,
+    get_balance,
+    sign,
+    split_signature,
+    network_name
 )

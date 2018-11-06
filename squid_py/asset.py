@@ -1,10 +1,10 @@
-import os
 import hashlib
-import logging
 import json
-from .ddo import DDO
-import pathlib
+import logging
 import re
+
+from .ddo import DDO
+
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
@@ -31,7 +31,7 @@ class Asset:
 
     @property
     def bare_did_string(self):
-        #TODO: This is temp, until the proper handling is implemented!
+        # TODO: This is temp, until the proper handling is implemented!
         return self.asset_id.split(':')[-1]
 
     def assign_did_from_ddo(self):
@@ -39,33 +39,38 @@ class Asset:
         #TODO: This is a temporary hack, need to clearly define how DID is assigned!
         :return:
         """
-        did = self.ddo['id']
+        did = self.ddo.did
         match = re.match('^did:op:([0-9a-f]+)', did)
         if match:
             self.asset_id = match.groups(1)[0]
 
     @classmethod
-    def from_ddo_json_file(cls,json_file_path):
+    def from_ddo_json_file(cls, json_file_path):
         this_asset = cls()
-        this_asset.ddo = DDO.from_json_file(json_file_path)
-        this_asset.asset_id = this_asset.ddo['id']
+        this_asset.ddo = DDO(json_filename=json_file_path)
+        this_asset.asset_id = this_asset.ddo.did
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
     @property
     def metadata(self):
         assert self.has_metadata
-        metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
-        assert len(metadata_service) == 1
-        metadata_service = metadata_service[0]
-        return metadata_service['metadata']
+        return self._get_metadata()
 
     @property
     def has_metadata(self):
-        metadata_service = [service for service in self.ddo['service'] if service['type'] == 'Metadata']
-        return len(metadata_service) == 1
+        return not self._get_metadata() == None
 
-    def is_valid_did(self,length=64):
+    def _get_metadata(self):
+        result = None
+        metadata_service = self.ddo.get_service('Metadata')
+        if metadata_service:
+            values = metadata_service.get_values()
+            if 'metadata' in values:
+                result = values['metadata']
+        return result
+
+    def is_valid_did(self, length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
 
@@ -78,7 +83,14 @@ class Asset:
         if not self.ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        self.asset_id = hashlib.sha256(self.ddo.raw_string.encode('utf-8')).hexdigest()
+        metadata = self._get_metadata()
+        if not metadata:
+            raise ValueError("No metedata in {}".format(self))
+
+        if not 'base' in metadata:
+            raise ValueError("Invalid metedata in {}".format(self))
+
+        self.asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
 
     def assign_metadata(self):
         pass
@@ -141,7 +153,4 @@ class Asset:
         pass
 
     def __str__(self):
-        return "Asset {}, price: {}, publisher: {}".format(self.asset_id, self.price,self.publisher_id)
-
-
-
+        return "Asset {}, price: {}, publisher: {}".format(self.asset_id, self.price, self.publisher_id)

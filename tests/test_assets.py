@@ -131,16 +131,8 @@ def test_publish_data_asset_aquarius():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    # asset.generate_did()
-    ######################
-    # the sample ddo does not contain the correct asset_id, so force it to a
-    # new id...
-    #asset.generate_did()
-    
-    ## instead of v.
-    asset.ddo['id'] = 'did:op:{}'.format(secrets.token_hex(32))
     asset.assign_did_from_ddo()
-    
+
     ##########################################################
     # List currently published assets
     ##########################################################
@@ -149,9 +141,9 @@ def test_publish_data_asset_aquarius():
         print("Currently registered assets:")
         print(meta_data_assets['ids'])
 
-    if asset.asset_id in meta_data_assets['ids']:
-        ocean.metadata.get_asset_metadata(asset.asset_id)
-        ocean.metadata.retire_asset_metadata(asset.asset_id)
+    if asset.ddo.did in meta_data_assets['ids']:
+        ocean.metadata.get_asset_metadata(asset.ddo.did)
+        ocean.metadata.retire_asset_metadata(asset.ddo.did)
     # Publish the metadata
     this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
@@ -161,8 +153,9 @@ def test_publish_data_asset_aquarius():
 
     # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
-    published_metadata = ocean.metadata.get_asset_metadata(asset.asset_id)
+    published_metadata = ocean.metadata.get_asset_metadata(asset.ddo.did)
 
+    assert published_metadata
     # only compare top level keys
     # assert sorted(list(asset.metadata['base'].keys())) == sorted(list(published_metadata['base'].keys()))
     # asset.metadata == published_metadata
@@ -199,12 +192,12 @@ def test_ocean_publish():
     asset.assign_did_from_ddo()
 
     ######################
-    
+
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
-    if asset.asset_id in meta_data_assets['ids']:
-        ocean.metadata.get_asset_metadata(asset.asset_id)
-        ocean.metadata.retire_asset_metadata(asset.asset_id)
+    if asset.ddo.did in meta_data_assets['ids']:
+        ocean.metadata.get_asset_metadata(asset.ddo.did)
+        ocean.metadata.retire_asset_metadata(asset.ddo.did)
 
     ##########################################################
     # Register using high-level interface
