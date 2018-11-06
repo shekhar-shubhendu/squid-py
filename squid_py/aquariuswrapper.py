@@ -21,7 +21,10 @@ class AquariusWrapper(object):
         logging.debug("Metadata assets at {}".format(self._base_url))
 
     def list_assets(self):
-        return json.loads(requests.get(self._base_url).content)
+        asset_list = json.loads(requests.get(self._base_url).content)
+        if asset_list and 'ids' in asset_list:
+            return asset_list['ids']
+        return []
 
     def get_asset_metadata(self, asset_did):
         response = requests.get(self._base_url + '/ddo/%s' % asset_did).content
