@@ -7,6 +7,7 @@ from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
+from squid_py.didresolver import DIDResolver
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -72,12 +73,6 @@ class Ocean:
         """
         return self.metadata.get_asset_metadata(asset_did)
 
-    def get_asset_ids(self):
-        """
-
-        :return:
-        """
-        pass
 
     def search_assets(self, text, sort=None, offset=100, page=0):
         """
@@ -121,3 +116,6 @@ class Ocean:
 
         # 4) Register the asset onto blockchain
         result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
+
+    def resolve_did(self, did):
+        DIDResolver.resolve(did)
