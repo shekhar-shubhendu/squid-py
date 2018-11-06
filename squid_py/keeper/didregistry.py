@@ -1,10 +1,6 @@
 import re
-from web3 import Web3
-
 from urllib.parse import urlparse
-
-from squid_py.did import did_to_id_bytes
-from squid_py.ddo import DDO
+from web3 import Web3
 
 from squid_py.didresolver import (
     VALUE_TYPE_DID,
@@ -12,20 +8,22 @@ from squid_py.didresolver import (
     VALUE_TYPE_DDO,
 )
 
-from squid_py.exceptions import (
-    OceanDIDCircularReference,
-)
-
+from squid_py.did import did_to_id_bytes
+from squid_py.ddo import DDO
+from squid_py.exceptions import OceanDIDCircularReference
 from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 
 class DIDRegistry(ContractBase):
+    """
+    Class to register and update Ocean DID's
+    """
     def __init__(self, web3, contract_path, address):
         ContractBase.__init__(self, web3, OCEAN_DID_REGISTRY_CONTRACT, 'didregistry', contract_path, address)
 
 
 
-    def register(self, did_source, url=None, ddo=None, did=None, key=None, account = None):
+    def register(self, did_source, url=None, ddo=None, did=None, key=None, account=None):
         """
         Register or update a DID on the block chain using the DIDRegistry smart contract
 
@@ -73,15 +71,15 @@ class DIDRegistry(ContractBase):
             value = re.sub('^0x', '', Web3.toHex(id_bytes))
 
         if isinstance(key, str):
-            key = Web3.sha3(text = key)
+            key = Web3.sha3(text=key)
 
-        if key == None:
+        if key is None:
             key = Web3.toBytes(0)
 
         if not isinstance(key, bytes):
             raise ValueError('Invalid key value {}, must be bytes or string'.format(key))
 
-        if account == None:
+        if account is None:
             raise ValueError('You must provide an account address to use to register a DID')
 
         transaction = self.register_attribute(did_source_id, value_type, key, value, account)
@@ -106,4 +104,5 @@ class DIDRegistry(ContractBase):
         )
 
     def get_update_at(self, did):
+        """return the block number the last did was updated on the block chain"""
         return self.contract_concise.getUpdateAt(did)
