@@ -132,7 +132,7 @@ def test_publish_data_asset_aquarius():
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
     asset.assign_did_from_ddo()
-    
+
     ##########################################################
     # List currently published assets
     ##########################################################
@@ -155,6 +155,7 @@ def test_publish_data_asset_aquarius():
     # get_asset_metadata only returns 'base' key, is this correct?
     published_metadata = ocean.metadata.get_asset_metadata(asset.ddo.did)
 
+    assert published_metadata
     # only compare top level keys
     # assert sorted(list(asset.metadata['base'].keys())) == sorted(list(published_metadata['base'].keys()))
     # asset.metadata == published_metadata
@@ -191,7 +192,7 @@ def test_ocean_publish():
     asset.assign_did_from_ddo()
 
     ######################
-    
+
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
     if asset.ddo.did in meta_data_assets['ids']:

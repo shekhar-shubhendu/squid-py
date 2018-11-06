@@ -4,9 +4,7 @@
 import json
 import os
 import pathlib
-import pytest
 import secrets
-from web3 import Web3
 
 from squid_py.did import (
     did_generate,
@@ -134,7 +132,7 @@ def generate_sample_ddo():
 
     # add a proof signed with the private key
     ddo.add_proof(0, private_key)
-    
+
     metadata = json.loads(TEST_METADATA)
     ddo.add_service("Metadata", "http://myaquarius.org/api/v1/provider/assets/metadata/{did}", values={ 'metadata': metadata})
     for test_service in TEST_SERVICES:
@@ -143,7 +141,7 @@ def generate_sample_ddo():
             values = test_service['values']
 
         ddo.add_service(test_service['type'], test_service['serviceEndpoint'], values = values)
-            
+
     return ddo, private_key
 
 def test_creating_ddo():
@@ -214,7 +212,6 @@ def test_creating_ddo_embedded_public_key():
         assert ddo.validate_proof()
         ddo_text_proof_hash = ddo.calculate_hash()
         assert ddo_text_proof_hash
-
 
 def test_creating_did_using_ddo():
     # create an empty ddo

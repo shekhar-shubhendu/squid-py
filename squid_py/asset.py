@@ -69,7 +69,7 @@ class Asset:
             if 'metadata' in values:
                 result = values['metadata']
         return result
-        
+
     def is_valid_did(self, length=64):
         """The Asset.asset_id must conform to the specification"""
         return len(self.asset_id) == length
@@ -86,10 +86,10 @@ class Asset:
         metadata = self._get_metadata()
         if not metadata:
             raise ValueError("No metedata in {}".format(self))
-            
+
         if not 'base' in metadata:
             raise ValueError("Invalid metedata in {}".format(self))
-            
+
         self.asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
 
     def assign_metadata(self):
