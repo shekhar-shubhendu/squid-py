@@ -11,7 +11,7 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     history = history_file.read()
 
-requirements = ['keeper-contracts']
+requirements = ['keeper-contracts', 'web3==4.7.1', 'pyyaml', 'coloredlogs']
 
 setup_requirements = ['pytest-runner', ]
 
