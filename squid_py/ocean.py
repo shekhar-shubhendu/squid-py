@@ -8,12 +8,11 @@ from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 
-CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
-
 setup_logging()
 
 
 class Ocean:
+
     def __init__(self, config_file):
         """
         The Ocean class is the entry point into Ocean Protocol.
@@ -34,7 +33,7 @@ class Ocean:
         self._web3 = Web3(HTTPProvider(self.config.keeper_url))
 
         # With the interface loaded, the Keeper node is connected with all contracts
-        self.keeper = Keeper(self._web3, self.config.keeper_path, self.config.address_list)
+        self.keeper = Keeper(self._web3, self.config.keeper_path)
 
         # Add the Metadata store to the interface
         if self.config.aquarius_url:
@@ -54,10 +53,6 @@ class Ocean:
         print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
         print("Ocean.config.gas_limit: {}".format(self.config.gas_limit))
         print("Ocean.config.aquarius_url: {}".format(self.config.aquarius_url))
-        print("Ocean.config.address_list.market: {}".format(self.config.address_list['market']))
-        print("Ocean.config.address_list.token: {}".format(self.config.address_list['token']))
-        print("Ocean.config.address_list.auth: {}".format(self.config.address_list['auth']))
-        print("Ocean.config.address_list.didregistry: {}".format(self.config.address_list['didregistry']))
 
     def update_accounts(self):
         """

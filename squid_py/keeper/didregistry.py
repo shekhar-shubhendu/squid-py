@@ -1,10 +1,10 @@
-from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 
 
 class DIDRegistry(ContractBase):
-    def __init__(self, web3, contract_path, address):
-        ContractBase.__init__(self, web3, OCEAN_DID_REGISTRY_CONTRACT, 'didregistry', contract_path, address)
+
+    def __init__(self, web3, contract_path):
+        ContractBase.__init__(self, web3, contract_path, 'DIDRegistry')
 
     def register_attribute(self, did_hash, value_type, key, value, account_address):
         """Register an DID attribute as an event on the block chain

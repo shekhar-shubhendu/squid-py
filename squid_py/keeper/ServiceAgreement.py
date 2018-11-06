@@ -1,6 +1,4 @@
-
 from squid_py.config import DEFAULT_GAS_LIMIT
-from squid_py.constants import SERVICE_AGREEMENT_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 from web3 import Web3
 
@@ -8,8 +6,8 @@ from web3 import Web3
 class ServiceAgreement(ContractBase):
     """
     """
-    def __init__(self, web3, contract_path, address):
-        ContractBase.__init__(self, web3, SERVICE_AGREEMENT_CONTRACT, 'service_agreement', contract_path, address)
+    def __init__(self, web3, contract_path):
+        ContractBase.__init__(self, web3, contract_path, 'ServiceAgreement')
         self._defaultGas = DEFAULT_GAS_LIMIT
 
     def setup_agreement_template(self, contracts, fingerprints, dependencies_bits, service_description):

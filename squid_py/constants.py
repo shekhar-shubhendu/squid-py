@@ -1,8 +1,0 @@
-OCEAN_MARKET_CONTRACT = 'OceanMarket.development.json/OceanMarket.development'
-OCEAN_TOKEN_CONTRACT = 'OceanToken.development.json/OceanToken.development'
-OCEAN_ACL_CONTRACT = 'OceanAuth.development.json/OceanAuth.development'
-KEEPER_CONTRACTS = 'keeper-contracts'
-OCEAN_DID_REGISTRY_CONTRACT = 'DIDRegistry.development.json/DIDRegistry.development'
-SERVICE_AGREEMENT_CONTRACT = 'ServiceAgreement'
-PAYMENT_CONDITIONS_CONTRACT = 'PaymentConditions'
-ACCESS_CONDITIONS_CONTRACT = 'AccessConditions'

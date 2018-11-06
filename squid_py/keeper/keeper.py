@@ -13,7 +13,8 @@ from squid_py.keeper.token import Token
 
 
 class Keeper(object):
-    def __init__(self, web3, contract_path, address_list):
+
+    def __init__(self, web3, contract_path):
         """
         The Keeper class aggregates all contracts in the Ocean Protocol node
 
@@ -24,15 +25,12 @@ class Keeper(object):
 
         self.web3 = web3
         self.contract_path = contract_path
-        self.address_list = address_list
 
         logging.debug("Keeper contract artifacts (JSON) at: {}".format(self.contract_path))
 
         # The contract objects
-        self.market = Market(web3, contract_path, address_list['market'])
-        self.auth = Auth(web3, contract_path, address_list['auth'])
-        self.token = Token(web3, contract_path, address_list['token'])
-        self.didregistry = DIDRegistry(web3, contract_path, address_list['didregistry'])
-        self.service_agreement = ServiceAgreement(web3, contract_path, address_list['service_agreement'])
-
-        logging.debug("Keeper instantiated with {} contracts".format(len(self.address_list)))
+        self.market = Market(web3, contract_path)
+        self.auth = Auth(web3, contract_path)
+        self.token = Token(web3, contract_path)
+        self.didregistry = DIDRegistry(web3, contract_path)
+        self.service_agreement = ServiceAgreement(web3, contract_path)
