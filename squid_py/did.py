@@ -4,10 +4,8 @@
 """
 
 import re
-
-from urllib.parse import (
-    urlparse,
-)
+from urllib.parse import urlparse
+from web3 import Web3
 
 OCEAN_DID_METHOD = 'op'
 
@@ -86,7 +84,7 @@ def is_did_valid(did):
     """
     result = did_parse(did)
     if result:
-        return result['id_hex'] != None
+        return result['id_hex'] is not None
     return False
 
 
@@ -117,6 +115,10 @@ def get_id_from_did(did):
     return None
 
 def did_to_id_bytes(did):
+    """
+    return an Ocean DID to it's correspondng hex id in bytes
+    So did:op:<hex>, will return <hex> in byte format
+    """
     id_bytes = None
     if isinstance(did, str):
         if re.match('^[0x]?[0-9A-Za-z]+$', did):
