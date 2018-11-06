@@ -116,11 +116,11 @@ class DIDResolver():
 
 
 
-    def get_did(self, did):
+    def get_did(self, did_bytes):
         """return a did value and value type from the block chain event record using 'did'"""
         result = None
 
-        block_number = self._didregistry.get_update_at(did)
+        block_number = self._didregistry.get_update_at(did_bytes)
 
         if block_number == 0:
             raise OceanDIDNotFound('cannot find DID {}'.format(Web3.toHex(did_bytes)))
