@@ -46,6 +46,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+tests/resources/ddo/ddo_sample_generated_*
 
 # Translations
 *.mo
