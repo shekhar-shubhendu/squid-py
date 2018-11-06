@@ -1,10 +1,10 @@
 import importlib
 
 from squid_py.keeper.utils import get_contract_abi_by_address
-from squid_py.utils.web3_helper import Web3Helper
+from squid_py.utils import watch_event
 
 
-def watch_service_agreement_events(web3helper, config, service_agreement_id, service_definition,
+def watch_service_agreement_events(web3, config, service_agreement_id, service_definition,
                                    actor_type, num_confirmations=12):
     """ Subscribes to the events defined in the given service definition, targeted
         for the given actor type. Filters events by the given service agreement ID.
@@ -29,12 +29,14 @@ def watch_service_agreement_events(web3helper, config, service_agreement_id, ser
 
             contract_address = condition['condition_key']['contract_address']
             contract_abi = get_contract_abi_by_address(config, contract_address)
-            contract = web3helper.web3.eth.contract(address=contract_address,
+            contract = web3.eth.contract(address=contract_address,
                                                     abi=contract_abi)
 
-            web3helper.watch_event(contract,
-                                   event['name'],
-                                   _callback,
-                                   fromBlock='latest',
-                                   interval=0.5,
-                                   filters=filters)
+            watch_event(
+                contract,
+                event['name'],
+                _callback,
+                fromBlock='latest',
+                interval=0.5,
+                filters=filters
+            )

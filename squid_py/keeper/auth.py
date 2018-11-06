@@ -7,8 +7,8 @@ from squid_py.keeper.contract_base import (
 
 class Auth(ContractBase):
 
-    def __init__(self, web3_helper, contract_path, address):
-        ContractBase.__init__(self, web3_helper, OCEAN_ACL_CONTRACT, 'auth', contract_path, address)
+    def __init__(self, web3, contract_path, address):
+        ContractBase.__init__(self, web3, OCEAN_ACL_CONTRACT, 'auth', contract_path, address)
 
     def cancel_access_request(self, order_id, sender_address):
         """You can cancel consent and do refund only after consumer makes the payment and timeout."""

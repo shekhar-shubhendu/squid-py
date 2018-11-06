@@ -6,8 +6,8 @@ from web3 import Web3, HTTPProvider
 from squid_py.config import Config
 from squid_py.keeper.utils import get_contract_by_name, get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.service_agreement.register_service_agreement import register_service_agreement
-from squid_py.utils.web3_helper import Web3Helper
 
+from squid_py.utils import network_name
 
 CONFIG_PATH = 'config_local.ini'
 
@@ -17,7 +17,6 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def setUp(self):
         self.config = Config(CONFIG_PATH)
         self.web3 = Web3(HTTPProvider(self.config.keeper_url))
-        self.web3helper = Web3Helper(self.web3)
 
         self._setup_service_agreement()
         self._setup_token()
@@ -26,7 +25,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         service_agreement_id = uuid.uuid4().hex
 
         register_service_agreement(
-            self.web3helper,
+            self.web3,
             self.config,
             service_agreement_id,
             {
@@ -60,12 +59,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         self.consumer = self.web3.eth.accounts[0]
         self.web3.eth.defaultAccount = self.consumer
 
-        contract = get_contract_by_name(self.config, self.web3helper.network_name,
+        contract = get_contract_by_name(self.config, network_name(self.web3),
                                         'ServiceAgreement')
         self.service_agreement = self.web3.eth.contract(address=contract['address'],
                                                         abi=contract['abi'])
 
-        payment_contract = get_contract_by_name(self.config, self.web3helper.network_name,
+        payment_contract = get_contract_by_name(self.config, network_name(self.web3),
                                                 'PaymentConditions')
         self.payment_contract = self.web3.eth.contract(address=payment_contract['address'],
                                                        abi=payment_contract['abi'])
@@ -127,12 +126,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         tx = self.web3.eth.waitForTransactionReceipt(receipt)
 
     def _setup_token(self):
-        market = get_contract_by_name(self.config, self.web3helper.network_name, 'OceanMarket')
+        market = get_contract_by_name(self.config, network_name(self.web3), 'OceanMarket')
         market = self.web3.eth.contract(address=market['address'], abi = market['abi'])
 
         market.functions.requestTokens(100).transact()
 
-        token = get_contract_by_name(self.config, self.web3helper.network_name, 'OceanToken')
+        token = get_contract_by_name(self.config, network_name(self.web3), 'OceanToken')
         token = self.web3.eth.contract(address=token['address'], abi=token['abi'])
 
         token.functions.approve(self.payment_contract.address, 100).transact()

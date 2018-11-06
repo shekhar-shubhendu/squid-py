@@ -51,7 +51,6 @@ def split_signature(web3, signature):
 
 # properties
 
-@property
 def network_name(web3):
     """Give the network name."""
     network_id = web3.version.network
