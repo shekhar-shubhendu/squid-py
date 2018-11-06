@@ -111,7 +111,7 @@ class Ocean:
 
         # 3) Publish to metadata store
         # Check if it's already registered first!
-        if asset.asset_id in self.metadata.list_assets()['ids']:
+        if asset.asset_id in self.metadata.list_assets():
             # TODO: raise proper error
             pass
         self.metadata.publish_asset_metadata(asset)

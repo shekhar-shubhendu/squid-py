@@ -139,9 +139,9 @@ def test_publish_data_asset_aquarius():
     meta_data_assets = ocean.metadata.list_assets()
     if meta_data_assets:
         print("Currently registered assets:")
-        print(meta_data_assets['ids'])
+        print(meta_data_assets)
 
-    if asset.ddo.did in meta_data_assets['ids']:
+    if asset.ddo.did in meta_data_assets:
         ocean.metadata.get_asset_metadata(asset.ddo.did)
         ocean.metadata.retire_asset_metadata(asset.ddo.did)
     # Publish the metadata
@@ -195,7 +195,7 @@ def test_ocean_publish():
 
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
-    if asset.ddo.did in meta_data_assets['ids']:
+    if asset.ddo.did in meta_data_assets:
         ocean.metadata.get_asset_metadata(asset.ddo.did)
         ocean.metadata.retire_asset_metadata(asset.ddo.did)
 
