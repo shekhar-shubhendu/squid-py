@@ -8,7 +8,10 @@ import json
 import re
 
 
-class Service(object):
+class Service():
+    """
+    Serivce class to create validate service in a DDO
+    """
 
     def __init__(self, service_id, endpoint, service_type, values):
         self._id = service_id
@@ -17,32 +20,38 @@ class Service(object):
 
         # assign the _values property to empty until they are used
         self._values = None
-        reserved_names =  ['id', 'serviceEndpoint', 'type']
+        reserved_names = ['id', 'serviceEndpoint', 'type']
         if values:
             for name, value in values.items():
                 if name not in reserved_names:
                     if not self._values:
                         self._values = {}
-                    self._values[name]= value
+                    self._values[name] = value
 
 
     def get_id(self):
+        """Return the service id"""
         return self._id
 
     def assign_did(self, did):
+        """ Assign a new DID/Id to the service"""
         if re.match('^#.*', self._id):
             self._id = did + self._id
 
     def get_type(self):
+        """get the service type"""
         return self._type
 
     def get_endpoint(self):
+        """get the service endpoint"""
         return self._endpoint
 
     def get_values(self):
+        """get any service value s"""
         return self._values
 
-    def as_text(self, is_pretty = False):
+    def as_text(self, is_pretty=False):
+        """return the service as a JSON string"""
         values = {
             'id': self._id,
             'type': self._type,
@@ -59,6 +68,7 @@ class Service(object):
         return json.dumps(values)
 
     def as_dictionary(self):
+        """return the service as a python dictionary"""
         values = {
             'id': self._id,
             'type': self._type,
@@ -71,4 +81,5 @@ class Service(object):
         return values
 
     def is_valid(self):
-        return self._endpoint != None and self._type != None
+        """return True if the sevice is valid"""
+        return self._endpoint is not None and self._type is not None
