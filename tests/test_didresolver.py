@@ -95,20 +95,19 @@ def test_did_resitry_register():
     didregistry = ocean.keeper.didregistry
     did_id = secrets.token_hex(32)
     did_test = 'did:op:' + did_id
-    value_type = VALUE_TYPE_URL
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
 
 
     # register DID-> URL
-    didregistry.register(did_test, url=value_test, account=register_account)
+    didregistry.register(did_test, url=value_test, key=key_test, account=register_account)
 
     # register DID-> DDO Object
     ddo = DDO(did_test)
     ddo.add_signature()
     ddo.add_service('metadata-test', value_test)
 
-    didregistry.register(did_test, ddo=ddo, account=register_account)
+    didregistry.register(did_test, ddo=ddo, key=key_test, account=register_account)
 
     # register DID-> DDO json
     didregistry.register(did_test, ddo=ddo.as_text(), account=register_account)
