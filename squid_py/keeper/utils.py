@@ -2,8 +2,8 @@ import json
 import os
 
 
-def get_contract_abi_by_address(config, address):
-    contract_tree = os.walk(config.keeper_path)
+def get_contract_abi_by_address(contract_path, address):
+    contract_tree = os.walk(contract_path)
 
     while True:
         dirname, _, files = next(contract_tree)
@@ -20,9 +20,9 @@ def get_contract_abi_by_address(config, address):
                 return definition['abi']
 
 
-def get_contract_by_name(config, network_name, contract_name):
+def get_contract_by_name(contract_path, network_name, contract_name):
     file_name = '{}.{}.json'.format(contract_name, network_name)
-    with open(os.path.join(config.keeper_path, file_name)) as f:
+    with open(os.path.join(contract_path, file_name)) as f:
         contract = json.loads(f.read())
         return contract
 

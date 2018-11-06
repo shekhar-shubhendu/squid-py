@@ -4,10 +4,11 @@ import uuid
 from web3 import Web3, HTTPProvider
 
 from squid_py.config import Config
+from squid_py.keeper.conditions.payment_conditions import PaymentConditions
 from squid_py.keeper.utils import get_contract_by_name, get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.service_agreement.register_service_agreement import register_service_agreement
-
 from squid_py.utils import network_name
+
 
 CONFIG_PATH = 'config_local.ini'
 
@@ -18,6 +19,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         self.config = Config(CONFIG_PATH)
         self.web3 = Web3(HTTPProvider(self.config.keeper_url))
 
+        self.payment_conditions = PaymentConditions(self.web3, self.config.keeper_path)
+
         self._setup_service_agreement()
         self._setup_token()
 
@@ -26,12 +29,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         register_service_agreement(
             self.web3,
-            self.config,
+            self.config.keeper_path,
             service_agreement_id,
             {
                 'conditions': [{
                     'condition_key': {
-                        'contract_address': self.payment_contract.address
+                        'contract_address': self.payment_conditions.address
                     },
                     'events': [{
                         'name': 'PaymentLocked',
@@ -59,20 +62,15 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         self.consumer = self.web3.eth.accounts[0]
         self.web3.eth.defaultAccount = self.consumer
 
-        contract = get_contract_by_name(self.config, network_name(self.web3),
+        contract = get_contract_by_name(self.config.keeper_path, network_name(self.web3),
                                         'ServiceAgreement')
         self.service_agreement = self.web3.eth.contract(address=contract['address'],
                                                         abi=contract['abi'])
 
-        payment_contract = get_contract_by_name(self.config, network_name(self.web3),
-                                                'PaymentConditions')
-        self.payment_contract = self.web3.eth.contract(address=payment_contract['address'],
-                                                       abi=payment_contract['abi'])
-
-        self.contracts = [payment_contract['address']]
+        self.contracts = [self.payment_conditions.address]
         self.fingerprints = [
             hexstr_to_bytes(self.web3,
-                            get_fingerprint_by_name(payment_contract['abi'], 'lockPayment'))
+                            get_fingerprint_by_name(self.payment_conditions.abi, 'lockPayment'))
         ]
         self.dependencies = [0]
 
@@ -126,22 +124,25 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         tx = self.web3.eth.waitForTransactionReceipt(receipt)
 
     def _setup_token(self):
-        market = get_contract_by_name(self.config, network_name(self.web3), 'OceanMarket')
+        market = get_contract_by_name(self.config.keeper_path,
+                                      network_name(self.web3), 'OceanMarket')
         market = self.web3.eth.contract(address=market['address'], abi = market['abi'])
 
         market.functions.requestTokens(100).transact()
 
-        token = get_contract_by_name(self.config, network_name(self.web3), 'OceanToken')
+        token = get_contract_by_name(self.config.keeper_path, network_name(self.web3),
+                                     'OceanToken')
         token = self.web3.eth.contract(address=token['address'], abi=token['abi'])
 
-        token.functions.approve(self.payment_contract.address, 100).transact()
+        token.functions.approve(self.payment_conditions.address, 100).transact()
 
     def _lock_payment(self, service_agreement_id, did, price):
-        receipt = self.payment_contract.functions.lockPayment(
+        receipt = self.payment_conditions.contract_concise.lockPayment(
             service_agreement_id.encode(),
             did.encode(),
-            price
-        ).transact()
+            price,
+            transact={'from': self.consumer},
+        )
         tx = self.web3.eth.waitForTransactionReceipt(receipt)
-        print(self.payment_contract.events.PaymentLocked().processReceipt(tx))
+        print(self.payment_conditions.contract.events.PaymentLocked().processReceipt(tx))
 
