@@ -40,6 +40,7 @@ class DIDResolved():
     Class that handles the resolved DID information
     """
     def __init__(self):
+        """init the object with an empty set of hops"""
         self._items = []
         self._value = None
 
@@ -61,70 +62,89 @@ class DIDResolved():
 
     @property
     def did_bytes(self):
-        if self.self._items:
+        """return the resolved did in bytes"""
+        if self._items:
             return self._items[-1]['did_bytes']
+        return None
 
     @property
     def owner(self):
+        """return the resolved owner address"""
         if self._items:
             return self._items[-1]['owner']
+        return None
 
     @property
     def key(self):
+        """return the resolved key"""
         if self._items:
             return self._items[-1]['key']
+        return None
 
     @property
     def block_number(self):
-        print(self._items)
+        """return the resolved block number"""
         if self._items:
             return self._items[-1]['block_number']
+        return None
 
     @property
     def value(self):
+        """return the resolved value can be a URL/DDO(on chain)/DID(string)"""
         return self._value
 
     @property
     def value_type(self):
+        """return the resolved value type"""
         if self._items:
             return self._items[-1]['value_type']
+        return None
 
     @property
     def is_url(self):
+        """return True if the resolved value is an URL"""
         return self._items and self._items[-1]['value_type'] == VALUE_TYPE_URL
 
     @property
     def url(self):
+        """return the resolved URL"""
         if self.is_url:
             return self._value
         return None
 
     @property
     def is_ddo(self):
+        """return True if the resolved value is a DDO JSON string"""
         return self._items and self._items[-1]['value_type'] == VALUE_TYPE_DDO
 
     @property
     def ddo(self):
+        """return the resolved DDO JSON string"""
         if self.is_ddo:
             return self._value
         return None
 
     @property
     def is_did(self):
+        """return True if the resolved value is a DID"""
         return self._items and self._items[-1]['value_type'] == VALUE_TYPE_DID
 
     @property
     def did(self):
+        """return the resolved DID value as a string"""
         if self.is_did:
             return self._value
         return None
 
     @property
     def items(self):
+        """return the list of DIDRegistry items used to get to this resolved value
+        the last item is the resolved item"""
         return self._items
 
     @property
     def hop_count(self):
+        """return the number of hops needed to resolve the DID"""
         if self._items:
             return len(self._items)
         return 0
@@ -234,8 +254,8 @@ class DIDResolver():
             'topics': [self._event_signature, Web3.toHex(did_bytes)]
         })
         log_items = block_filter.get_all_entries()
-        if log_items and len(log_items) > 0:
-            log_item = log_items[len(log_items) - 1]
+        if log_items:
+            log_item = log_items[-1]
             value, value_type, block_number = decode_single('(string,uint8,uint256)', \
                 Web3.toBytes(hexstr=log_item['data']))
             topics = log_item['topics']
