@@ -42,7 +42,7 @@ class DIDResolved():
     def __init__(self):
         self._items = []
         self._value = None
-        
+
     def add_data(self, data, value):
         """
         Add a resolved event data item to the list of resolved items
@@ -57,8 +57,8 @@ class DIDResolved():
             self._value = did_generate_from_id(value)
         else:
             self._value = value
-        
-    
+
+
     @property
     def did_bytes(self):
         if self.self._items:
@@ -73,14 +73,20 @@ class DIDResolved():
     def key(self):
         if self._items:
             return self._items[-1]['key']
-            
+
+    @property
+    def block_number(self):
+        print(self._items)
+        if self._items:
+            return self._items[-1]['block_number']
+
     @property
     def value(self):
         return self._value
-        
+
     @property
     def value_type(self):
-        if self._data:
+        if self._items:
             return self._items[-1]['value_type']
 
     @property
@@ -92,7 +98,7 @@ class DIDResolved():
         if self.is_url:
             return self._value
         return None
-        
+
     @property
     def is_ddo(self):
         return self._items and self._items[-1]['value_type'] == VALUE_TYPE_DDO
@@ -116,14 +122,14 @@ class DIDResolved():
     @property
     def items(self):
         return self._items
-    
+
     @property
     def hop_count(self):
         if self._items:
             return len(self._items)
         return 0
-        
-        
+
+
 class DIDResolver():
     """
     DID Resolver class
@@ -206,7 +212,7 @@ class DIDResolver():
                     raise OceanDIDCircularReference('circular reference found at did {}'.format(Web3.toHex(did_bytes)))
                 data = self.get_did(did_bytes)
 
-            
+
         if resolved.hop_count > 0:
             return resolved
         return None
