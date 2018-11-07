@@ -66,12 +66,12 @@ class DIDResolved():
 
     @property
     def owner(self):
-        if self.self._items:
+        if self._items:
             return self._items[-1]['owner']
 
     @property
     def key(self):
-        if self.self._items:
+        if self._items:
             return self._items[-1]['key']
             
     @property
@@ -218,7 +218,7 @@ class DIDResolver():
         result = None
 
         block_number = self._didregistry.get_update_at(did_bytes)
-
+        logger.debug('block_number %d', block_number)
         if block_number == 0:
             raise OceanDIDNotFound('cannot find DID {}'.format(Web3.toHex(did_bytes)))
 
@@ -232,12 +232,14 @@ class DIDResolver():
             log_item = log_items[len(log_items) - 1]
             value, value_type, block_number = decode_single('(string,uint8,uint256)', \
                 Web3.toBytes(hexstr=log_item['data']))
+            topics = log_item['topics']
+            logger.debug('topics {}'.format(topics))
             result = {
                 'value_type': value_type,
                 'value': value,
                 'block_number': block_number,
-                'did_bytes': log_item['topics'][1],
-                'owner': log_item['topics'][2],
-                'key': log_item['topics'][2],
+                'did_bytes': Web3.toBytes(topics[1]),
+                'owner': Web3.toChecksumAddress(topics[2][-20:]),
+                'key': Web3.toBytes(topics[3]),
             }
         return result

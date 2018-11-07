@@ -146,6 +146,7 @@ def test_did_resolver_library():
     value_type = VALUE_TYPE_URL
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
+    key_zero = Web3.toBytes(hexstr='0x' + ('00' * 32))
 
     didresolver = DIDResolver(ocean._web3, ocean.keeper.didregistry)
 
@@ -158,7 +159,9 @@ def test_did_resolver_library():
     assert didresolved
     assert didresolved.is_url
     assert didresolved.url == value_test
-
+    assert didresolved.key == key_zero
+    assert didresolved.owner == register_account
+    
     with pytest.raises(ValueError):
         didresolver.resolve(did_id)
 
@@ -166,17 +169,27 @@ def test_did_resolver_library():
     assert didresolved
     assert didresolved.is_url
     assert didresolved.url == value_test
+    assert didresolved.key == key_zero
+    assert didresolved.owner == register_account
 
     # resolve URL from a hash of a DID string
     did_hash = Web3.sha3(text=did_test)
 
+    logger.info('register hash %s', Web3.toHex(did_hash))
     register_did = didregistry.register_attribute(did_hash, value_type, key_test, value_test, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
+    print(receipt)
+    print('block number', didregistry.get_update_at(did_hash))
     gas_used_url = receipt['gasUsed']
     didresloved = didresolver.resolve(did_hash)
+    logger.info('register hash %s', Web3.toHex(did_hash))
+    print(didresolved.items)
     assert didresolved
     assert didresolved.is_url
     assert didresolved.url == value_test
+    assert didresolved.key == key_test
+    assert didresolved.value_type == value_type
+    assert didresolved.owner == register_account
 
     # test update of an already assigned DID
     value_test_new = 'http://aquarius:5000'
