@@ -24,7 +24,7 @@ class DDO:
 
     """
 
-    def __init__(self, did='', json_text=None, json_filename=None, created=None):
+    def __init__(self, did='', json_text=None, json_filename=None, created=None, dictionary=None):
         """ clear the DDO data values """
         self._did = ''
         self._public_keys = []
@@ -44,7 +44,10 @@ class DDO:
                 json_text = file_handle.read()
 
         if json_text:
-            self.__read_json(json_text)
+            self._read_dict(json.loads(json_text))
+
+        if dictionary:
+            self._read_dict(dictionary)
 
     def add_public_key(self, public_key):
         """add a public key object to the list of public keys"""
@@ -139,9 +142,9 @@ class DDO:
 
         return json.dumps(data)
 
-    def __read_json(self, ddo_json):
-        """import a JSON text into this DDO"""
-        values = json.loads(ddo_json)
+    def _read_dict(self, dictionary):
+        """import a JSON dict into this DDO"""
+        values = dictionary
         self._did = values['id']
         self._created = values.get('created', None)
         if 'publicKey' in values:

@@ -3,11 +3,11 @@ import logging
 from web3 import Web3, HTTPProvider
 
 from squid_py.ocean.account import Account
+from squid_py.ocean.asset import Asset
 from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
-from squid_py.did import get_id_from_did
 from squid_py.didresolver import DIDResolver
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -74,7 +74,8 @@ class Ocean:
         Given an asset_did, return the Asset
         :return: Asset object
         """
-        return self.metadata.get_asset_metadata(asset_did)
+
+        return Asset.from_ddo_dict(self.metadata.get_asset_metadata(asset_did))
 
     def search_assets(self, text, sort=None, offset=100, page=0, aquarius_url=None):
         """
@@ -88,9 +89,9 @@ class Ocean:
         """
         if aquarius_url is not None:
             aquarius = AquariusWrapper(aquarius_url)
-            return aquarius.text_search(text=text, sort=sort, offset=offset, page=page)
+            return [Asset.from_ddo_dict(i) for i in aquarius.text_search(text, sort, offset, page)]
         else:
-            return self.metadata.text_search(text=text, sort=sort, offset=offset, page=page)
+            return [Asset.from_ddo_dict(i) for i in self.metadata.text_search(text, sort, offset, page)]
 
     def register(self, asset, asset_price, publisher_acct):
         """
@@ -99,11 +100,11 @@ class Ocean:
         Wrapper on both
             - keeper.market.register
             - metadata.publish_asset
+            - keeper.did_registry
 
         :param asset: Asset object.
         :param asset_price: Price of the asset.
         :param publisher_acct: Account of the publisher.
-        :param address
         :return:
         """
 
@@ -120,10 +121,13 @@ class Ocean:
         if asset.asset_id in self.metadata.list_assets():
             # TODO: raise proper error
             pass
+        logging.info("Publishing {} in aquarius".format(asset.did))
         self.metadata.publish_asset_metadata(asset)
 
         # 4) Register the asset onto blockchain
+        logging.info("Registering asset with did {} on chain.".format(asset.did))
         self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
+        logging.info("Registering did {} in the registry.".format(asset.did))
         self.keeper.didregistry.register(asset.did,
                                          key=Web3.sha3(text='Metadata'),
                                          url=self.config.aquarius_url,
