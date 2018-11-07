@@ -156,7 +156,7 @@ def test_did_resolver_library():
 
     didresolved = didresolver.resolve(did_test)
     assert didresolved
-    assert didresolved.is_url    
+    assert didresolved.is_url
     assert didresolved.url == value_test
 
     with pytest.raises(ValueError):
@@ -164,7 +164,7 @@ def test_did_resolver_library():
 
     didresolved = didresolver.resolve(did_id_bytes)
     assert didresolved
-    assert didresolved.is_url    
+    assert didresolved.is_url
     assert didresolved.url == value_test
 
     # resolve URL from a hash of a DID string
@@ -175,7 +175,7 @@ def test_did_resolver_library():
     gas_used_url = receipt['gasUsed']
     didresloved = didresolver.resolve(did_hash)
     assert didresolved
-    assert didresolved.is_url    
+    assert didresolved.is_url
     assert didresolved.url == value_test
 
     # test update of an already assigned DID
@@ -184,9 +184,9 @@ def test_did_resolver_library():
     receipt = didregistry.get_tx_receipt(register_did)
     didresolved = didresolver.resolve(did_hash)
     assert didresolved
-    assert didresolved.is_url    
+    assert didresolved.is_url
     assert didresolved.url == value_test_new
-    
+
     # resolve DDO from a direct DID ID value
     ddo = DDO(did_test)
     ddo.add_signature()
@@ -202,9 +202,9 @@ def test_did_resolver_library():
 
     didresolved = didresolver.resolve(did_id_bytes)
     resolved_ddo = DDO(json_text = didresolved.ddo)
-    
+
     assert didresolved
-    assert didresolved.is_ddo     
+    assert didresolved.is_ddo
     assert ddo.calculate_hash() == resolved_ddo.calculate_hash()
 
     logger.info('gas used URL: %d, DDO: %d, DDO +%d extra', gas_used_url, gas_used_ddo, gas_used_ddo - gas_used_url)
@@ -230,7 +230,7 @@ def test_did_resolver_library():
     did_id_bytes = Web3.toBytes(hexstr=ids[0])
     didresolved = didresolver.resolve(did_id_bytes)
     assert didresolved
-    assert didresolved.is_url    
+    assert didresolved.is_url
     assert didresolved.url == value_test
     assert didresolved.hop_count == chain_length
 

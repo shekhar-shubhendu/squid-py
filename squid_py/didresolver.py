@@ -167,8 +167,7 @@ class DIDResolver():
 
         # resolve a DID to a URL or DDO
         data = self.get_did(did_bytes)
-        hop_count = 0
-        while data and (max_hop_count == 0 or hop_count < max_hop_count):
+        while data and (max_hop_count == 0 or resolved.hop_count < max_hop_count):
             if data['value_type'] == VALUE_TYPE_URL or data['value_type'] == VALUE_TYPE_DDO:
                 logger.info('found did {0} -> {1}'.format(Web3.toHex(did_bytes), data['value']))
                 if data['value']:
@@ -207,9 +206,8 @@ class DIDResolver():
                     raise OceanDIDCircularReference('circular reference found at did {}'.format(Web3.toHex(did_bytes)))
                 data = self.get_did(did_bytes)
 
-            hop_count = hop_count + 1
             
-        if resolved.items:
+        if resolved.hop_count > 0:
             return resolved
         return None
 
