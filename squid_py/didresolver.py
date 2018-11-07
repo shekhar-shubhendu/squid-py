@@ -254,21 +254,15 @@ class DIDResolver:
         if log_items:
             log_item = log_items[-1]
             value, value_type, block_number = decode_single('(string,uint8,uint256)', \
-                                              << << << < HEAD
-            Web3.toBytes(hexstr=log_item['data']))
-
-    == == == =
-    Web3.toBytes(hexstr=log_item['data']))
-    topics = log_item['topics']
-    logger.debug('topics {}'.format(topics))
-    >> >> >> > ffc22962d72715bbcf1a8068605c34e5272ce5bd
-    result = {
-    'value_type': value_type,
-    'value': value,
-    'block_number': block_number,
-    'did_bytes': Web3.toBytes(topics[1]),
-    'owner': Web3.toChecksumAddress(topics[2][-20:]),
-    'key': Web3.toBytes(topics[3]),
-
-}
-return result
+                Web3.toBytes(hexstr=log_item['data']))
+            topics = log_item['topics']
+            logger.debug('topics {}'.format(topics))
+            result = {
+                'value_type': value_type,
+                'value': value,
+                'block_number': block_number,
+                'did_bytes': Web3.toBytes(topics[1]),
+                'owner': Web3.toChecksumAddress(topics[2][-20:]),
+                'key': Web3.toBytes(topics[3]),
+            }
+        return result

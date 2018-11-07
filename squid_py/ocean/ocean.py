@@ -7,6 +7,7 @@ from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
+from squid_py.did import get_id_from_did
 from squid_py.didresolver import DIDResolver
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -73,8 +74,7 @@ class Ocean:
         Given an asset_did, return the Asset
         :return: Asset object
         """
-        return self.metadata.get_asset_metadata(asset_did)
-
+        # return self.metadata.get_asset_metadata(asset_did)
 
     def search_assets(self, text, sort=None, offset=100, page=0):
         """
@@ -87,7 +87,7 @@ class Ocean:
         """
         return self.metadata.text_search(text=text, sort=sort, offset=offset, page=page)
 
-    def register(self, asset, asset_price, publisher_acct):
+    def register(self, asset, asset_price, publisher_acct, address):
         """
         Register an asset in both the Market (on-chain) and in the Meta Data store
 
@@ -98,6 +98,7 @@ class Ocean:
         :param asset:
         :param asset_price:
         :param publisher_acct:
+        :param address
         :return:
         """
 
@@ -117,7 +118,23 @@ class Ocean:
         self.metadata.publish_asset_metadata(asset)
 
         # 4) Register the asset onto blockchain
-        result = self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
+        self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
+        self.keeper.didregistry.register(asset.did,
+                                         key=Web3.sha3(text='Metadata'),
+                                         url=self.config.aquarius_url,
+                                         account=address)
 
     def resolve_did(self, did):
-        self.did_resolver.resolve(did)
+        """
+        When you pass a did retrieve the ddo associated.
+        :param did:
+        :return:
+        """
+        resolver = self.did_resolver.resolve(did)
+        if resolver.is_ddo:
+            return self.did_resolver.resolve(did).ddo
+        elif resolver.is_url:
+            aquarius = AquariusWrapper(resolver.url)
+            return aquarius.get_asset_metadata(did)
+        else:
+            return None

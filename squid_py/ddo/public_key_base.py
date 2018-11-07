@@ -28,6 +28,7 @@ class PublicKeyBase():
     Base Public Key class, to allow to perfom basic key storage and validation
     using DDO keys
     """
+
     def __init__(self, key_id, **kwargs):
         self._id = key_id
         self._store_type = kwargs.get('store_type', None)
@@ -54,7 +55,7 @@ class PublicKeyBase():
         return self._owner
 
     # def set_owner(self, value):
-        # self._owner = value
+    # self._owner = value
 
     def get_type(self):
         """get the type of key"""

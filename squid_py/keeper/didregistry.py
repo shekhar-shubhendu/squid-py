@@ -14,14 +14,14 @@ from squid_py.exceptions import OceanDIDCircularReference
 from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 
+
 class DIDRegistry(ContractBase):
     """
     Class to register and update Ocean DID's
     """
+
     def __init__(self, web3, contract_path, address):
         ContractBase.__init__(self, web3, OCEAN_DID_REGISTRY_CONTRACT, 'didregistry', contract_path, address)
-
-
 
     def register(self, did_source, url=None, ddo=None, did=None, key=None, account=None):
         """

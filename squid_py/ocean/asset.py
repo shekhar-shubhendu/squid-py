@@ -28,19 +28,32 @@ class Asset:
         self.asset_id =asset_id
         self.publisher_id = publisher_id
         self.price = price
-        self.ddo = ddo
+        self._ddo = ddo
 
     @property
-    def bare_did_string(self):
-        # TODO: This is temp, until the proper handling is implemented!
-        return self.asset_id.split(':')[-1]
+    def did(self):
+        """return the DID for this asset"""
+        if not self._ddo:
+            raise AttributeError("No DDO object in {}".format(self))
+        if not self._ddo.is_valid:
+            raise ValueError("Invalid DDO object in {}".format(self))
+
+        return self._ddo.did
+
+    @property
+    def ddo(self):
+        """
+        Public ddo object
+        :return: ddo object
+        """
+        return self._ddo
 
     def assign_did_from_ddo(self):
         """
         #TODO: This is a temporary hack, need to clearly define how DID is assigned!
         :return:
         """
-        did = self.ddo.did
+        did = self._ddo.did
         match = re.match('^did:op:([0-9a-f]+)', did)
         if match:
             self.asset_id = match.groups(1)[0]
@@ -48,8 +61,8 @@ class Asset:
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
         this_asset = cls()
-        this_asset.ddo = DDO(json_filename=json_file_path)
-        this_asset.asset_id = this_asset.ddo.did
+        this_asset._ddo = DDO(json_filename=json_file_path)
+        this_asset.asset_id = this_asset._ddo.did
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
@@ -64,7 +77,7 @@ class Asset:
 
     def _get_metadata(self):
         result = None
-        metadata_service = self.ddo.get_service('Metadata')
+        metadata_service = self._ddo.get_service('Metadata')
         if metadata_service:
             values = metadata_service.get_values()
             if 'metadata' in values:
@@ -79,9 +92,9 @@ class Asset:
         """
         During development, the DID can be generated here for convenience.
         """
-        if not self.ddo:
+        if not self._ddo:
             raise AttributeError("No DDO object in {}".format(self))
-        if not self.ddo.is_valid:
+        if not self._ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
         metadata = self._get_metadata()
@@ -129,14 +142,6 @@ class Asset:
 
         return
 
-    def get_DDO(self):
-        """
-
-        :return:
-        """
-
-    def get_DID(self):
-        pass
 
     def get_metadata(self):
         return self.metadata

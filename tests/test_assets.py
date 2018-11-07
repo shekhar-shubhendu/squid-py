@@ -9,7 +9,9 @@ import pytest
 from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean import Ocean
+from squid_py.did import get_id_from_did
 import secrets
+import json
 
 # Disable low level loggers
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -202,4 +204,5 @@ def test_ocean_publish():
     ##########################################################
     # Register using high-level interface
     ##########################################################
-    ocean.register(asset, 100, publisher_acct)
+    ocean.register(asset, 100, publisher_acct, publisher_address)
+    assert ocean.resolve_did(asset.did)

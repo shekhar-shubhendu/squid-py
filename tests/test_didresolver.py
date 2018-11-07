@@ -89,8 +89,8 @@ def test_did_resolver_raw_test():
     assert decode_block_number == block_number
 """
 
-def test_did_resitry_register():
 
+def test_did_resitry_register():
     ocean = Ocean(config_file='config_local.ini')
 
     register_account = list(ocean.accounts)[1]
@@ -99,7 +99,6 @@ def test_did_resitry_register():
     did_test = 'did:op:' + did_id
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
-
 
     # register DID-> URL
     didregistry.register(did_test, url=value_test, key=key_test, account=register_account)
@@ -136,7 +135,6 @@ def test_did_resitry_register():
 
 
 def test_did_resolver_library():
-
     ocean = Ocean(config_file='config_local.ini')
 
     register_account = list(ocean.accounts)[1]
@@ -208,7 +206,6 @@ def test_did_resolver_library():
     did_id_bytes = Web3.toBytes(hexstr=did_id)
     value_type = VALUE_TYPE_DDO
 
-
     register_did = didregistry.register_attribute(did_id_bytes, value_type, key_test, ddo.as_text(), register_account)
     receipt = didregistry.get_tx_receipt(register_did)
     gas_used_ddo = receipt['gasUsed']
@@ -238,10 +235,12 @@ def test_did_resolver_library():
         if i < len(ids) - 1:
             next_did_id = Web3.toHex(hexstr=ids[i + 1])
             logger.info('add chain {0} -> {1}'.format(Web3.toHex(did_id_bytes), next_did_id))
-            register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID, key_test, next_did_id, register_account)
+            register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID, key_test, next_did_id,
+                                                          register_account)
         else:
             logger.info('end chain {0} -> URL'.format(Web3.toHex(did_id_bytes)))
-            register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_URL, key_test, value_test, register_account)
+            register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_URL, key_test, value_test,
+                                                          register_account)
         receipt = didregistry.get_tx_receipt(register_did)
 
     did_id_bytes = Web3.toBytes(hexstr=ids[0])
@@ -254,7 +253,6 @@ def test_did_resolver_library():
     assert didresolved.value_type == value_type
     assert didresolved.owner == register_account
     assert didresolved.block_number == receipt['blockNumber']
-
 
     # test circular chain
 
@@ -292,7 +290,8 @@ def test_did_resolver_library():
         didresolver.resolve(did_id_bytes)
 
     # test value type error on a linked DID_REF
-    register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID_REF, key_test, value_test, register_account)
+    register_did = didregistry.register_attribute(did_id_bytes, VALUE_TYPE_DID_REF, key_test, value_test,
+                                                  register_account)
     receipt = didregistry.get_tx_receipt(register_did)
 
     # resolve to get the error

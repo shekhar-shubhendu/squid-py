@@ -12,6 +12,7 @@ from .public_key_base import (
     PublicKeyBase,
 )
 
+
 class Authentication():
     """DDO Authentication"""
 

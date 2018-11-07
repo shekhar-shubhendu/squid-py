@@ -28,7 +28,6 @@ class Service():
                         self._values = {}
                     self._values[name] = value
 
-
     def get_id(self):
         """Return the service id"""
         return self._id

@@ -29,9 +29,6 @@ class AquariusWrapper(object):
     def get_asset_metadata(self, asset_did):
         response = requests.get(self._base_url + '/ddo/%s' % asset_did).content
         response_dict = json.loads(response)
-        # metadata_base = response_dict['base']
-        # metadata = dict()
-        # metadata['base'] = metadata_base
         return response_dict
 
     def list_assets_metadata(self):
