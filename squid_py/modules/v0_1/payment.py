@@ -16,7 +16,7 @@ def lockPayment(web3, contract_path, account, service_agreement_id, service_defi
             break
 
     if payment_condition is None:
-        raise InvalidModule('Failed to find the lockPayment condition in the function definition')
+        raise InvalidModule('Failed to find the lockPayment condition in the service definition')
 
     address = payment_condition['conditionKey']['contractAddress']
     fingerprint = payment_condition['conditionKey']['fingerprint']
