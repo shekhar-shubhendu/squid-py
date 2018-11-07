@@ -1,17 +1,14 @@
-from .ocean_base import OceanBase
 from squid_py.models.balance import Balance
 
-class Account:
-# class Account(OceanBase):
 
-    def __init__(self, name, keeper, address):
+class Account:
+    def __init__(self, keeper, address):
         """
         Hold account address, and update balances of Ether and Ocean token
 
         :param keeper: The instantiated Keeper
         :param address: The address of this account
         """
-        self.name = name
         self.keeper = keeper
         self.address = address
         self.balance = self.get_balance()

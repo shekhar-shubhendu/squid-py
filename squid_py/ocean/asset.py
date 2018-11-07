@@ -143,9 +143,6 @@ class Asset:
 
         return
 
-    def get_metadata(self):
-        return self.metadata
-
     def get_service_agreements(self):
         pass
 

@@ -9,6 +9,7 @@ from squid_py.config import Config
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
+from squid_py.exceptions import OceanDIDAlreadyExist
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -64,9 +65,13 @@ class Ocean:
         print("Ocean.config.address_list.didregistry: {}".format(self.config.address_list['didregistry']))
 
     def get_accounts(self):
+        """
+        Returns all available accounts loaded via a wallet, or by Web3.
+        :return:
+        """
         accounts_dict = dict()
         for account_address in self._web3.eth.accounts:
-            accounts_dict[account_address] = Account('name', self.keeper, account_address)
+            accounts_dict[account_address] = Account(self.keeper, account_address)
         return accounts_dict
 
     def get_asset(self, asset_did):
@@ -119,8 +124,7 @@ class Ocean:
         # 3) Publish to metadata store
         # Check if it's already registered first!
         if asset.asset_id in self.metadata.list_assets():
-            # TODO: raise proper error
-            pass
+            raise OceanDIDAlreadyExist
         logging.info("Publishing {} in aquarius".format(asset.did))
         self.metadata.publish_asset_metadata(asset)
 
@@ -147,3 +151,15 @@ class Ocean:
             return aquarius.get_asset_metadata(did)
         else:
             return None
+
+    def get_order(self):
+        pass
+
+    def get_orders_by_account(self):
+        pass
+
+    def search_orders(self):
+        pass
+
+    def get_service_agreement(self):
+        pass
