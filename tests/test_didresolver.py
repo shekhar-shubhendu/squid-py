@@ -12,11 +12,13 @@ from eth_abi import (
 )
 
 from squid_py.ddo import DDO
+from squid_py.did import did_generate_from_id
 
 from squid_py.ocean.ocean import Ocean
 
 from squid_py.didresolver import (
     DIDResolver,
+    DIDResolved,
     VALUE_TYPE_DID,
     VALUE_TYPE_DID_REF,
     VALUE_TYPE_URL,
@@ -144,6 +146,7 @@ def test_did_resolver_library():
     value_type = VALUE_TYPE_URL
     key_test = Web3.sha3(text='provider')
     value_test = 'http://localhost:5000'
+    key_zero = Web3.toBytes(hexstr='0x' + ('00' * 32))
 
     didresolver = DIDResolver(ocean._web3, ocean.keeper.didregistry)
 
@@ -152,13 +155,22 @@ def test_did_resolver_library():
 
     didregistry.register(did_test, url=value_test, account=register_account)
 
-    assert didresolver.resolve(did_test) == value_test
+    didresolved = didresolver.resolve(did_test)
+    assert didresolved
+    assert didresolved.is_url
+    assert didresolved.url == value_test
+    assert didresolved.key == key_zero
+    assert didresolved.owner == register_account
 
     with pytest.raises(ValueError):
         didresolver.resolve(did_id)
 
-    result = didresolver.resolve(did_id_bytes)
-    assert result == value_test
+    didresolved = didresolver.resolve(did_id_bytes)
+    assert didresolved
+    assert didresolved.is_url
+    assert didresolved.url == value_test
+    assert didresolved.key == key_zero
+    assert didresolved.owner == register_account
 
     # resolve URL from a hash of a DID string
     did_hash = Web3.sha3(text=did_test)
@@ -166,15 +178,27 @@ def test_did_resolver_library():
     register_did = didregistry.register_attribute(did_hash, value_type, key_test, value_test, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
     gas_used_url = receipt['gasUsed']
-    result = didresolver.resolve(did_hash)
-    assert result == value_test
+    didresolved = didresolver.resolve(did_hash)
+    assert didresolved
+    assert didresolved.is_url
+    assert didresolved.url == value_test
+    assert didresolved.key == key_test
+    assert didresolved.value_type == value_type
+    assert didresolved.owner == register_account
+    assert didresolved.block_number == receipt['blockNumber']
 
     # test update of an already assigned DID
     value_test_new = 'http://aquarius:5000'
     register_did = didregistry.register_attribute(did_hash, value_type, key_test, value_test_new, register_account)
     receipt = didregistry.get_tx_receipt(register_did)
-    result = didresolver.resolve(did_hash)
-    assert result == value_test_new
+    didresolved = didresolver.resolve(did_hash)
+    assert didresolved
+    assert didresolved.is_url
+    assert didresolved.url == value_test_new
+    assert didresolved.key == key_test
+    assert didresolved.value_type == value_type
+    assert didresolved.owner == register_account
+    assert didresolved.block_number == receipt['blockNumber']
 
     # resolve DDO from a direct DID ID value
     ddo = DDO(did_test)
@@ -189,9 +213,16 @@ def test_did_resolver_library():
     receipt = didregistry.get_tx_receipt(register_did)
     gas_used_ddo = receipt['gasUsed']
 
-    result = didresolver.resolve(did_id_bytes)
-    resolved_ddo = DDO(json_text = result)
+    didresolved = didresolver.resolve(did_id_bytes)
+    resolved_ddo = DDO(json_text = didresolved.ddo)
+
+    assert didresolved
+    assert didresolved.is_ddo
     assert ddo.calculate_hash() == resolved_ddo.calculate_hash()
+    assert didresolved.key == key_test
+    assert didresolved.value_type == value_type
+    assert didresolved.owner == register_account
+    assert didresolved.block_number == receipt['blockNumber']
 
     logger.info('gas used URL: %d, DDO: %d, DDO +%d extra', gas_used_url, gas_used_ddo, gas_used_ddo - gas_used_url)
 
@@ -214,8 +245,15 @@ def test_did_resolver_library():
         receipt = didregistry.get_tx_receipt(register_did)
 
     did_id_bytes = Web3.toBytes(hexstr=ids[0])
-    result = didresolver.resolve(did_id_bytes)
-    assert result == value_test
+    didresolved = didresolver.resolve(did_id_bytes)
+    assert didresolved
+    assert didresolved.is_url
+    assert didresolved.url == value_test
+    assert didresolved.hop_count == chain_length
+    assert didresolved.key == key_test
+    assert didresolved.value_type == value_type
+    assert didresolved.owner == register_account
+    assert didresolved.block_number == receipt['blockNumber']
 
 
     # test circular chain
@@ -234,8 +272,10 @@ def test_did_resolver_library():
 
     # test hop count
     hop_count = math.floor(len(ids) / 2)
-    result = didresolver.resolve(did_id_bytes, hop_count)
-    assert result == Web3.toBytes(hexstr=ids[hop_count])
+    didresolved = didresolver.resolve(did_id_bytes, hop_count)
+    assert didresolved
+    assert didresolved.is_did
+    assert didresolved.did == did_generate_from_id(Web3.toHex(hexstr=ids[hop_count]))
 
     # test DID not found
     did_id = secrets.token_hex(32)
