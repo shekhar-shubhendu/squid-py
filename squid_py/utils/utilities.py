@@ -14,7 +14,8 @@ def get_balance(web3, account_address, block_identifier):
     return web3.eth.getBalance(account_address, block_identifier)
 
 
-def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest', filters=None, ):
+def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
+                filters=None, num_confirmations=12):
     event_filter = install_filter(
         contract_name, event_name, fromBlock, toBlock, filters
     )
@@ -22,6 +23,7 @@ def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBl
     Thread(
         target=watcher,
         args=(event_filter, callback),
+        kwargs={'num_confirmations': num_confirmations},
         daemon=True,
     ).start()
     return event_filter
@@ -64,21 +66,53 @@ def network_name(web3):
     return switcher.get(network_id, 'development')
 
 
-# static methods
-def watcher(event_filter, callback):
+def watcher(event_filter, callback, num_confirmations=12):
     while True:
         try:
-            events = event_filter.get_all_entries()
+            events = event_filter.get_new_entries()
         except ValueError as err:
             # ignore error, but log it
             print('Got error grabbing keeper events: ', str(err))
             events = []
 
         for event in events:
-            callback(event)
-            # time.sleep(0.1)
+            if num_confirmations > 0:
+                Thread(
+                    target=await_confirmations,
+                    args=(
+                        event_filter,
+                        event['blockNumber'],
+                        event['blockHash'].hex(),
+                        num_confirmations,
+                        callback,
+                        event,
+                    ),
+                    daemon=True,
+                ).start()
+            else:
+                callback(event)
 
         # always take a rest
+        time.sleep(0.1)
+
+
+def await_confirmations(event_filter, block_number, block_hash, num_confirmations, callback, event):
+    while True:
+        latest_block = event_filter.web3.eth.getBlock('latest')
+
+        if latest_block['number'] >= block_number + num_confirmations:
+            block = event_filter.web3.eth.getBlock(block_number)
+            if block['hash'].hex() == block_hash:
+                callback(event)
+
+            # if hashes do not match, it means the event did not end up in the longest chain
+            # after the given number of confirmations
+            #
+            # we stop listening for blocks cause it is now unlikely that the event's chain will
+            # be the longest again; ideally though, we should only stop listening for blocks after
+            # the alternative chain reaches a certain height
+            break
+
         time.sleep(0.1)
 
 
