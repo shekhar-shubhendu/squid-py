@@ -137,6 +137,10 @@ class DIDResolver():
                 Web3.toBytes(hexstr=log_item['data']))
             result = {
                 'value_type': value_type,
-                'value': value
+                'value': value,
+                'block_number': block_number,
+                'did_bytes': log_item['topics'][1],
+                'owner': log_item['topics'][2],
+                'key': log_item['topics'][2],
             }
         return result
