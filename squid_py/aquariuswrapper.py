@@ -21,7 +21,10 @@ class AquariusWrapper(object):
         logging.debug("Metadata assets at {}".format(self._base_url))
 
     def list_assets(self):
-        return json.loads(requests.get(self._base_url).content)
+        asset_list = json.loads(requests.get(self._base_url).content)
+        if asset_list and 'ids' in asset_list:
+            return asset_list['ids']
+        return []
 
     def get_asset_metadata(self, asset_did):
         response = requests.get(self._base_url + '/ddo/%s' % asset_did).content
@@ -35,7 +38,7 @@ class AquariusWrapper(object):
         return json.loads(requests.get(self._base_url + '/ddo').content)
 
     def publish_asset_metadata(self, asset):
-        response = requests.post(self._base_url + '/ddo', data=json.dumps(asset.ddo), headers=self._headers)
+        response = requests.post(self._base_url + '/ddo', data=asset.ddo.as_text(), headers=self._headers)
         if response.status_code == 500:
             raise ValueError("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
         elif response.status_code == 400:
@@ -51,7 +54,7 @@ class AquariusWrapper(object):
 
     def update_asset_metadata(self, asset):
         return json.loads(
-            requests.put(self._base_url + '/ddo/%s' % asset.ddo['id'], data=json.dumps(asset.ddo),
+            requests.put(self._base_url + '/ddo/%s' % asset.ddo.did, data=asset.ddo.as_text(),
                          headers=self._headers).content)
 
     def text_search(self, text, sort=None, offset=100, page=0):

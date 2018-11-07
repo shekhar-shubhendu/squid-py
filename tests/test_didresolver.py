@@ -11,7 +11,7 @@ from eth_abi import (
     decode_single,
 )
 
-from did_ddo_lib import OceanDDO
+from squid_py.ddo import DDO
 
 from squid_py.ocean import Ocean
 
@@ -87,6 +87,52 @@ def test_did_resolver_raw_test():
     assert decode_block_number == block_number
 """
 
+def test_did_resitry_register():
+
+    ocean = Ocean(config_file='config_local.ini')
+
+    register_account = list(ocean.accounts)[1]
+    didregistry = ocean.keeper.didregistry
+    did_id = secrets.token_hex(32)
+    did_test = 'did:op:' + did_id
+    key_test = Web3.sha3(text='provider')
+    value_test = 'http://localhost:5000'
+
+
+    # register DID-> URL
+    didregistry.register(did_test, url=value_test, key=key_test, account=register_account)
+
+    # register DID-> DDO Object
+    ddo = DDO(did_test)
+    ddo.add_signature()
+    ddo.add_service('metadata-test', value_test)
+
+    didregistry.register(did_test, ddo=ddo, key=key_test, account=register_account)
+
+    # register DID-> DDO json
+    didregistry.register(did_test, ddo=ddo.as_text(), account=register_account)
+
+    # register DID-> DID string
+    did_id_new = secrets.token_hex(32)
+    did_test_new = 'did:op:' + did_id_new
+    didregistry.register(did_test, did=did_test_new, account=register_account)
+
+    # register DID-> DID bytes
+    didregistry.register(did_test, did=Web3.toBytes(hexstr=did_id_new), account=register_account)
+
+    # test circular ref
+    with pytest.raises(OceanDIDCircularReference):
+        didregistry.register(did_test, did=did_test, account=register_account)
+
+    # No account provided
+    with pytest.raises(ValueError):
+        didregistry.register(did_test, url=value_test)
+
+    # Invalide key field provided
+    with pytest.raises(ValueError):
+        didregistry.register(did_test, url=value_test, account=register_account, key=42)
+
+
 def test_did_resolver_library():
 
     ocean = Ocean(config_file='config_local.ini')
@@ -104,13 +150,11 @@ def test_did_resolver_library():
     # resolve URL from a direct DID ID value
     did_id_bytes = Web3.toBytes(hexstr=did_id)
 
-    register_did = didregistry.register_attribute(did_id_bytes, value_type, key_test, value_test, register_account)
-    receipt = didregistry.get_tx_receipt(register_did)
+    didregistry.register(did_test, url=value_test, account=register_account)
 
-    with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
-        didresolver.resolve(did_test)
+    assert didresolver.resolve(did_test) == value_test
 
-    with pytest.raises(TypeError, message = 'You must provide a 32 byte value'):
+    with pytest.raises(ValueError):
         didresolver.resolve(did_id)
 
     result = didresolver.resolve(did_id_bytes)
@@ -133,7 +177,7 @@ def test_did_resolver_library():
     assert result == value_test_new
 
     # resolve DDO from a direct DID ID value
-    ddo = OceanDDO(did_test)
+    ddo = DDO(did_test)
     ddo.add_signature()
     ddo.add_service('meta-store', value_test)
     did_id = secrets.token_hex(32)
@@ -146,14 +190,14 @@ def test_did_resolver_library():
     gas_used_ddo = receipt['gasUsed']
 
     result = didresolver.resolve(did_id_bytes)
-    resolved_ddo = OceanDDO(ddo_text = result)
+    resolved_ddo = DDO(json_text = result)
     assert ddo.calculate_hash() == resolved_ddo.calculate_hash()
 
     logger.info('gas used URL: %d, DDO: %d, DDO +%d extra', gas_used_url, gas_used_ddo, gas_used_ddo - gas_used_url)
 
     value_type = VALUE_TYPE_URL
     # resolve chain of direct DID IDS to URL
-    chain_length = 10
+    chain_length = 4
     ids = []
     for i in range(0, chain_length):
         ids.append(secrets.token_hex(32))
