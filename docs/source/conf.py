@@ -21,13 +21,13 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'squid-py'
-copyright = '2018, OceanProtocol'
-author = 'OceanProtocol'
+copyright = 'squid-py contributors'
+author = 'squid-py contributors'
 
 # The short X.Y version
-version = '0.1 Beta'
+version = '0.2.1'
 # The full version, including alpha/beta/rc tags
-release = '0.1 Beta'
+release = '0.2.1'
 
 
 # -- General configuration ---------------------------------------------------
