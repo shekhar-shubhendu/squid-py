@@ -204,5 +204,5 @@ def test_ocean_publish():
     ##########################################################
     # Register using high-level interface
     ##########################################################
-    ocean.register(asset, 100, publisher_acct, publisher_address)
+    ocean.register(asset, 100, publisher_acct)
     assert ocean.resolve_did(asset.did)

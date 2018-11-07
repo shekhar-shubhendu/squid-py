@@ -74,20 +74,25 @@ class Ocean:
         Given an asset_did, return the Asset
         :return: Asset object
         """
-        # return self.metadata.get_asset_metadata(asset_did)
+        return self.metadata.get_asset_metadata(asset_did)
 
-    def search_assets(self, text, sort=None, offset=100, page=0):
+    def search_assets(self, text, sort=None, offset=100, page=0, aquarius_url=None):
         """
         Search an asset in oceanDB using aquarius.
-        :param text
-        :param sort
-        :param offset
-        :param page
+        :param text String with the value that you are searching.
+        :param sort Dictionary to choose order base in some value.
+        :param offset Number of elements shows by page.
+        :param page Page number.
+        :param aquarius_url Url of the aquarius where you want to search. If there is not provided take the default.
         :return: List of assets that match with the query.
         """
-        return self.metadata.text_search(text=text, sort=sort, offset=offset, page=page)
+        if aquarius_url is not None:
+            aquarius = AquariusWrapper(aquarius_url)
+            return aquarius.text_search(text=text, sort=sort, offset=offset, page=page)
+        else:
+            return self.metadata.text_search(text=text, sort=sort, offset=offset, page=page)
 
-    def register(self, asset, asset_price, publisher_acct, address):
+    def register(self, asset, asset_price, publisher_acct):
         """
         Register an asset in both the Market (on-chain) and in the Meta Data store
 
@@ -95,9 +100,9 @@ class Ocean:
             - keeper.market.register
             - metadata.publish_asset
 
-        :param asset:
-        :param asset_price:
-        :param publisher_acct:
+        :param asset: Asset object.
+        :param asset_price: Price of the asset.
+        :param publisher_acct: Account of the publisher.
         :param address
         :return:
         """
@@ -122,7 +127,7 @@ class Ocean:
         self.keeper.didregistry.register(asset.did,
                                          key=Web3.sha3(text='Metadata'),
                                          url=self.config.aquarius_url,
-                                         account=address)
+                                         account=publisher_acct.address)
 
     def resolve_did(self, did):
         """

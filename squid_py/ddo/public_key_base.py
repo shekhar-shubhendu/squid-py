@@ -9,12 +9,7 @@
 import json
 import re
 
-from base64 import (
-    b64decode,
-    b64encode,
-    b85encode,
-    b85decode,
-)
+from base64 import b64decode, b64encode, b85encode, b85decode
 
 PUBLIC_KEY_STORE_TYPE_PEM = 'publicKeyPem'
 PUBLIC_KEY_STORE_TYPE_JWK = 'publicKeyJwk'
@@ -23,7 +18,7 @@ PUBLIC_KEY_STORE_TYPE_BASE64 = 'publicKeyBase64'
 PUBLIC_KEY_STORE_TYPE_BASE85 = 'publicKeyBase85'
 
 
-class PublicKeyBase():
+class PublicKeyBase:
     """
     Base Public Key class, to allow to perfom basic key storage and validation
     using DDO keys
@@ -119,11 +114,7 @@ class PublicKeyBase():
 
     def as_text(self, is_pretty=False):
         """ return the key as JSON text"""
-        values = {
-            'id': self._id,
-            'type': self._type,
-        }
-        values[self._store_type] = self._value
+        values = {'id': self._id, 'type': self._type, self._store_type: self._value}
         if self._owner:
             values['owner'] = self._owner
 
@@ -134,11 +125,7 @@ class PublicKeyBase():
 
     def as_dictionary(self):
         """return the key as a python dictionary"""
-        values = {
-            'id': self._id,
-            'type': self._type,
-        }
-        values[self._store_type] = self._value
+        values = {'id': self._id, 'type': self._type, self._store_type: self._value}
         if self._owner:
             values['owner'] = self._owner
         return values

@@ -1,14 +1,10 @@
 """
     DID Lib to do DID's and DDO's
-
 """
 import datetime
 import json
 import re
-from base64 import (
-    b64encode,
-    b64decode,
-)
+from base64 import b64encode, b64decode
 
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
