@@ -1,15 +1,13 @@
+import time
 import unittest
 import uuid
 
 from web3 import Web3, HTTPProvider
-from web3.contract import ConciseContract
 
 from squid_py.config import Config
-from squid_py.keeper.conditions.payment_conditions import PaymentConditions
-from squid_py.keeper.utils import get_contract_by_name, get_fingerprint_by_name, hexstr_to_bytes
+from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import register_service_agreement
-from squid_py.utils import network_name
 
 
 CONFIG_PATH = 'config_local.ini'
@@ -35,37 +33,59 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = uuid.uuid4().hex
+ 
+        did = uuid.uuid4().hex
+        price = 10
 
+        lock_payment_fingerprint = get_fingerprint_by_name(
+            self.payment_conditions.contract.abi,
+            'lockPayment',
+        )
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
+            self.consumer,
             service_agreement_id,
             {
                 'conditions': [{
-                    'condition_key': {
-                        'contract_address': self.payment_conditions.contract.address
+                    'conditionKey': {
+                        'contractAddress': self.service_agreement.contract.address
                     },
                     'events': [{
-                        'name': 'PaymentLocked',
-                        'actor_type': 'consumer',
+                        'name': 'ExecuteAgreement',
+                        'actorType': 'consumer',
                         'handler': {
-                            'module_name': 'payment',
-                            'function_name': 'lockPayment',
+                            'moduleName': 'payment',
+                            'functionName': 'lockPayment',
                             'version': '0.1'
                         }
                     }]
+                }, {
+                    'conditionKey': {
+                        'contractAddress': self.payment_conditions.contract.address,
+                        'fingerprint': lock_payment_fingerprint,
+                        'functionName': 'lockPayment'
+                    },
+                    'parameters': {
+                        'did': did,
+                        'price': price,
+                    },
+                    'events': []
                 }]
-            }
+            },
+            'consumer'
         )
 
-        did = uuid.uuid4().hex
-        price = 10
         self._execute_service_agreement(service_agreement_id, did, price)
-        self._lock_payment(service_agreement_id, did, price)
 
-        while True:
-            import time
+        flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
+        for check in range(10):
+            events = flt.get_new_entries()
+            if events:
+                break
             time.sleep(0.5)
+
+        assert events, 'Expected PaymentLocked to be emitted'
 
     def _setup_service_agreement(self):
         self.contracts = [self.payment_conditions.contract.address]
@@ -126,11 +146,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             service_agreement_id.encode(),
             did.encode(),
         ]
-        receipt = self.service_agreement.contract_concise.executeAgreement(
+        self.service_agreement.contract_concise.executeAgreement(
             *execute_args,
             transact={'from': self.consumer}
         )
-        tx = self.web3.eth.waitForTransactionReceipt(receipt)
 
     def _setup_token(self):
         self.market.contract_concise.requestTokens(100, transact={'from': self.consumer})
@@ -140,13 +159,3 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             100,
             transact={'from': self.consumer},
         )
-
-    def _lock_payment(self, service_agreement_id, did, price):
-        receipt = self.payment_conditions.contract_concise.lockPayment(
-            service_agreement_id.encode(),
-            did.encode(),
-            price,
-            transact={'from': self.consumer},
-        )
-        tx = self.web3.eth.waitForTransactionReceipt(receipt)
-        print(self.payment_conditions.contract.events.PaymentLocked().processReceipt(tx))
