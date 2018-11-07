@@ -73,13 +73,14 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     'events': []
                 }]
             },
-            'consumer'
+            'consumer',
+            num_confirmations=1
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
 
         flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
-        for check in range(10):
+        for check in range(20):
             events = flt.get_new_entries()
             if events:
                 break

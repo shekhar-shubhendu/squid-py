@@ -37,5 +37,6 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
                 _callback,
                 fromBlock='latest',
                 interval=0.5,
-                filters=filters
+                filters=filters,
+                num_confirmations=num_confirmations,
             )
