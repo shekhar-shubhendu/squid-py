@@ -18,7 +18,10 @@ from squid_py.exceptions import (
     OceanDIDUnknownValueType
 )
 
-from squid_py.did import did_to_id_bytes
+from squid_py.did import (
+    did_to_id_bytes,
+    did_generate_from_id
+)
 
 
 
@@ -32,6 +35,95 @@ VALUE_TYPE_DDO = 3
 
 logger = logging.getLogger()
 
+class DIDResolved():
+    """
+    Class that handles the resolved DID information
+    """
+    def __init__(self):
+        self._items = []
+        self._value = None
+        
+    def add_data(self, data, value):
+        """
+        Add a resolved event data item to the list of resolved items
+        as this could be the last item in the chain.
+
+        :param data: dictionary of the DIDRegistry event data
+        :param value: formated value depending on the data['value_type'] string, bytes32
+
+        """
+        self._items.append(data)
+        if data['value_type'] == VALUE_TYPE_DID:
+            self._value = did_generate_from_id(value)
+        else:
+            self._value = value
+        
+    
+    @property
+    def did_bytes(self):
+        if self.self._items:
+            return self._items[-1]['did_bytes']
+
+    @property
+    def owner(self):
+        if self.self._items:
+            return self._items[-1]['owner']
+
+    @property
+    def key(self):
+        if self.self._items:
+            return self._items[-1]['key']
+            
+    @property
+    def value(self):
+        return self._value
+        
+    @property
+    def value_type(self):
+        if self._data:
+            return self._items[-1]['value_type']
+
+    @property
+    def is_url(self):
+        return self._items and self._items[-1]['value_type'] == VALUE_TYPE_URL
+
+    @property
+    def url(self):
+        if self.is_url:
+            return self._value
+        return None
+        
+    @property
+    def is_ddo(self):
+        return self._items and self._items[-1]['value_type'] == VALUE_TYPE_DDO
+
+    @property
+    def ddo(self):
+        if self.is_ddo:
+            return self._value
+        return None
+
+    @property
+    def is_did(self):
+        return self._items and self._items[-1]['value_type'] == VALUE_TYPE_DID
+
+    @property
+    def did(self):
+        if self.is_did:
+            return self._value
+        return None
+
+    @property
+    def items(self):
+        return self._items
+    
+    @property
+    def hop_count(self):
+        if self._items:
+            return len(self._items)
+        return 0
+        
+        
 class DIDResolver():
     """
     DID Resolver class
@@ -69,6 +161,7 @@ class DIDResolver():
         if not isinstance(did_bytes, bytes):
             raise TypeError('You must provide a 32 Byte value')
 
+        resolved = DIDResolved()
         result = None
         did_visited = {}
 
@@ -83,6 +176,7 @@ class DIDResolver():
                         result = data['value'].decode('utf8')
                     except:
                         raise TypeError('Invalid string (URL or DDO) data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
+                resolved.add_data(data, result)
                 data = None
                 break
             elif data['value_type'] == VALUE_TYPE_DID:
@@ -91,6 +185,7 @@ class DIDResolver():
                     did_bytes = Web3.toBytes(hexstr=data['value'].decode('utf8'))
                 except:
                     raise TypeError('Invalid data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
+                resolved.add_data(data, did_bytes)
                 result = did_bytes
             elif data['value_type'] == VALUE_TYPE_DID_REF:
                 # at the moment the same method as DID, get the hexstr and convert to bytes
@@ -99,6 +194,7 @@ class DIDResolver():
                     did_bytes = Web3.toBytes(hexstr=data['value'].decode('utf8'))
                 except:
                     raise TypeError('Invalid data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
+                resolved.add_data(data, did_bytes)
                 result = did_bytes
             else:
                 raise OceanDIDUnknownValueType('Unknown value type {}'.format(data['value_type']))
@@ -112,7 +208,10 @@ class DIDResolver():
                 data = self.get_did(did_bytes)
 
             hop_count = hop_count + 1
-        return result
+            
+        if resolved.items:
+            return resolved
+        return None
 
 
 
