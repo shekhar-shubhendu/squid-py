@@ -151,7 +151,7 @@ def test_publish_data_asset_aquarius():
     # Publish the metadata
     this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
     assert(this_metadata)
-    
+
     print("Publishing again should raise error")
     with pytest.raises(ValueError):
         this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
