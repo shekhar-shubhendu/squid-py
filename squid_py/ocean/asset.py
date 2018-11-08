@@ -12,6 +12,7 @@ from squid_py.did import (
 DDO_SERVICE_METADATA_NAME = 'Metadata'
 DDO_SERVICE_METADATA_KEY = 'metadata'
 
+
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
         """
@@ -44,7 +45,6 @@ class Asset:
         self._ddo = ddo
         if self._ddo and self._ddo.is_valid:
             self.asset_id = did_to_id(self._ddo.did)
-
 
     @property
     def did(self):
