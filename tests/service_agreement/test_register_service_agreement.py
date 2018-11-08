@@ -1,3 +1,4 @@
+import os
 import time
 import unittest
 import uuid
@@ -7,7 +8,10 @@ from web3 import Web3, HTTPProvider
 from squid_py.config import Config
 from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.ocean import Ocean
-from squid_py.service_agreement.register_service_agreement import register_service_agreement
+from squid_py.service_agreement.register_service_agreement import (
+    get_pending_service_agreements,
+    register_service_agreement
+)
 
 
 CONFIG_PATH = 'config_local.ini'
@@ -15,21 +19,46 @@ CONFIG_PATH = 'config_local.ini'
 
 class TestRegisterServiceAgreement(unittest.TestCase):
 
-    def setUp(self):
-        self.config = Config(CONFIG_PATH)
-        self.web3 = Web3(HTTPProvider(self.config.keeper_url))
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config(CONFIG_PATH)
+        cls.web3 = Web3(HTTPProvider(cls.config.keeper_url))
 
-        self.ocean = Ocean(CONFIG_PATH)
-        self.market = self.ocean.keeper.market
-        self.token = self.ocean.keeper.token
-        self.payment_conditions = self.ocean.keeper.payment_conditions
-        self.service_agreement = self.ocean.keeper.service_agreement
+        cls.ocean = Ocean(CONFIG_PATH)
+        cls.market = cls.ocean.keeper.market
+        cls.token = cls.ocean.keeper.token
+        cls.payment_conditions = cls.ocean.keeper.payment_conditions
+        cls.service_agreement = cls.ocean.keeper.service_agreement
 
-        self.consumer = self.web3.eth.accounts[0]
-        self.web3.eth.defaultAccount = self.consumer
+        cls.consumer = cls.web3.eth.accounts[0]
+        cls.web3.eth.defaultAccount = cls.consumer
 
-        self._setup_service_agreement()
-        self._setup_token()
+        cls._setup_service_agreement()
+        cls._setup_token()
+
+        cls.storage_path = 'test_squid_py.db'
+
+    def tearDown(self):
+        os.remove(self.storage_path)
+
+    def test_register_service_agreement_stores_the_record(self):
+        service_agreement_id = uuid.uuid4().hex
+        did = uuid.uuid4().hex
+
+        register_service_agreement(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,
+            service_agreement_id,
+            did,
+            {
+                'conditions': []
+            },
+            'consumer',
+        )
+
+        assert [(service_agreement_id, did)] == get_pending_service_agreements(self.storage_path)
 
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = uuid.uuid4().hex
@@ -44,8 +73,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
+            self.storage_path,
             self.consumer,
             service_agreement_id,
+            did,
             {
                 'conditions': [{
                     'conditionKey': {
@@ -88,27 +119,28 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         assert events, 'Expected PaymentLocked to be emitted'
 
-    def _setup_service_agreement(self):
-        self.contracts = [self.payment_conditions.contract.address]
-        self.fingerprints = [
+    @classmethod
+    def _setup_service_agreement(cls):
+        cls.contracts = [cls.payment_conditions.contract.address]
+        cls.fingerprints = [
             hexstr_to_bytes(
-                self.web3,
-                get_fingerprint_by_name(self.payment_conditions.contract.abi, 'lockPayment'),
+                cls.web3,
+                get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'lockPayment'),
             )
         ]
-        self.dependencies = [0]
+        cls.dependencies = [0]
 
         template_name = uuid.uuid4().hex.encode()
-        setup_args = [self.contracts, self.fingerprints, self.dependencies, template_name]
-        receipt = self.service_agreement.contract_concise.setupAgreementTemplate(
+        setup_args = [cls.contracts, cls.fingerprints, cls.dependencies, template_name]
+        receipt = cls.service_agreement.contract_concise.setupAgreementTemplate(
             *setup_args,
-            transact={'from': self.consumer}
+            transact={'from': cls.consumer}
         )
-        tx = self.web3.eth.waitForTransactionReceipt(receipt)
+        tx = cls.web3.eth.waitForTransactionReceipt(receipt)
 
-        self.template_id = Web3.toHex(self.service_agreement.events.
-                                      SetupAgreementTemplate().processReceipt(tx)[0].args.
-                                      serviceTemplateId)
+        cls.template_id = Web3.toHex(cls.service_agreement.events.
+                                     SetupAgreementTemplate().processReceipt(tx)[0].args.
+                                     serviceTemplateId)
 
     def _execute_service_agreement(self, service_agreement_id, did, price):
         hashes = [
@@ -152,11 +184,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             transact={'from': self.consumer}
         )
 
-    def _setup_token(self):
-        self.market.contract_concise.requestTokens(100, transact={'from': self.consumer})
+    @classmethod
+    def _setup_token(cls):
+        cls.market.contract_concise.requestTokens(100, transact={'from': cls.consumer})
 
-        self.token.contract_concise.approve(
-            self.payment_conditions.address,
+        cls.token.contract_concise.approve(
+            cls.payment_conditions.address,
             100,
-            transact={'from': self.consumer},
+            transact={'from': cls.consumer},
         )

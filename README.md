@@ -56,6 +56,8 @@ of the network to work with from this client.
 `keeper.path` points to the folder with keeper contracts definitions. When you install the package, the artifacts are
 automatically picked up from the `keeper-contracts` Python dependency.
 
+`storage.path` points to the local database file used for storing temporary information (for instance, pending service agreements).
+
 In addition to the configuration file, you may use the following environment variables (override the corresponding configuration file values):
 
 - KEEPER_PATH

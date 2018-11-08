@@ -14,17 +14,20 @@ DEFAULT_KEEPER_URL = 'http://localhost:8545'
 DEFAULT_KEEPER_PATH = 'artifacts'
 DEFAULT_GAS_LIMIT = 300000
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
+DEFAULT_STORAGE_PATH = 'squid_py.db'
 
 NAME_KEEPER_URL = 'keeper.url'
 NAME_KEEPER_PATH = 'keeper.path'
 NAME_GAS_LIMIT = 'gas_limit'
 NAME_AQUARIUS_URL = 'aquarius.url'
+NAME_STORAGE_PATH = 'storage.path'
 
 environ_names = {
     NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
     NAME_KEEPER_PATH: ['KEEPER_PATH', 'Path to the keeper contracts'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
     NAME_AQUARIUS_URL: ['AQUARIUS_URL', 'Aquarius URL'],
+    NAME_STORAGE_PATH: ['STORAGE_PATH', 'Path to the local database file'],
 }
 
 config_defaults = {
@@ -33,6 +36,7 @@ config_defaults = {
         NAME_KEEPER_PATH: DEFAULT_KEEPER_PATH,
         NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
         NAME_AQUARIUS_URL: DEFAULT_NAME_AQUARIUS_URL,
+        NAME_STORAGE_PATH: DEFAULT_STORAGE_PATH,
     }
 }
 
@@ -80,7 +84,9 @@ class Config(configparser.ConfigParser):
             path = os.path.join(site.PREFIXES[0], 'artifacts')
         return path
 
-    # properties
+    @property
+    def storage_path(self):
+        return self.get(self._section_name, NAME_STORAGE_PATH)
 
     @property
     def keeper_url(self):
