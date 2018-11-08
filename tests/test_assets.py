@@ -21,7 +21,7 @@ logging.getLogger("web3").setLevel(logging.WARNING)
 def test_create_asset_simple():
     # An asset can be be created directly
     asset1 = Asset(asset_id='TestID', publisher_id='TestPID', price=0, ddo=None)
-    assert not asset1.is_valid_did()
+    assert not asset1.is_valid
 
     # Can gen the DID locally BUT it requires a DDO!
     with pytest.raises(AttributeError):
@@ -36,7 +36,7 @@ def test_create_asset_ddo_file():
     asset1 = Asset.from_ddo_json_file(sample_ddo_path)
 
     assert isinstance(asset1.ddo, DDO)
-    assert asset1.ddo.is_valid
+    assert asset1.is_valid
     asset1.generate_did()
 
     assert asset1.has_metadata

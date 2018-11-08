@@ -115,8 +115,7 @@ class Ocean:
 
         # 1) Check that the asset is valid
         assert asset.has_metadata
-        assert asset.is_valid_did
-        assert asset.ddo.is_valid
+        assert asset.is_valid
 
         # 2) Check that the publisher is valid and has funds
         assert publisher_acct.address in self.accounts

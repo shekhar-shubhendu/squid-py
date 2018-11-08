@@ -79,9 +79,9 @@ class Asset:
                 result = values['metadata']
         return result
 
-    def is_valid_did(self, length=64):
-        """The Asset.asset_id must conform to the specification"""
-        return len(self.asset_id) == length
+    @property
+    def is_valid(self):
+        return self._ddo and self._ddo.is_valid
 
     def generate_did(self):
         """
