@@ -142,9 +142,9 @@ def test_publish_data_asset_aquarius():
         print("Currently registered assets:")
         print(meta_data_assets)
 
-    if asset.ddo.did in meta_data_assets:
-        ocean.metadata.get_asset_metadata(asset.ddo.did)
-        ocean.metadata.retire_asset_metadata(asset.ddo.did)
+    if asset.did in meta_data_assets:
+        ocean.metadata.get_asset_metadata(asset.did)
+        ocean.metadata.retire_asset_metadata(asset.did)
     # Publish the metadata
     this_metadata = ocean.metadata.publish_asset_metadata(asset)
 
@@ -154,7 +154,7 @@ def test_publish_data_asset_aquarius():
 
     # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
-    published_metadata = ocean.metadata.get_asset_metadata(asset.ddo.did)
+    published_metadata = ocean.metadata.get_asset_metadata(asset.did)
 
     assert published_metadata
     # only compare top level keys
@@ -195,9 +195,9 @@ def test_ocean_publish():
 
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata.list_assets()
-    if asset.ddo.did in meta_data_assets:
-        ocean.metadata.get_asset_metadata(asset.ddo.did)
-        ocean.metadata.retire_asset_metadata(asset.ddo.did)
+    if asset.did in meta_data_assets:
+        ocean.metadata.get_asset_metadata(asset.did)
+        ocean.metadata.retire_asset_metadata(asset.did)
 
     ##########################################################
     # Register using high-level interface
