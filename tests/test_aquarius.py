@@ -20,7 +20,7 @@ def test_aquarius():
     for match in ocean_provider.metadata.text_search(text='Office'):
         ocean_provider.metadata.retire_asset_metadata(match['id'])
 
-    ocean_provider.metadata.publish_asset_metadata(asset1)
+    ocean_provider.metadata.publish_asset_metadata(asset1.did, asset1.ddo)
 
     ocean_provider.metadata.get_asset_metadata(asset1.did)
 
@@ -30,7 +30,7 @@ def test_aquarius():
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
     asset2 = Asset.from_ddo_json_file(sample_ddo_path2)
 
-    ocean_provider.metadata.update_asset_metadata(asset2)
+    ocean_provider.metadata.update_asset_metadata(asset2.did, asset2.ddo)
     this_metadata = ocean_provider.metadata.get_asset_metadata(asset2.did)
 
     # basic test to compare authentication records in the DDO

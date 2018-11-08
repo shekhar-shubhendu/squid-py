@@ -126,7 +126,7 @@ class Ocean:
         if asset.asset_id in self.metadata.list_assets():
             raise OceanDIDAlreadyExist
         logging.info("Publishing {} in aquarius".format(asset.did))
-        self.metadata.publish_asset_metadata(asset)
+        self.metadata.publish_asset_metadata(asset.did, asset.ddo)
 
         # 4) Register the asset onto blockchain
         logging.info("Registering asset with did {} on chain.".format(asset.did))

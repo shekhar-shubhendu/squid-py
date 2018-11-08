@@ -146,11 +146,11 @@ def test_publish_data_asset_aquarius():
         ocean.metadata.get_asset_metadata(asset.did)
         ocean.metadata.retire_asset_metadata(asset.did)
     # Publish the metadata
-    this_metadata = ocean.metadata.publish_asset_metadata(asset)
+    this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
 
     print("Publishing again should raise error")
     with pytest.raises(ValueError):
-        this_metadata = ocean.metadata.publish_asset_metadata(asset)
+        this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
 
     # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
