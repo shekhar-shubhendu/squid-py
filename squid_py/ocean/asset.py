@@ -1,7 +1,6 @@
 import hashlib
 import json
 import logging
-import re
 
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean_base import OceanBase
@@ -28,13 +27,13 @@ class Asset:
         :param publisher_id:
         :param price:
         :param ddo: DDO instance
-        
+
         TODO: remove these init variables ? do we need ...
-        
+
         asset_id - decided on the DID/DDO and hash of the metadata
         publisher_id - this should be set when publishing
         price - set when writing to brizo?
-        
+
         """
 
         self.asset_id = asset_id
@@ -57,31 +56,35 @@ class Asset:
 
     @property
     def ddo(self):
+        """return ddo object assigned for this asset"""
         return self._ddo
 
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
+        """return a new Asset object from a DDO JSON file"""
         this_asset = cls(ddo=DDO(json_filename=json_file_path))
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
     @classmethod
     def from_ddo_dict(cls, dictionary):
-        this_asset = cls(ddo = DDO(dictionary=dictionary))
+        """return a new Asset object from DDO dictionary"""
+        this_asset = cls(ddo=DDO(dictionary=dictionary))
         logging.debug("Asset {} created from ddo dict {} ".format(this_asset.asset_id, dictionary))
         return this_asset
 
     @classmethod
     def create_from_metadata_file(cls, filename, service_endpoint):
+        """return a new Asset object from a metadata JSON file"""
         if filename:
             with open(filename, 'r') as file_handle:
                 metadata = json.load(file_handle)
                 return Asset.create_from_metadata(metadata, service_endpoint)
         return None
-        
+
     @classmethod
     def create_from_metadata(cls, metadata, service_endpoint):
-            
+        """return a new Asset object from a metadata dictionary"""
         # calc the asset id
         asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
         # generate a DID from an asset_id
@@ -95,20 +98,23 @@ class Asset:
         # add the static proof
         new_ddo.add_proof(0, private_password)
         # create the asset object
-        this_asset = cls(ddo = new_ddo)
+        this_asset = cls(ddo=new_ddo)
         logging.debug("Asset {} created from metadata {} ".format(this_asset.asset_id, metadata))
         return this_asset
 
     @property
     def metadata(self):
+        """return the metadata for this asset"""
         assert self.has_metadata
         return self._get_metadata()
 
     @property
     def has_metadata(self):
+        """return True if this asset has metadata"""
         return not self._get_metadata() is None
 
     def _get_metadata(self):
+        """ protected property to read the metadata from the DDO object"""
         result = None
         metadata_service = self._ddo.get_service('Metadata')
         if metadata_service:
@@ -119,8 +125,9 @@ class Asset:
 
     @property
     def is_valid(self):
+        """return True if this asset has a valid DDO and DID"""
         return self._ddo and self._ddo.is_valid
-    
+
     def assign_metadata(self):
         pass
 
