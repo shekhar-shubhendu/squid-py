@@ -30,32 +30,34 @@ class Asset:
         self.asset_id = asset_id
         self.publisher_id = publisher_id
         self.price = price
-        self.ddo = ddo
+        self._ddo = ddo
+        if self._ddo and self._ddo.is_valid:
+            self.asset_id = get_id_from_did(self._ddo.did)
+
 
     @property
     def did(self):
         """return the DID for this asset"""
-        if not self.ddo:
+        if not self._ddo:
             raise AttributeError("No DDO object in {}".format(self))
-        if not self.ddo.is_valid:
+        if not self._ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
-        return self.ddo.did
+        return self._ddo.did
 
+    @property
+    def ddo(self):
+        return self._ddo
 
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
-        this_asset = cls()
-        this_asset.ddo = DDO(json_filename=json_file_path)
-        this_asset.asset_id = get_id_from_did(this_asset.ddo.did)
+        this_asset = cls(ddo=DDO(json_filename=json_file_path))
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
     @classmethod
     def from_ddo_dict(cls, dictionary):
-        this_asset = cls()
-        this_asset.ddo = DDO(dictionary=dictionary)
-        this_asset.asset_id = get_id_from_did(this_asset.ddo.did)
+        this_asset = cls(ddo = DDO(dictionary=dictionary))
         logging.debug("Asset {} created from ddo dict {} ".format(this_asset.asset_id, dictionary))
         return this_asset
 
@@ -70,7 +72,7 @@ class Asset:
 
     def _get_metadata(self):
         result = None
-        metadata_service = self.ddo.get_service('Metadata')
+        metadata_service = self._ddo.get_service('Metadata')
         if metadata_service:
             values = metadata_service.get_values()
             if 'metadata' in values:
@@ -85,9 +87,9 @@ class Asset:
         """
         During development, the DID can be generated here for convenience.
         """
-        if not self.ddo:
+        if not self._ddo:
             raise AttributeError("No DDO object in {}".format(self))
-        if not self.ddo.is_valid:
+        if not self._ddo.is_valid:
             raise ValueError("Invalid DDO object in {}".format(self))
 
         metadata = self._get_metadata()
