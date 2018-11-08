@@ -49,3 +49,24 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
             filters=filters,
             num_confirmations=num_confirmations,
         )
+
+
+def watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id, service_definition,
+                                      callback, num_confirmations=12):
+    """ Subscribes to the service agreement fulfilled event, filtering by the given
+        service agreement ID.
+    """
+    contract_address = service_definition['serviceAgreementContract']['address']
+    contract_abi = get_contract_abi_by_address(contract_path, contract_address)
+    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+    filters = {'serviceId': service_agreement_id}
+    watch_event(
+        contract,
+        'AgreementFulfilled',
+        callback,
+        fromBlock='latest',
+        interval=0.5,
+        filters=filters,
+        num_confirmations=num_confirmations,
+    )

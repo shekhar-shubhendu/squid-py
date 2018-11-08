@@ -9,7 +9,7 @@ from squid_py.config import Config
 from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import (
-    get_pending_service_agreements,
+    get_service_agreements,
     register_service_agreement
 )
 
@@ -41,6 +41,38 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def tearDown(self):
         os.remove(self.storage_path)
 
+    def get_simple_service_agreement_definition(self, did, price):
+        lock_payment_fingerprint = get_fingerprint_by_name(
+            self.payment_conditions.contract.abi,
+            'lockPayment',
+        )
+        return {
+            'serviceAgreementContract': {
+                'address': self.service_agreement.contract.address,
+                'events': [{
+                    'name': 'ExecuteAgreement',
+                    'actorType': 'consumer',
+                    'handler': {
+                        'moduleName': 'payment',
+                        'functionName': 'lockPayment',
+                        'version': '0.1'
+                    }
+                }]
+            },
+            'conditions': [{
+                'conditionKey': {
+                    'contractAddress': self.payment_conditions.contract.address,
+                    'fingerprint': lock_payment_fingerprint,
+                    'functionName': 'lockPayment'
+                },
+                'parameters': {
+                    'did': did,
+                    'price': price,
+                },
+                'events': []
+            }]
+        }
+
     def test_register_service_agreement_stores_the_record(self):
         service_agreement_id = uuid.uuid4().hex
         did = uuid.uuid4().hex
@@ -54,6 +86,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             {
                 'serviceAgreementContract': {
+                    'address': self.service_agreement.contract.address,
                     'events': []
                 },
                 'conditions': []
@@ -61,18 +94,14 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             'consumer',
         )
 
-        assert [(service_agreement_id, did)] == get_pending_service_agreements(self.storage_path)
+        expected_agreements = [(service_agreement_id, did, 'pending')]
+        assert expected_agreements == get_service_agreements(self.storage_path)
 
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = uuid.uuid4().hex
- 
         did = uuid.uuid4().hex
         price = 10
 
-        lock_payment_fingerprint = get_fingerprint_by_name(
-            self.payment_conditions.contract.abi,
-            'lockPayment',
-        )
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
@@ -80,32 +109,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.consumer,
             service_agreement_id,
             did,
-            {
-                'serviceAgreementContract': {
-                    'address': self.service_agreement.contract.address,
-                    'events': [{
-                        'name': 'ExecuteAgreement',
-                        'actorType': 'consumer',
-                        'handler': {
-                            'moduleName': 'payment',
-                            'functionName': 'lockPayment',
-                            'version': '0.1'
-                        }
-                    }]
-                },
-                'conditions': [{
-                    'conditionKey': {
-                        'contractAddress': self.payment_conditions.contract.address,
-                        'fingerprint': lock_payment_fingerprint,
-                        'functionName': 'lockPayment'
-                    },
-                    'parameters': {
-                        'did': did,
-                        'price': price,
-                    },
-                    'events': []
-                }]
-            },
+            self.get_simple_service_agreement_definition(did, price),
             'consumer',
             num_confirmations=1
         )
@@ -120,6 +124,41 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             time.sleep(0.5)
 
         assert events, 'Expected PaymentLocked to be emitted'
+
+    def test_register_service_agreement_updates_fulfilled_agreements(self):
+        service_agreement_id = uuid.uuid4().hex
+        did = uuid.uuid4().hex
+        price = 10
+
+        register_service_agreement(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,
+            service_agreement_id,
+            did,
+            self.get_simple_service_agreement_definition(did, price),
+            'consumer',
+            num_confirmations=0
+        )
+
+        self._execute_service_agreement(service_agreement_id, did, price)
+
+        receipt = self.service_agreement.contract_concise.fulfillAgreement(
+            service_agreement_id,
+            transact={'from': self.consumer},
+        )
+        self.web3.eth.waitForTransactionReceipt(receipt)
+
+        expected_agreements = [(service_agreement_id, did, 'fulfilled')]
+        for i in range(10):
+            agreements = get_service_agreements(self.storage_path, 'fulfilled')
+            if expected_agreements == agreements:
+                break
+            time.sleep(0.5)
+
+        assert expected_agreements == agreements
+        assert not get_service_agreements(self.storage_path)
 
     @classmethod
     def _setup_service_agreement(cls):
