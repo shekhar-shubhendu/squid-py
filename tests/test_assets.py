@@ -9,7 +9,6 @@ import pytest
 from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean import Ocean
-from squid_py.did import get_id_from_did
 import secrets
 import json
 
@@ -151,7 +150,8 @@ def test_publish_data_asset_aquarius():
         ocean.metadata.retire_asset_metadata(asset.did)
     # Publish the metadata
     this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
-
+    assert(this_metadata)
+    
     print("Publishing again should raise error")
     with pytest.raises(ValueError):
         this_metadata = ocean.metadata.publish_asset_metadata(asset.did, asset.ddo)
