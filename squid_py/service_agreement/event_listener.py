@@ -13,30 +13,39 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
     """
 
     filters = {'serviceId': service_agreement_id.encode()}
+
+    # collect service agreement and condition events
+    events = []
+
+    for event in service_definition['serviceAgreementContract']['events']:
+        events.append((service_definition['serviceAgreementContract']['address'], event))
+
     for condition in service_definition['conditions']:
         for event in condition['events']:
             if event['actorType'] != actor_type:
                 continue
+            events.append((condition['conditionKey']['contractAddress'], event))
 
-            event_handler = event['handler']
-            version = event_handler['version'].replace('.', '_')
-            import_path = 'squid_py.modules.v{}.{}'.format(version, event_handler['moduleName'])
-            module = importlib.import_module(import_path, 'squid_py')
-            fn = getattr(module, event_handler['functionName'])
+    # subscribe to the events
+    for contract_address, event in events:
+        event_handler = event['handler']
+        version = event_handler['version'].replace('.', '_')
+        import_path = 'squid_py.modules.v{}.{}'.format(version, event_handler['moduleName'])
+        module = importlib.import_module(import_path, 'squid_py')
+        fn = getattr(module, event_handler['functionName'])
 
-            def _callback(payload):
-                fn(web3, contract_path, account, service_agreement_id, service_definition, payload)
+        def _callback(payload):
+            fn(web3, contract_path, account, service_agreement_id, service_definition, payload)
 
-            contract_address = condition['conditionKey']['contractAddress']
-            contract_abi = get_contract_abi_by_address(contract_path, contract_address)
-            contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+        contract_abi = get_contract_abi_by_address(contract_path, contract_address)
+        contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
-            watch_event(
-                contract,
-                event['name'],
-                _callback,
-                fromBlock='latest',
-                interval=0.5,
-                filters=filters,
-                num_confirmations=num_confirmations,
-            )
+        watch_event(
+            contract,
+            event['name'],
+            _callback,
+            fromBlock='latest',
+            interval=0.5,
+            filters=filters,
+            num_confirmations=num_confirmations,
+        )

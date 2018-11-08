@@ -53,6 +53,9 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             service_agreement_id,
             did,
             {
+                'serviceAgreementContract': {
+                    'events': []
+                },
                 'conditions': []
             },
             'consumer',
@@ -78,10 +81,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             service_agreement_id,
             did,
             {
-                'conditions': [{
-                    'conditionKey': {
-                        'contractAddress': self.service_agreement.contract.address
-                    },
+                'serviceAgreementContract': {
+                    'address': self.service_agreement.contract.address,
                     'events': [{
                         'name': 'ExecuteAgreement',
                         'actorType': 'consumer',
@@ -91,7 +92,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                             'version': '0.1'
                         }
                     }]
-                }, {
+                },
+                'conditions': [{
                     'conditionKey': {
                         'contractAddress': self.payment_conditions.contract.address,
                         'fingerprint': lock_payment_fingerprint,
