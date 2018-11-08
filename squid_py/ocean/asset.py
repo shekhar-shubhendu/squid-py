@@ -9,6 +9,8 @@ from squid_py.did import (
     did_generate_from_id,
 )
 
+DDO_SERVICE_METADATA_NAME = 'Metadata'
+DDO_SERVICE_METADATA_KEY = 'metadata'
 
 class Asset:
     def __init__(self, asset_id=None, publisher_id=None, price=None, ddo=None):
@@ -94,7 +96,7 @@ class Asset:
         # add a signature
         private_password = new_ddo.add_signature()
         # add the service endpoint with the meta data
-        new_ddo.add_service('Metadata', service_endpoint, values={'metadata': metadata})
+        new_ddo.add_service(DDO_SERVICE_METADATA_NAME, service_endpoint, values={DDO_SERVICE_METADATA_KEY: metadata})
         # add the static proof
         new_ddo.add_proof(0, private_password)
         # create the asset object
@@ -116,11 +118,11 @@ class Asset:
     def _get_metadata(self):
         """ protected property to read the metadata from the DDO object"""
         result = None
-        metadata_service = self._ddo.get_service('Metadata')
+        metadata_service = self._ddo.get_service(DDO_SERVICE_METADATA_NAME)
         if metadata_service:
             values = metadata_service.get_values()
-            if 'metadata' in values:
-                result = values['metadata']
+            if DDO_SERVICE_METADATA_KEY in values:
+                result = values[DDO_SERVICE_METADATA_KEY]
         return result
 
     @property
