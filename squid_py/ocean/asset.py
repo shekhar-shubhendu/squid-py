@@ -5,8 +5,8 @@ import logging
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean_base import OceanBase
 from squid_py.did import (
-    get_id_from_did,
-    did_generate_from_id,
+    did_to_id,
+    id_to_did,
 )
 
 DDO_SERVICE_METADATA_NAME = 'Metadata'
@@ -43,7 +43,7 @@ class Asset:
         self.price = price
         self._ddo = ddo
         if self._ddo and self._ddo.is_valid:
-            self.asset_id = get_id_from_did(self._ddo.did)
+            self.asset_id = did_to_id(self._ddo.did)
 
 
     @property
@@ -90,7 +90,7 @@ class Asset:
         # calc the asset id
         asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
         # generate a DID from an asset_id
-        new_did = did_generate_from_id(asset_id)
+        new_did = id_to_did(asset_id)
         # create a new DDO
         new_ddo = DDO(new_did)
         # add a signature

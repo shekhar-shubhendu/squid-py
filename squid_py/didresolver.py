@@ -20,7 +20,7 @@ from squid_py.exceptions import (
 
 from squid_py.did import (
     did_to_id_bytes,
-    did_generate_from_id
+    id_to_did
 )
 
 DIDREGISTRY_EVENT_NAME = 'DIDAttributeRegistered'
@@ -54,7 +54,7 @@ class DIDResolved:
         """
         self._items.append(data)
         if data['value_type'] == VALUE_TYPE_DID:
-            self._value = did_generate_from_id(value)
+            self._value = id_to_did(value)
         else:
             self._value = value
 

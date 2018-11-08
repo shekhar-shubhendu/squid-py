@@ -12,7 +12,7 @@ from eth_abi import (
 )
 
 from squid_py.ddo import DDO
-from squid_py.did import did_generate_from_id
+from squid_py.did import id_to_did
 
 from squid_py.ocean.ocean import Ocean
 
@@ -273,7 +273,7 @@ def test_did_resolver_library():
     didresolved = didresolver.resolve(did_id_bytes, hop_count)
     assert didresolved
     assert didresolved.is_did
-    assert didresolved.did == did_generate_from_id(Web3.toHex(hexstr=ids[hop_count]))
+    assert didresolved.did == id_to_did(Web3.toHex(hexstr=ids[hop_count]))
 
     # test DID not found
     did_id = secrets.token_hex(32)

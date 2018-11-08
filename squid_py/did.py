@@ -94,10 +94,8 @@ def is_did_valid(did):
     return False
 
 
-def did_generate_from_id(did_id, method='op'):
-    """
-    generate a DID from a hex id, this at the moment is a valid asset_id
-    """
+def id_to_did(did_id, method='op'):
+    """returns an Ocean DID from given a hex id"""
     if isinstance(did_id, bytes):
         did_id = Web3.toHex(did_id)
 
@@ -113,7 +111,7 @@ def did_generate_from_id(did_id, method='op'):
     return 'did:{0}:{1}'.format(method, did_id)
 
 
-def get_id_from_did(did):
+def did_to_id(did):
     """return an id extracted from a DID string"""
     if is_did_valid(did):
         result = did_parse(did)
