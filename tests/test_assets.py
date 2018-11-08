@@ -133,7 +133,6 @@ def test_publish_data_asset_aquarius():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    asset.assign_did_from_ddo()
 
     ##########################################################
     # List currently published assets
@@ -191,7 +190,6 @@ def test_ocean_publish():
     # Create an Asset with valid metadata
     ##########################################################
     asset = Asset.from_ddo_json_file(sample_ddo_path)
-    asset.assign_did_from_ddo()
 
     ######################
 

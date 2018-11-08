@@ -5,6 +5,7 @@ import re
 
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean_base import OceanBase
+from squid_py.did import get_id_from_did
 
 
 class Asset:
@@ -41,21 +42,12 @@ class Asset:
 
         return self.ddo.did
 
-    def assign_did_from_ddo(self):
-        """
-        #TODO: This is a temporary hack, need to clearly define how DID is assigned!
-        :return:
-        """
-        did = self.ddo.did
-        match = re.match('^did:op:([0-9a-f]+)', did)
-        if match:
-            self.asset_id = match.groups(1)[0]
 
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
         this_asset = cls()
         this_asset.ddo = DDO(json_filename=json_file_path)
-        this_asset.asset_id = this_asset.ddo.did
+        this_asset.asset_id = get_id_from_did(this_asset.ddo.did)
         logging.debug("Asset {} created from ddo file {} ".format(this_asset.asset_id, json_file_path))
         return this_asset
 
@@ -63,7 +55,7 @@ class Asset:
     def from_ddo_dict(cls, dictionary):
         this_asset = cls()
         this_asset.ddo = DDO(dictionary=dictionary)
-        this_asset.asset_id = this_asset.ddo.did
+        this_asset.asset_id = get_id_from_did(this_asset.ddo.did)
         logging.debug("Asset {} created from ddo dict {} ".format(this_asset.asset_id, dictionary))
         return this_asset
 
