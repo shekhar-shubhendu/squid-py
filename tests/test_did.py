@@ -13,8 +13,8 @@ from squid_py.did import (
     did_parse,
     did_validate,
     is_did_valid,
-    did_generate_from_id,
-    get_id_from_did,
+    id_to_did,
+    did_to_id,
     did_to_id_bytes,
 )
 
@@ -100,24 +100,24 @@ def test_did():
 
 
     valid_did_text = 'did:op:{}'.format(test_id)
-    assert did_generate_from_id(test_id) == valid_did_text
+    assert id_to_did(test_id) == valid_did_text
 
     # accept hex string from Web3 py
-    assert did_generate_from_id(Web3.toHex(hexstr=test_id)) == valid_did_text
+    assert id_to_did(Web3.toHex(hexstr=test_id)) == valid_did_text
 
     #accepts binary value
-    assert did_generate_from_id(Web3.toBytes(hexstr=test_id)) == valid_did_text
+    assert id_to_did(Web3.toBytes(hexstr=test_id)) == valid_did_text
 
     with pytest.raises(TypeError):
-        did_generate_from_id(None)
+        id_to_did(None)
 
     with pytest.raises(TypeError):
-        did_generate_from_id({'bad': 'value'})
+        id_to_did({'bad': 'value'})
 
-    assert did_generate_from_id('') == 'did:op:0'
-    assert get_id_from_did(valid_did_text) == test_id
-    assert get_id_from_did('did:op1:011') == None
-    assert get_id_from_did('did:op:0') == '0'
+    assert id_to_did('') == 'did:op:0'
+    assert did_to_id(valid_did_text) == test_id
+    assert did_to_id('did:op1:011') == None
+    assert did_to_id('did:op:0') == '0'
 
 
 def test_did_to_bytes():

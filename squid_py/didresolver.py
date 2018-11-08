@@ -20,10 +20,8 @@ from squid_py.exceptions import (
 
 from squid_py.did import (
     did_to_id_bytes,
-    did_generate_from_id
+    id_to_did
 )
-
-
 
 DIDREGISTRY_EVENT_NAME = 'DIDAttributeRegistered'
 
@@ -32,13 +30,14 @@ VALUE_TYPE_DID_REF = 1
 VALUE_TYPE_URL = 2
 VALUE_TYPE_DDO = 3
 
-
 logger = logging.getLogger()
 
-class DIDResolved():
+
+class DIDResolved:
     """
     Class that handles the resolved DID information
     """
+
     def __init__(self):
         """init the object with an empty set of hops"""
         self._items = []
@@ -55,10 +54,9 @@ class DIDResolved():
         """
         self._items.append(data)
         if data['value_type'] == VALUE_TYPE_DID:
-            self._value = did_generate_from_id(value)
+            self._value = id_to_did(value)
         else:
             self._value = value
-
 
     @property
     def did_bytes(self):
@@ -150,11 +148,12 @@ class DIDResolved():
         return 0
 
 
-class DIDResolver():
+class DIDResolver:
     """
     DID Resolver class
     Resolve DID to a URL/DDO
     """
+
     def __init__(self, web3, didregistry):
         self._web3 = web3
         self._didregistry = didregistry
@@ -200,7 +199,8 @@ class DIDResolver():
                     try:
                         result = data['value'].decode('utf8')
                     except:
-                        raise TypeError('Invalid string (URL or DDO) data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
+                        raise TypeError(
+                            'Invalid string (URL or DDO) data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
                 resolved.add_data(data, result)
                 data = None
                 break
@@ -232,12 +232,9 @@ class DIDResolver():
                     raise OceanDIDCircularReference('circular reference found at did {}'.format(Web3.toHex(did_bytes)))
                 data = self.get_did(did_bytes)
 
-
         if resolved.hop_count > 0:
             return resolved
         return None
-
-
 
     def get_did(self, did_bytes):
         """return a did value and value type from the block chain event record using 'did'"""

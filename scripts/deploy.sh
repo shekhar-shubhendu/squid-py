@@ -26,14 +26,3 @@ sed -i -e "/auth.address =/c auth.address = ${auth}" $CONF_FILE
 sed -i -e "/didregistry.address =/c didregistry.address = ${didregistry}" $CONF_FILE
 
 #sed -i -e "/aquarius.address =/c aquarius.address=" $CONF_FILE
-
-###########################################################################################
-#   TODO: 
-#  Remove lines below when we set the keeper-contracts>0.3.3 in the requirments_dev.txt
-#
-###########################################################################################
-#TOX_WORK_FOLDER=.tox/py36/contracts
-#if [ -d $TOX_WORK_FOLDER ]; then
-#    # copy the new DIDRegistry contract to the venv/contracts folder for loading
-#    docker cp docker_keeper-contracts_1:/keeper-contracts/artifacts/DIDRegistry.development.json $TOX_WORK_FOLDER/DIDRegistry.json
-#fi

@@ -1,14 +1,10 @@
 """
     DID Lib to do DID's and DDO's
-
 """
 import datetime
 import json
 import re
-from base64 import (
-    b64encode,
-    b64decode,
-)
+from base64 import b64encode, b64decode
 
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
@@ -21,12 +17,14 @@ from .public_key_base import PublicKeyBase, PUBLIC_KEY_STORE_TYPE_PEM
 from .public_key_rsa import PublicKeyRSA, AUTHENTICATION_TYPE_RSA, PUBLIC_KEY_TYPE_RSA
 from .service import Service
 
-class DDO():
+
+class DDO:
     """
     DDO class to create, import, export, validate DDO objects.
 
     """
-    def __init__(self, did='', json_text=None, json_filename=None, created=None):
+
+    def __init__(self, did='', json_text=None, json_filename=None, created=None, dictionary=None):
         """ clear the DDO data values """
         self._did = ''
         self._public_keys = []
@@ -46,8 +44,10 @@ class DDO():
                 json_text = file_handle.read()
 
         if json_text:
-            self.__read_json(json_text)
+            self._read_dict(json.loads(json_text))
 
+        if dictionary:
+            self._read_dict(dictionary)
 
     def add_public_key(self, public_key):
         """add a public key object to the list of public keys"""
@@ -142,9 +142,9 @@ class DDO():
 
         return json.dumps(data)
 
-    def __read_json(self, ddo_json):
-        """import a JSON text into this DDO"""
-        values = json.loads(ddo_json)
+    def _read_dict(self, dictionary):
+        """import a JSON dict into this DDO"""
+        values = dictionary
         self._did = values['id']
         self._created = values.get('created', None)
         if 'publicKey' in values:
@@ -221,7 +221,6 @@ class DDO():
         if not isinstance(self._proof, dict):
             return False
 
-
         if 'creator' in self._proof and 'signatureValue' in self._proof:
             signature = b64decode(self._proof['signatureValue'])
             return self.validate_from_key(self._proof['creator'], signature_text, signature)
@@ -247,7 +246,7 @@ class DDO():
             return False
 
         # if public_key.get_store_type() != PUBLIC_KEY_STORE_TYPE_PEM:
-            # key_value = key_value.decode()
+        # key_value = key_value.decode()
 
         return DDO.validate_signature(signature_text, key_value, signature_value, authentication.get_type())
 
@@ -354,12 +353,12 @@ class DDO():
 
     def is_empty(self):
         """return True if this DDO object is empty"""
-        return self._did == ''                          \
-                and len(self._public_keys) == 0         \
-                and len(self._authentications) == 0     \
-                and len(self._services) == 0            \
-                and self._proof is None                 \
-                and self._created is None
+        return self._did == '' \
+               and len(self._public_keys) == 0 \
+               and len(self._authentications) == 0 \
+               and len(self._services) == 0 \
+               and self._proof is None \
+               and self._created is None
 
     def is_did_assigend(self):
         """return true if a DID is assigned to this DDO"""
@@ -387,7 +386,6 @@ class DDO():
         for service in self._services:
             service.assign_did(did)
             ddo.add_service(service)
-
 
         if self.is_proof_defined():
             if re.match('^#.*', self._proof['creator']):
@@ -464,7 +462,6 @@ class DDO():
         public_key = PublicKeyRSA(values['id'], owner=values.get('owner', None))
         public_key.set_key_value(values)
         return public_key
-
 
     @staticmethod
     def create_authentication_from_json(values):
