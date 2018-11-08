@@ -13,7 +13,6 @@ def register_service_agreement(web3, contract_path, storage_path, account, servi
     """
 
     def _cleanup(event):
-        print('Updating the record')
         record_service_agreement(storage_path, service_agreement_id, did, 'fulfilled')
 
     watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id, service_definition,
@@ -52,3 +51,19 @@ def get_service_agreements(storage_path, status='pending'):
                 cursor.execute("SELECT * FROM service_agreements WHERE status='%s';" % status)]
     finally:
         conn.close()
+
+
+def execute_pending_service_agreements(web3, contract_path, storage_path, account, actor_type,
+                                       did_resolver_fn, num_confirmations=12):
+    """ Iterates over pending service agreements recorded in the local storage,
+        fetches their service definitions, and subscribes to service agreement events.
+    """
+    for service_agreement_id, did, _ in get_service_agreements(storage_path):
+        ddo = did_resolver_fn(did)
+        for service_definition in ddo['service']:
+            if service_definition['type'] != 'Access':
+                continue
+
+            watch_service_agreement_events(web3, contract_path, account, service_agreement_id,
+                                           service_definition, actor_type,
+                                           num_confirmations=num_confirmations)

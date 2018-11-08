@@ -9,7 +9,9 @@ from squid_py.config import Config
 from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import (
+    execute_pending_service_agreements,
     get_service_agreements,
+    record_service_agreement,
     register_service_agreement
 )
 
@@ -47,6 +49,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             'lockPayment',
         )
         return {
+            'type': 'Access',
             'serviceAgreementContract': {
                 'address': self.service_agreement.contract.address,
                 'events': [{
@@ -159,6 +162,41 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         assert expected_agreements == agreements
         assert not get_service_agreements(self.storage_path)
+
+    def test_execute_pending_service_agreements_subscribes_to_events(self):
+        service_agreement_id = uuid.uuid4().hex
+        did = uuid.uuid4().hex
+        price = 10
+
+        record_service_agreement(self.storage_path, service_agreement_id, did)
+
+        def _did_resolver_fn(did):
+            return {
+                'service': [
+                    self.get_simple_service_agreement_definition(did, price),
+                ]
+            }
+
+        execute_pending_service_agreements(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,
+            'consumer',
+            _did_resolver_fn,
+            num_confirmations=0,
+        )
+
+        self._execute_service_agreement(service_agreement_id, did, price)
+
+        flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
+        for check in range(10):
+            events = flt.get_new_entries()
+            if events:
+                break
+            time.sleep(0.5)
+
+        assert events, 'Expected PaymentLocked to be emitted'
 
     @classmethod
     def _setup_service_agreement(cls):
