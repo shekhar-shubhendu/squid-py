@@ -5,7 +5,10 @@ import re
 
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean_base import OceanBase
-from squid_py.did import get_id_from_did
+from squid_py.did import (
+    get_id_from_did,
+    did_generate_from_id,
+)
 
 
 class Asset:
@@ -25,6 +28,13 @@ class Asset:
         :param publisher_id:
         :param price:
         :param ddo: DDO instance
+        
+        TODO: remove these init variables ? do we need ...
+        
+        asset_id - decided on the DID/DDO and hash of the metadata
+        publisher_id - this should be set when publishing
+        price - set when writing to brizo?
+        
         """
 
         self.asset_id = asset_id
@@ -61,6 +71,34 @@ class Asset:
         logging.debug("Asset {} created from ddo dict {} ".format(this_asset.asset_id, dictionary))
         return this_asset
 
+    @classmethod
+    def create_from_metadata_file(cls, filename, service_endpoint):
+        if filename:
+            with open(filename, 'r') as file_handle:
+                metadata = json.load(file_handle)
+                return Asset.create_from_metadata(metadata, service_endpoint)
+        return None
+        
+    @classmethod
+    def create_from_metadata(cls, metadata, service_endpoint):
+            
+        # calc the asset id
+        asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
+        # generate a DID from an asset_id
+        new_did = did_generate_from_id(asset_id)
+        # create a new DDO
+        new_ddo = DDO(new_did)
+        # add a signature
+        private_password = new_ddo.add_signature()
+        # add the service endpoint with the meta data
+        new_ddo.add_service('Metadata', service_endpoint, values={'metadata': metadata})
+        # add the static proof
+        new_ddo.add_proof(0, private_password)
+        # create the asset object
+        this_asset = cls(ddo = new_ddo)
+        logging.debug("Asset {} created from metadata {} ".format(this_asset.asset_id, metadata))
+        return this_asset
+
     @property
     def metadata(self):
         assert self.has_metadata
@@ -82,25 +120,7 @@ class Asset:
     @property
     def is_valid(self):
         return self._ddo and self._ddo.is_valid
-
-    def generate_did(self):
-        """
-        During development, the DID can be generated here for convenience.
-        """
-        if not self._ddo:
-            raise AttributeError("No DDO object in {}".format(self))
-        if not self._ddo.is_valid:
-            raise ValueError("Invalid DDO object in {}".format(self))
-
-        metadata = self._get_metadata()
-        if not metadata:
-            raise ValueError("No metedata in {}".format(self))
-
-        if not 'base' in metadata:
-            raise ValueError("Invalid metedata in {}".format(self))
-
-        self.asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
-
+    
     def assign_metadata(self):
         pass
 

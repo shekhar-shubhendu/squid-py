@@ -18,14 +18,20 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
 
-def test_create_asset_simple():
-    # An asset can be be created directly
-    asset1 = Asset(asset_id='TestID', publisher_id='TestPID', price=0, ddo=None)
-    assert not asset1.is_valid
+def test_create_asset_from_metadata():
+    sample_metadata_path = pathlib.Path.cwd() / 'tests' / 'resources' / 'metadata' / 'sample_metadata1.json'
+    assert sample_metadata_path.exists(), "{} does not exist!".format(sample_metadata_path)
 
-    # Can gen the DID locally BUT it requires a DDO!
-    with pytest.raises(AttributeError):
-        asset1.generate_did()
+    # An asset can be be created directly from a metadata file/string
+    asset1 = Asset.create_from_metadata_file(sample_metadata_path, 'http://localhost:5000')
+    assert asset1.is_valid
+
+    with open(sample_metadata_path) as file_handle:
+        metadata = json.load(file_handle)
+
+    # An asset can be be created directly from a metadata file/string
+    asset1 = Asset.create_from_metadata(metadata, 'http://localhost:5000')
+    assert asset1.is_valid
 
 
 def test_create_asset_ddo_file():
@@ -37,7 +43,6 @@ def test_create_asset_ddo_file():
 
     assert isinstance(asset1.ddo, DDO)
     assert asset1.is_valid
-    asset1.generate_did()
 
     assert asset1.has_metadata
     print(asset1.metadata)
@@ -83,7 +88,6 @@ def test_register_data_asset_market():
     # Register
     ##########################################################
     # The asset requires an ID before registration!
-    asset.generate_did()
 
     # Call the Register function
     result = ocean.keeper.market.register_asset(asset, asset_price, aquarius_acct.address)
