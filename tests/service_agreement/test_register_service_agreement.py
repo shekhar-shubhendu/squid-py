@@ -50,6 +50,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         )
         return {
             'type': 'Access',
+            'templateId': self.template_id,
             'serviceAgreementContract': {
                 'address': self.service_agreement.contract.address,
                 'events': [{
