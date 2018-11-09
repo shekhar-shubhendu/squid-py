@@ -11,7 +11,7 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     history = history_file.read()
 
-requirements = ['keeper-contracts', 'web3==4.7.1', 'pyyaml', 'coloredlogs']
+requirements = ['keeper-contracts', 'web3==4.5.0', 'pyyaml', 'coloredlogs']
 
 setup_requirements = ['pytest-runner', ]
 
@@ -35,11 +35,12 @@ setup(
     include_package_data=True,
     keywords='squid-py',
     name='squid-py',
-    packages=find_packages(include=['squid_py','squid_py.keeper','squid_py.utils','squid_py.ddo']),
+    packages=find_packages(
+        include=['squid_py', 'squid_py.keeper', 'squid_py.utils', 'squid_py.ddo', 'squid_py.models', 'squid_py.ocean']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/oceanprotocol/squid-py',
-    version='0.2.3',
+    version='0.2.4',
     zip_safe=False,
 )
