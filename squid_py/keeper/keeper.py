@@ -5,6 +5,7 @@
 
 import logging
 
+from squid_py.keeper.conditions.access_conditions import AccessConditions
 from squid_py.keeper.conditions.payment_conditions import PaymentConditions
 from squid_py.keeper.ServiceAgreement import ServiceAgreement
 from squid_py.keeper.auth import Auth
@@ -36,3 +37,4 @@ class Keeper(object):
         self.didregistry = DIDRegistry(web3, contract_path)
         self.service_agreement = ServiceAgreement(web3, contract_path)
         self.payment_conditions = PaymentConditions(web3, contract_path)
+        self.access_conditions = AccessConditions(web3, contract_path)
