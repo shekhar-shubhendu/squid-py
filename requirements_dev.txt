@@ -51,6 +51,7 @@ PyYAML==3.13
 requests==2.19.1
 requests-toolbelt==0.8.0
 rlp==1.0.2
+ocean-secret-store-client==0.0.1
 semantic-version==2.6.0
 singletonify==0.1.2.0
 six==1.11.0
