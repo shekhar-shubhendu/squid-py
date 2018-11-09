@@ -77,7 +77,7 @@ def _get_lock_payment_condition_key(web3, service_definition, address, abi):
     return web3.soliditySha3(
         ['bytes32', 'address', 'bytes4'],
         [
-            hexstr_to_bytes(web3, service_definition['templateId']),
+            service_definition['templateId'].encode(),
             address,
             hexstr_to_bytes(web3, get_fingerprint_by_name(abi, 'lockPayment')),
         ]

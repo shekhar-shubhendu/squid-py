@@ -4,6 +4,9 @@ from squid_py.keeper.utils import get_contract_abi_by_address
 from squid_py.utils import watch_event
 
 
+SERVICE_AGREEMENT_ID = 'serviceAgreementId'
+
+
 def watch_service_agreement_events(web3, contract_path, account, service_agreement_id,
                                    service_definition, actor_type, num_confirmations=12):
     """ Subscribes to the events defined in the given service definition, targeted
@@ -12,7 +15,7 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
         The service definition format is described in OEP-11.
     """
 
-    filters = {'serviceId': service_agreement_id.encode()}
+    filters = {SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
 
     # collect service agreement and condition events
     events = []
@@ -60,7 +63,7 @@ def watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id,
     contract_abi = get_contract_abi_by_address(contract_path, contract_address)
     contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
-    filters = {'serviceId': service_agreement_id}
+    filters = {SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
     watch_event(
         contract,
         'AgreementFulfilled',

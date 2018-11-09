@@ -148,17 +148,21 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         self._execute_service_agreement(service_agreement_id, did, price)
 
-        receipt = self.service_agreement.contract_concise.fulfillAgreement(
-            service_agreement_id,
-            transact={'from': self.consumer},
-        )
-        self.web3.eth.waitForTransactionReceipt(receipt)
-
         expected_agreements = [(service_agreement_id, did, 'fulfilled')]
         for i in range(10):
+            try:
+                receipt = self.service_agreement.contract_concise.fulfillAgreement(
+                    service_agreement_id.encode(),
+                    transact={'from': self.consumer},
+                )
+                self.web3.eth.waitForTransactionReceipt(receipt)
+            except Exception:
+                pass
+
             agreements = get_service_agreements(self.storage_path, 'fulfilled')
             if expected_agreements == agreements:
                 break
+
             time.sleep(0.5)
 
         assert expected_agreements == agreements
@@ -201,6 +205,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
     @classmethod
     def _setup_service_agreement(cls):
+        cls.template_id = uuid.uuid4().hex
+
         cls.contracts = [cls.payment_conditions.contract.address]
         cls.fingerprints = [
             hexstr_to_bytes(
@@ -211,16 +217,20 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls.dependencies = [0]
 
         template_name = uuid.uuid4().hex.encode()
-        setup_args = [cls.contracts, cls.fingerprints, cls.dependencies, template_name]
+        setup_args = [
+            cls.template_id.encode(),
+            cls.contracts,
+            cls.fingerprints,
+            cls.dependencies,
+            template_name,
+            [0],  # root condition
+            0,  # AND
+        ]
         receipt = cls.service_agreement.contract_concise.setupAgreementTemplate(
             *setup_args,
             transact={'from': cls.consumer}
         )
-        tx = cls.web3.eth.waitForTransactionReceipt(receipt)
-
-        cls.template_id = Web3.toHex(cls.service_agreement.events.
-                                     SetupAgreementTemplate().processReceipt(tx)[0].args.
-                                     serviceTemplateId)
+        cls.web3.eth.waitForTransactionReceipt(receipt)
 
     def _execute_service_agreement(self, service_agreement_id, did, price):
         hashes = [
@@ -232,7 +242,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         condition_keys = [
             self.web3.soliditySha3(
                 ['bytes32', 'address', 'bytes4'],
-                [hexstr_to_bytes(self.web3, self.template_id),
+                [self.template_id.encode(),
                  self.contracts[0],
                  self.fingerprints[0]]
             ).hex()
@@ -242,7 +252,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.consumer,
             hexstr=self.web3.soliditySha3(
                 ['bytes32', 'bytes32[]', 'bytes32[]', 'uint256[]', 'bytes32'],
-                [hexstr_to_bytes(self.web3, self.template_id),
+                [self.template_id.encode(),
                  condition_keys,
                  hashes,
                  timeouts,
@@ -251,7 +261,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         ).hex()
 
         execute_args = [
-            hexstr_to_bytes(self.web3, self.template_id),
+            self.template_id.encode(),
             signature,
             self.consumer,
             hashes,
