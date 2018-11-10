@@ -121,7 +121,7 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
     A bash script is available to copy these addresses into this file directly from a running docker image. This script needs to run in the root of the project. 
     
     ```
-    source ./script/deploy.sh
+    source ./scripts/deploy.sh
     ```
     
     Alternatively, you can manually enter the parameters in this file.
