@@ -29,7 +29,7 @@
 
   "service": [
     {
-    "type": "Consume",
+    "type": "Access",
     "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/consume?pubKey=${pubKey}&serviceId={serviceId}&url={url}",
     "serviceDefinitionId": "...",
     "slaTemplateId": "...",
@@ -66,7 +66,7 @@
               }
             ],
             "dependencies": [],
-            "timeoutFlags": [0]
+            "dependencyTimeoutFlags": [0]
         }, {
             "name": "grantAccess",
             "timeout": 0,
@@ -99,7 +99,7 @@
               }
             ],
             "dependencies": ["lockPayment"],
-            "timeoutFlags": [0]
+            "dependencyTimeoutFlags": [0]
         }, {
             "name": "releasePayment",
             "timeout": 0,
@@ -132,7 +132,7 @@
               }
             ],
             "dependencies": ["grantAccess"],
-            "timeoutFlags": [0]
+            "dependencyTimeoutFlags": [0]
         }, {
             "name": "refundPayment",
             "timeout": 1,
@@ -165,7 +165,7 @@
               }
             ],
             "dependencies": ["lockPayment", "grantAccess"],
-            "timeoutFlags": [0, 1]
+            "dependencyTimeoutFlags": [0, 1]
         }
     ]
     }, {

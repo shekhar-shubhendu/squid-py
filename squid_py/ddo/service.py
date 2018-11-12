@@ -19,15 +19,12 @@ class Service():
         self._type = service_type
 
         # assign the _values property to empty until they are used
-        self._values = None
-        reserved_names = ['id', 'serviceEndpoint', 'type']
+        self._values = {}
+        reserved_names = {'id', 'serviceEndpoint', 'type'}
         if values:
             for name, value in values.items():
                 if name not in reserved_names:
-                    if not self._values:
-                        self._values = {}
                     self._values[name] = value
-
 
     def get_id(self):
         """Return the service id"""
@@ -49,6 +46,10 @@ class Service():
     def get_values(self):
         """get any service value s"""
         return self._values
+
+    def update_value(self, name, value):
+        if name not in {'id', 'serviceEndpoint', 'type'}:
+            self._values[name] = value
 
     def as_text(self, is_pretty=False):
         """return the service as a JSON string"""

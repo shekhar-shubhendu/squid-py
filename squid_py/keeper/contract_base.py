@@ -25,7 +25,7 @@ class ContractBase(object):
         self.contract_concise = contract[0]
         self.contract = contract[1]
 
-        self.address = self.to_checksum_address(contract[2])
+        self.address = contract[2]
         self.name = contract_name
 
         logging.debug("Loaded {}".format(self))
@@ -36,13 +36,12 @@ class ContractBase(object):
 
     def load(self, contract_path, contract_name):
         """Retrieve a tuple with the concise contract and the contract definition."""
-
         contract_definition = get_contract_by_name(
             contract_path,
             network_name(self.web3),
             contract_name,
         )
-        address = contract_definition['address']
+        address = self.to_checksum_address(contract_definition['address'])
         abi = contract_definition['abi']
 
         concise_contract = self.web3.eth.contract(

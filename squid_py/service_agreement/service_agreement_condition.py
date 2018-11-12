@@ -5,28 +5,92 @@ class Parameter:
         self.type = param_json['type']
         self.value = param_json['value']
 
+    def as_dict(self):
+        return {
+            "name": self.name,
+            "type": self.type,
+            "value": self.value
+        }
+
+
+class Event:
+    """
+    Example:
+        {
+          "name": "PaymentLocked",
+          "actorType": [
+            "publisher"
+          ],
+          "handlers": {
+            "moduleName": "accessControl",
+            "functionName": "grantAccess",
+            "version": "0.1"
+          }
+        }
+
+    """
+    def __init__(self, event_json):
+        self.values_dict = dict(event_json)
+
+    def as_dict(self):
+        return self.values_dict
+
 
 class ServiceAgreementCondition(object):
     def __init__(self, condition_json=None):
         self.name = ''
+        self.condition_key = ''
         self.contract_address = ''
         self.function_fingerprint = ''
         self.function_name = ''
         self.dependencies = []
         self.timeout_flags = []
         self.parameters = []
+        self.events = []
         self.timeout = 0
+        if condition_json:
+            self.init_from_condition_json(condition_json)
 
-    def parse_condition_json(self, condition_json):
+    def init_from_condition_json(self, condition_json):
         self.name = condition_json['name']
         self.timeout = condition_json['timeout']
-        self.contract_address = condition_json['conditionKey']['contractAddress']
-        self.function_fingerprint = condition_json['conditionKey']['fingerprint']
-        self.function_name = condition_json['conditionKey']['functionName']
-        self.dependencies = condition_json['dependencies']
-        self.timeout_flags = condition_json['timeoutFlags']
-        assert len(self.dependencies) == len(self.timeout_flags)
-        if self.dependencies:
-            assert sum(self.timeout_flags) == 0 or self.timeout > 0, 'timeout must be set when any dependency is set to rely on a timeout.'
+        self.contract_address = condition_json['contractAddress']
+        self.condition_key = condition_json['conditionKey']
+        self.function_name = condition_json['functionName']
+        self.events = [Event(e) for e in condition_json['events']]
+        if 'fingerprint' in condition_json:
+            self.function_fingerprint = condition_json['fingerprint']
+            self.dependencies = condition_json['dependencies']
+            self.timeout_flags = condition_json['dependencyTimeoutFlags']
+            assert len(self.dependencies) == len(self.timeout_flags)
+            if self.dependencies:
+                assert sum(self.timeout_flags) == 0 or self.timeout > 0, 'timeout must be set when any dependency is set to rely on a timeout.'
 
-        self.parameters = [Parameter(p) for p in condition_json['parameters']]
+            self.parameters = [Parameter(p) for p in condition_json['parameters']]
+
+    def to_dict(self):
+        condition_dict = {
+            "name": self.name,
+            "timeout": self.timeout,
+            "conditionKey": self.condition_key,
+            "contractAddress": self.contract_address,
+            "functionName": self.function_name,
+            "events": [e.as_dict() for e in self.events]
+        }
+        if self.function_fingerprint:
+            condition_dict.update({
+                "fingerprint": self.function_fingerprint,
+                "dependencies": self.dependencies,
+                "dependencyTimeoutFlags": self.timeout_flags,
+                "parameters": [p.as_dict() for p in self.parameters]
+            }),
+
+        return condition_dict
+
+    @property
+    def param_types(self):
+        return [parameter.type for parameter in self.parameters]
+
+    @property
+    def param_values(self):
+        return [parameter.value for parameter in self.parameters]

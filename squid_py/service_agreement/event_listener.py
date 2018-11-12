@@ -1,10 +1,8 @@
 import importlib
 
+from squid_py.keeper.ServiceAgreement import ServiceAgreement
 from squid_py.keeper.utils import get_contract_abi_by_address
 from squid_py.utils import watch_event
-
-
-SERVICE_AGREEMENT_ID = 'serviceAgreementId'
 
 
 def watch_service_agreement_events(web3, contract_path, account, service_agreement_id,
@@ -15,7 +13,7 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
         The service definition format is described in OEP-11.
     """
 
-    filters = {SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
+    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
 
     # collect service agreement and condition events
     events = []

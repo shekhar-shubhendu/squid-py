@@ -30,14 +30,14 @@ def test_ocean_instance():
 def test_accounts():
     os.environ['CONFIG_FILE'] = 'config_local.ini'
     ocean = Ocean(os.environ['CONFIG_FILE'])
-    ocean.update_accounts()
+    ocean._update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
 
     # These accounts have a positive ETH balance
     for address, account in ocean.accounts.items():
-        assert account.ether >= 0
-        assert account.ocean >= 0
+        assert account.ether_balance >= 0
+        assert account.ocean_balance >= 0
 
 
 def test_token_request():
@@ -46,13 +46,13 @@ def test_token_request():
     amount = 2000
 
     # Get the current accounts, assign 2
-    ocean.update_accounts()
+    ocean._update_accounts()
     aquarius_address = list(ocean.accounts)[0]
     consumer_address = list(ocean.accounts)[1]
 
     # Start balances for comparison
-    aquarius_start_eth = ocean.accounts[aquarius_address].ether
-    aquarius_start_ocean = ocean.accounts[aquarius_address].ocean
+    aquarius_start_eth = ocean.accounts[aquarius_address].ether_balance
+    aquarius_start_ocean = ocean.accounts[aquarius_address].ocean_balance
 
     # Make requests, assert success on request
     rcpt = ocean.accounts[aquarius_address].request_tokens(amount)
@@ -62,11 +62,11 @@ def test_token_request():
 
     # Update and print balances
     # Ocean.accounts is a dict address: account
-    ocean.update_accounts()
+    ocean._update_accounts()
     for address in ocean.accounts:
         print(ocean.accounts[address])
-    aquarius_current_eth = ocean.accounts[aquarius_address].ether
-    aquarius_current_ocean = ocean.accounts[aquarius_address].ocean
+    aquarius_current_eth = ocean.accounts[aquarius_address].ether_balance
+    aquarius_current_ocean = ocean.accounts[aquarius_address].ocean_balance
 
     # Confirm balance changes
     assert aquarius_current_eth < aquarius_start_eth

@@ -4,7 +4,7 @@ import os
 
 def get_contract_abi_by_address(contract_path, address):
     contract_tree = os.walk(contract_path)
-
+    address = address.lower()
     while True:
         dirname, _, files = next(contract_tree)
         for entry in files:
@@ -14,7 +14,7 @@ def get_contract_abi_by_address(contract_path, address):
                 except Exception:
                     continue
 
-                if address != definition['address']:
+                if address != definition['address'].lower():
                     continue
 
                 return definition['abi']
@@ -33,6 +33,10 @@ def get_fingerprint_by_name(abi, name):
             return item['signature']
 
     raise ValueError('{} not found in the given ABI'.format(name))
+
+
+def get_fingerprint_bytes_by_name(web3, abi, name):
+    return hexstr_to_bytes(web3, get_fingerprint_by_name(abi, name))
 
 
 def hexstr_to_bytes(web3, hexstr):

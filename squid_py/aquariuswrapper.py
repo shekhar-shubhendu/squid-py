@@ -20,6 +20,9 @@ class AquariusWrapper(object):
         logging.debug("Metadata Store API documentation at {}/api/v1/docs".format(aquarius_url))
         logging.debug("Metadata assets at {}".format(self._base_url))
 
+    def get_service_endpoint(self, did):
+        return self._base_url + '/ddo/%s' % did
+
     def list_assets(self):
         return json.loads(requests.get(self._base_url).content)
 

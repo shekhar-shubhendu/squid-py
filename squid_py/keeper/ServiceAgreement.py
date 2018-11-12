@@ -6,6 +6,8 @@ from web3 import Web3
 class ServiceAgreement(ContractBase):
     """
     """
+    SERVICE_AGREEMENT_ID = 'serviceAgreementId'
+
     def __init__(self, web3, contract_path):
         ContractBase.__init__(self, web3, contract_path, 'ServiceAgreement')
         self._defaultGas = DEFAULT_GAS_LIMIT

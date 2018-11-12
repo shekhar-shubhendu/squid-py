@@ -1,9 +1,27 @@
 import logging
+import uuid
 import time
 from collections import namedtuple
 from threading import Thread
 
+from web3 import Web3
+from eth_keys import KeyAPI
+
 Signature = namedtuple('Signature', ('v', 'r', 's'))
+
+
+def get_publickey_from_address(web3, address):
+    _hash = Web3.sha3(address)
+    signature = web3.eth.sign(address, hexstr=_hash)
+    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, signature)
+
+
+def generate_new_id(metadata):
+    return uuid.uuid4().hex
+
+
+def get_id_from_did(did):
+    return Web3.toHex(did.split(':')[-1])
 
 
 def sign(web3, account_address, message):

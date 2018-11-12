@@ -124,8 +124,7 @@ class DIDResolver():
         log_items = block_filter.get_all_entries()
         if log_items and len(log_items) > 0:
             log_item = log_items[len(log_items) - 1]
-            value, value_type, block_number = decode_single('(string,uint8,uint256)', \
-                Web3.toBytes(hexstr=log_item['data']))
+            value, value_type, block_number = decode_single('(string,uint8,uint256)', Web3.toBytes(hexstr=log_item['data']))
             result = {
                 'value_type': value_type,
                 'value': value
