@@ -61,7 +61,7 @@ def watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id,
     contract_abi = get_contract_abi_by_address(contract_path, contract_address)
     contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
-    filters = {SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
+    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
     watch_event(
         contract,
         'AgreementFulfilled',
