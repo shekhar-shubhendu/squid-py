@@ -11,11 +11,45 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     history = history_file.read()
 
-requirements = ['keeper-contracts', 'web3==4.5.0', 'pyyaml', 'coloredlogs']
+# Installed by pip install squid-py
+# or pip install -e .
+install_requirements = [
+    'coloredlogs',
+    'eciespy',
+    'keeper-contracts',
+    'pyopenssl',
+    'PyJWT',  # not jwt
+    'PyYAML',
+    'web3==4.5.0',
+    # web3 requires eth-abi, requests, and more, so those will be installed too.
+    # See https://github.com/ethereum/web3.py/blob/master/setup.py
+]
 
+# Required to run setup.py:
 setup_requirements = ['pytest-runner', ]
 
-test_requirements = ['pytest', ]
+test_requirements = [
+    'codacy-coverage',
+    'coverage',
+    'docker',
+    'flake8',
+    'mccabe',
+    'pyflakes',
+    'pytest',
+    'tox',
+]
+
+# Possibly required by developers of squid-py:
+dev_requirements = [
+    'bumpversion',
+    'pkginfo',
+    'twine',
+    'watchdog',
+]
+
+docs_requirements = [
+    'Sphinx',
+]
 
 setup(
     author="leucothia",
@@ -28,7 +62,11 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     description="🐳 Ocean/Web3py wrapper.",
-    install_requires=requirements,
+    extras_require={
+        'test': test_requirements,
+        'dev': dev_requirements + test_requirements + docs_requirements,
+    },
+    install_requires=install_requirements,
     license="Apache Software License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
