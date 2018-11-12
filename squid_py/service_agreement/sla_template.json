@@ -7,6 +7,7 @@
   "conditions": [
     {
       "name": "executeAgreement",
+      "timeout": 0,
       "conditionKey": "0x123",
       "contractAddress": "",
       "functionName": "executeAgreement",

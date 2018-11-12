@@ -10,10 +10,10 @@ class ServiceAgreement(object):
         self.sa_definition_id = sa_definition_id
         self.conditions = conditions
 
-    def as_dict(self):
+    def as_dictionary(self):
         return {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: self.sa_definition_id,
-            ServiceAgreement.SERVICE_CONDITIONS_KEY: [cond.as_dict() for cond in self.conditions]
+            ServiceAgreement.SERVICE_CONDITIONS_KEY: [cond.as_dictionary() for cond in self.conditions]
         }
 
     @property

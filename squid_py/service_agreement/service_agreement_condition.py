@@ -5,7 +5,7 @@ class Parameter:
         self.type = param_json['type']
         self.value = param_json['value']
 
-    def as_dict(self):
+    def as_dictionary(self):
         return {
             "name": self.name,
             "type": self.type,
@@ -32,7 +32,7 @@ class Event:
     def __init__(self, event_json):
         self.values_dict = dict(event_json)
 
-    def as_dict(self):
+    def as_dictionary(self):
         return self.values_dict
 
 
@@ -68,21 +68,21 @@ class ServiceAgreementCondition(object):
 
             self.parameters = [Parameter(p) for p in condition_json['parameters']]
 
-    def to_dict(self):
+    def as_dictionary(self):
         condition_dict = {
             "name": self.name,
             "timeout": self.timeout,
             "conditionKey": self.condition_key,
             "contractAddress": self.contract_address,
             "functionName": self.function_name,
-            "events": [e.as_dict() for e in self.events]
+            "events": [e.as_dictionary() for e in self.events]
         }
         if self.function_fingerprint:
             condition_dict.update({
                 "fingerprint": self.function_fingerprint,
                 "dependencies": self.dependencies,
                 "dependencyTimeoutFlags": self.timeout_flags,
-                "parameters": [p.as_dict() for p in self.parameters]
+                "parameters": [p.as_dictionary() for p in self.parameters]
             }),
 
         return condition_dict

@@ -12,14 +12,15 @@ from squid_py.ocean import Ocean
 import secrets
 
 # Disable low level loggers
+from squid_py.services import ServiceDescriptor
+
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
 
 def test_create_asset_simple():
     # An asset can be be created directly
-    asset1 = Asset(asset_id='TestID', publisher_id='TestPID', ddo=None)
-    assert len(asset1.did) != 64
+    asset1 = Asset(ddo=None, publisher_id='TestPID')
 
     # Can gen the DID locally BUT it requires a DDO!
     with pytest.raises(AttributeError):
@@ -35,7 +36,6 @@ def test_create_asset_ddo_file():
 
     assert isinstance(asset1.ddo, DDO)
     assert asset1.ddo.is_valid
-    asset1.generate_did()
 
     assert asset1.has_metadata
     print(asset1.metadata)
@@ -81,6 +81,8 @@ def test_register_data_asset_market():
     # Register
     ##########################################################
     # The asset requires an ID before registration!
+    # Hack, clear the did to allow generating a new one
+    asset.ddo._did = None
     asset.generate_did()
 
     # Call the Register function
@@ -199,5 +201,5 @@ def test_ocean_publish():
     ##########################################################
     # Register using high-level interface
     ##########################################################
-    services = []
-    ocean.register_asset(asset, publisher_acct, services)
+    service_descriptors = [ServiceDescriptor.access_service_descriptor(asset_price, '/purchaseEndpoint', '/serviceEndpoint', 600)]
+    ocean.register_asset(asset.get_metadata(), publisher_address, service_descriptors)

@@ -11,9 +11,9 @@ Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
 def get_publickey_from_address(web3, address):
-    _hash = Web3.sha3(address)
-    signature = web3.eth.sign(address, hexstr=_hash)
-    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, signature)
+    _hash = Web3.sha3(text='verify signature.')
+    signature = web3.eth.sign(address, _hash)
+    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(signature))
 
 
 def generate_new_id(metadata):
@@ -21,7 +21,7 @@ def generate_new_id(metadata):
 
 
 def get_id_from_did(did):
-    return Web3.toHex(did.split(':')[-1])
+    return convert_to_bytes(Web3, did.split(':')[-1])
 
 
 def sign(web3, account_address, message):

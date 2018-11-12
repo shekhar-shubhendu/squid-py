@@ -363,7 +363,7 @@ class DDO():
 
     def is_did_assigend(self):
         """return true if a DID is assigned to this DDO"""
-        return self._did != ''
+        return self._did != '' and self._did is not None
 
     def get_created_time(self):
         """return the DDO created time, can be None"""

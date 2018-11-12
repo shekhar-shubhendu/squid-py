@@ -26,6 +26,9 @@ class Asset:
 
         self.ddo = ddo
         self.publisher_id = publisher_id
+        self.asset_id = None
+        if self.ddo and self.ddo.is_did_assigend():
+            self.assign_did_from_ddo()
 
     def __str__(self):
         return "Asset {}, publisher: {}".format(self.did, self.publisher_id)
@@ -38,7 +41,7 @@ class Asset:
         did = self.ddo.did
         match = re.match('^did:op:([0-9a-f]+)', did)
         if match:
-            self.did = match.groups(1)[0]
+            self.asset_id = match.groups(1)[0]
 
     @classmethod
     def from_ddo_json_file(cls, json_file_path):
@@ -57,14 +60,10 @@ class Asset:
 
     @property
     def did(self):
-        return self.getId()
+        return self.ddo.did
 
     def getId(self):
-        match = re.match('^did:op:([0-9a-f]+)', self.ddo.did)
-        if match:
-            return match.groups(1)[0]
-
-        return None
+        return self.asset_id
 
     def generate_did(self):
         """
@@ -82,7 +81,8 @@ class Asset:
         if not 'base' in metadata:
             raise ValueError("Invalid metedata in {}".format(self))
 
-        self.did = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
+        self.asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
+        self.ddo = self.ddo.create_new('did:op:%s' % self.asset_id)
 
     def purchase(self, consumer, timeout):
         """
@@ -105,9 +105,10 @@ class Asset:
 
         :return:
         """
+        return self.ddo
 
     def get_DID(self):
-        pass
+        return self.ddo.did
 
     def get_metadata(self):
         result = None

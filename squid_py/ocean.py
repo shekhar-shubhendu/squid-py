@@ -148,7 +148,7 @@ class Ocean:
         self.metadata_store.publish_asset_metadata(Asset(ddo))
 
         # register on-chain
-        self.keeper.didregistry.register_attribute(to_32byte_hex(asset_id), VALUE_TYPE_DID, Web3.sha3('Metadata'), ddo_service_endpoint, publisher_account)
+        self.keeper.didregistry.register_attribute(Web3.toBytes(hexstr=asset_id), VALUE_TYPE_DID, Web3.sha3(text='Metadata'), ddo_service_endpoint, publisher_account)
 
         return ddo
 

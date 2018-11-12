@@ -78,6 +78,11 @@ class Service():
         if self._values:
             # add extra service values to the dictonairy
             for name, value in self._values.items():
+                if isinstance(value, object) and hasattr(value, 'as_dictionary'):
+                    value = value.as_dictionary()
+                elif isinstance(value, list):
+                    value = [v.as_dictionary() if hasattr(v, 'as_dictionary') else v for v in value]
+
                 values[name] = value
         return values
 

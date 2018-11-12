@@ -11,9 +11,9 @@ from squid_py.utils.utilities import get_id_from_did
 
 
 class ServiceTypes:
-    METADATA = 'metadata'
-    ACCESS_ASSET = 'access'
-    COMPUTE_SERVICE = 'compute'
+    METADATA = 'Metadata'
+    ACCESS_ASSET = 'Access'
+    COMPUTE_SERVICE = 'Compute'
 
 
 class ServiceDescriptor(object):
