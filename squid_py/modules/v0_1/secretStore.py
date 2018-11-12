@@ -19,7 +19,7 @@ def grantAccess(web3, contract_path, account, service_agreement_id, service_defi
     service_agreement_address = service_definition['serviceAgreementContract']['address']
     if is_condition_fulfilled(web3, contract_path, service_definition['templateId'],
                               service_agreement_id, service_agreement_address,
-                              access_conditions.address, abi, 'grantAcces'):
+                              access_conditions.address, abi, 'grantAccess'):
         return
 
     parameters = access_condition_definition['parameters']
