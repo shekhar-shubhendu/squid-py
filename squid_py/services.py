@@ -18,14 +18,14 @@ class ServiceTypes:
 
 class ServiceDescriptor(object):
     @staticmethod
-    def access_service_descriptor(price, purchase_endpoint, service_endpoint):
+    def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
         return (ServiceTypes.ACCESS_ASSET,
-                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint})
+                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
 
     @staticmethod
-    def compute_service_descriptor(price, purchase_endpoint, service_endpoint):
+    def compute_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
         return (ServiceTypes.COMPUTE_SERVICE,
-                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint})
+                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
 
 
 class ServiceFactory(object):
@@ -35,12 +35,12 @@ class ServiceFactory(object):
         service_type, kwargs = service_descriptor
         if service_type == ServiceTypes.ACCESS_ASSET:
             return ServiceFactory.build_access_service(
-                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint']
+                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
 
         if service_type == ServiceTypes.COMPUTE_SERVICE:
             return ServiceFactory.build_compute_service(
-                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint']
+                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
 
         raise ValueError('Unknown service type "%s"' % service_type)
@@ -50,7 +50,7 @@ class ServiceFactory(object):
         Service(did, service_endpoint, ServiceTypes.METADATA, values={'metadata': metadata})
 
     @staticmethod
-    def build_access_service(did, price, purchase_endpoint, service_endpoint):
+    def build_access_service(did, price, purchase_endpoint, service_endpoint, timeout):
         param_map = {
             'assetId': Web3.toHex(get_id_from_did(did)),
             'price': price
@@ -62,7 +62,12 @@ class ServiceFactory(object):
         for cond in conditions:
             for param in cond.parameters:
                 param.value = param_map[param.name]
+
+            if cond.timeout > 0:
+                cond.timeout = timeout
+
             conditions_json_list.append(cond)
+
         sa = ServiceAgreement('services-1', sla_template.conditions)
         other_values = {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: sa.sa_definition_id,
@@ -75,6 +80,6 @@ class ServiceFactory(object):
         return Service(did, service_endpoint, ServiceTypes.ACCESS_ASSET, values=other_values)
 
     @staticmethod
-    def build_compute_service(did, price, purchase_endpoint, service_endpoint):
+    def build_compute_service(did, price, purchase_endpoint, service_endpoint, timeout):
         # TODO: implement this once the compute flow is ready
         return

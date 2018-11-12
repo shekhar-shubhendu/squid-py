@@ -3,6 +3,7 @@ import logging
 
 import requests
 from web3 import Web3, HTTPProvider
+from secret_store_client.client import Client
 
 from squid_py.account import Account
 from squid_py.aquariuswrapper import AquariusWrapper
@@ -126,8 +127,11 @@ class Ocean:
         auth = Authentication(pub_key, PUBLIC_KEY_TYPE_RSA)
         ddo.add_authentication(auth, PUBLIC_KEY_TYPE_RSA)
 
-        contents_url = metadata['contentsUrl']
         # TODO: setup secret store encryption session and encrypt contents
+        # contents_url = metadata['base']['contentUrls']
+        # publisher = Client(secret_store_url, parity_client_publish_url,
+        #                    publisher_address, publisher_password)
+
         # DDO url and `Metadata` service
         ddo_service_endpoint = self.metadata_store.get_service_endpoint(did)
         metadata_service = ServiceFactory.build_metadata_service(did, metadata, ddo_service_endpoint)
@@ -148,11 +152,12 @@ class Ocean:
 
         return ddo
 
-    def purchase_asset(self, consumer, ddo, service_definition_id, price, timeout):
+    def sign_service_agreement(self, did, consumer, service_definition_id):
         service_id = ''
         # Extract all of the params necessary for execute agreement from the ddo
         service = None
         sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
+        ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
         for s in ddo.services:
             if sa_def_key in s.get_values() and s.get_values()[sa_def_key] == service_definition_id:
                 service = s
@@ -164,8 +169,8 @@ class Ocean:
         service = service.as_dictionary()
         purchase_endpoint = service['purchaseEndpoint']
         # Prepare a payload to send to `Brizo`
-        payload = json.puts()
-        requests.post(purchase_endpoint, '', payload)
+        # payload = json.puts()
+        # requests.post(purchase_endpoint, '', payload)
 
         return service_id
 
