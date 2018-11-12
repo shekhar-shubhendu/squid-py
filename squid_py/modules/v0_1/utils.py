@@ -38,7 +38,7 @@ def get_condition_key(web3, template_id, address, abi, fn_name):
 def get_condition_contract_data(web3, contract_path, service_definition, name):
     condition_definition = None
     for condition in service_definition['conditions']:
-        if condition['conditionKey'].get('functionName') == name:
+        if condition['name'] == name:
             condition_definition = condition
             break
 

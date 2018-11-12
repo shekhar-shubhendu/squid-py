@@ -73,10 +73,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 }],
             },
             'conditions': [{
+                'name': 'lockPayment',
                 'conditionKey': {
                     'contractAddress': self.payment_conditions.contract.address,
                     'fingerprint': lock_payment_fingerprint,
-                    'functionName': 'lockPayment'
                 },
                 'parameters': {
                     'did': did,
@@ -92,10 +92,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     }
                 }],
             }, {
+                'name': 'grantAccess',
                 'conditionKey': {
                     'contractAddress': self.access_conditions.contract.address,
                     'fingerprint': grant_access_fingerprint,
-                    'functionName': 'grantAccess'
                 },
                 'parameters': {
                     'did': did,
@@ -111,10 +111,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     }
                 }],
             }, {
+                'name': 'releasePayment',
                 'conditionKey': {
                     'contractAddress': self.payment_conditions.contract.address,
                     'fingerprint': release_payment_fingerprint,
-                    'functionName': 'releasePayment'
                 },
                 'parameters': {
                     'did': did,
