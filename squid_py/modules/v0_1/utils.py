@@ -5,6 +5,7 @@ from squid_py.keeper.utils import (
     get_fingerprint_by_name,
     hexstr_to_bytes,
 )
+from squid_py.modules.v0_1.exceptions import InvalidModule
 
 
 def is_condition_fulfilled(web3, contract_path, template_id, service_agreement_id,
@@ -37,7 +38,7 @@ def get_condition_key(web3, template_id, address, abi, fn_name):
 def get_condition_contract_data(web3, contract_path, service_definition, name):
     condition_definition = None
     for condition in service_definition['conditions']:
-        if condition['conditionKey'].get('functionName') == 'lockPayment':
+        if condition['conditionKey'].get('functionName') == name:
             condition_definition = condition
             break
 
