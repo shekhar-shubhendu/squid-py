@@ -30,6 +30,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls.market = cls.ocean.keeper.market
         cls.token = cls.ocean.keeper.token
         cls.payment_conditions = cls.ocean.keeper.payment_conditions
+        cls.access_conditions = cls.ocean.keeper.access_conditions
         cls.service_agreement = cls.ocean.keeper.service_agreement
 
         cls.consumer = cls.web3.eth.accounts[0]
@@ -44,9 +45,17 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         os.remove(self.storage_path)
 
     def get_simple_service_agreement_definition(self, did, price):
+        grant_access_fingerprint = get_fingerprint_by_name(
+            self.access_conditions.contract.abi,
+            'grantAccess',
+        )
         lock_payment_fingerprint = get_fingerprint_by_name(
             self.payment_conditions.contract.abi,
             'lockPayment',
+        )
+        release_payment_fingerprint = get_fingerprint_by_name(
+            self.payment_conditions.contract.abi,
+            'releasePayment',
         )
         return {
             'type': 'Access',
@@ -61,7 +70,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                         'functionName': 'lockPayment',
                         'version': '0.1'
                     }
-                }]
+                }],
             },
             'conditions': [{
                 'conditionKey': {
@@ -73,7 +82,45 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     'did': did,
                     'price': price,
                 },
-                'events': []
+                'events': [{
+                    'name': 'PaymentLocked',
+                    'actorType': 'publisher',
+                    'handler': {
+                        'moduleName': 'secretStore',
+                        'functionName': 'grantAccess',
+                        'version': '0.1'
+                    }
+                }],
+            }, {
+                'conditionKey': {
+                    'contractAddress': self.access_conditions.contract.address,
+                    'fingerprint': grant_access_fingerprint,
+                    'functionName': 'grantAccess'
+                },
+                'parameters': {
+                    'did': did,
+                    'price': price,
+                },
+                'events': [{
+                    'name': 'AccessGranted',
+                    'actorType': 'publisher',
+                    'handler': {
+                        'moduleName': 'payment',
+                        'functionName': 'releasePayment',
+                        'version': '0.1'
+                    }
+                }],
+            }, {
+                'conditionKey': {
+                    'contractAddress': self.payment_conditions.contract.address,
+                    'fingerprint': release_payment_fingerprint,
+                    'functionName': 'releasePayment'
+                },
+                'parameters': {
+                    'did': did,
+                    'price': price,
+                },
+                'events': [],
             }]
         }
 
@@ -119,15 +166,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
-
-        flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
-        for check in range(20):
-            events = flt.get_new_entries()
-            if events:
-                break
-            time.sleep(0.5)
-
-        assert events, 'Expected PaymentLocked to be emitted'
+        payment_locked = self._wait_for_payment_locked()
+        assert payment_locked, 'Expected PaymentLocked to be emitted'
 
     def test_register_service_agreement_updates_fulfilled_agreements(self):
         service_agreement_id = uuid.uuid4().hex
@@ -146,19 +186,37 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             num_confirmations=0
         )
 
+        register_service_agreement(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,  # using the same account for the sake of simplicity here
+            service_agreement_id,
+            did,
+            self.get_simple_service_agreement_definition(did, price),
+            'publisher',
+            num_confirmations=0
+        )
+
         self._execute_service_agreement(service_agreement_id, did, price)
+
+        payment_locked = self._wait_for_payment_locked()
+        assert payment_locked, 'Payment was not locked'
+
+        access_granted = self._wait_for_access_granted()
+        assert access_granted, 'Access was not granted'
+
+        payment_released = self._wait_for_payment_released()
+        assert payment_released, 'Payment was not released'
+
+        receipt = self.service_agreement.contract_concise.fulfillAgreement(
+            service_agreement_id.encode(),
+            transact={'from': self.consumer},
+        )
+        self.web3.eth.waitForTransactionReceipt(receipt)
 
         expected_agreements = [(service_agreement_id, did, 'fulfilled')]
         for i in range(10):
-            try:
-                receipt = self.service_agreement.contract_concise.fulfillAgreement(
-                    service_agreement_id.encode(),
-                    transact={'from': self.consumer},
-                )
-                self.web3.eth.waitForTransactionReceipt(receipt)
-            except Exception:
-                pass
-
             agreements = get_service_agreements(self.storage_path, 'fulfilled')
             if expected_agreements == agreements:
                 break
@@ -207,14 +265,26 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def _setup_service_agreement(cls):
         cls.template_id = uuid.uuid4().hex
 
-        cls.contracts = [cls.payment_conditions.contract.address]
+        cls.contracts = [
+            cls.access_conditions.contract.address,
+            cls.payment_conditions.contract.address,
+            cls.payment_conditions.contract.address,
+        ]
         cls.fingerprints = [
             hexstr_to_bytes(
                 cls.web3,
+                get_fingerprint_by_name(cls.access_conditions.contract.abi, 'grantAccess'),
+            ),
+            hexstr_to_bytes(
+                cls.web3,
                 get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'lockPayment'),
+            ),
+            hexstr_to_bytes(
+                cls.web3,
+                get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'releasePayment'),
             )
         ]
-        cls.dependencies = [0]
+        cls.dependencies = [2, 0, 4]  # lockPayment -> grantAccess -> releasePayment
 
         template_name = uuid.uuid4().hex.encode()
         setup_args = [
@@ -235,6 +305,14 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def _execute_service_agreement(self, service_agreement_id, did, price):
         hashes = [
             self.web3.soliditySha3(
+                ['bytes32', 'bytes32'],
+                [did.encode(), did.encode()]
+            ).hex(),
+            self.web3.soliditySha3(
+                ['bytes32', 'uint256'],
+                [did.encode(), price]
+            ).hex(),
+            self.web3.soliditySha3(
                 ['bytes32', 'uint256'],
                 [did.encode(), price]
             ).hex()
@@ -243,11 +321,11 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3.soliditySha3(
                 ['bytes32', 'address', 'bytes4'],
                 [self.template_id.encode(),
-                 self.contracts[0],
-                 self.fingerprints[0]]
-            ).hex()
+                 contract,
+                 fingerprint]
+            ).hex() for contract, fingerprint in zip(self.contracts, self.fingerprints)
         ]
-        timeouts = [0]
+        timeouts = [0, 0, 0]
         signature = self.web3.eth.sign(
             self.consumer,
             hexstr=self.web3.soliditySha3(
@@ -283,3 +361,27 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             100,
             transact={'from': cls.consumer},
         )
+
+    def _wait_for_payment_locked(self):
+        flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
+        for check in range(20):
+            events = flt.get_new_entries()
+            if events:
+                return events[0]
+            time.sleep(0.5)
+
+    def _wait_for_access_granted(self):
+        flt = self.access_conditions.events.AccessGranted.createFilter(fromBlock='latest')
+        for check in range(20):
+            events = flt.get_new_entries()
+            if events:
+                return events[0]
+            time.sleep(0.5)
+
+    def _wait_for_payment_released(self):
+        flt = self.payment_conditions.events.PaymentReleased.createFilter(fromBlock='latest')
+        for check in range(20):
+            events = flt.get_new_entries()
+            if events:
+                return events[0]
+            time.sleep(0.5)

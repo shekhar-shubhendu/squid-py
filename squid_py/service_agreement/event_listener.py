@@ -47,13 +47,17 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
         contract_abi = get_contract_abi_by_address(contract_path, contract_address)
         contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
+        # FIXME change this after AccessConditions contract is fixed
+        _filters = filters \
+                   if event_handler['functionName'] == 'lockPayment' \
+                   else {'serviceId': service_agreement_id.encode()}
         watch_event(
             contract,
             event['name'],
             _get_callback(fn),
             fromBlock='latest',
             interval=0.5,
-            filters=filters,
+            filters=_filters,
             num_confirmations=num_confirmations,
         )
 
