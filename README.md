@@ -93,11 +93,13 @@ In addition to the configuration file, you may use the following environment var
 
 1. Copy keeper artifacts
     
-    A bash script is available to copy keeper artifacts into this file directly from a running docker image. This script needs to run in the root of the project. 
-    
+    A bash script is available to copy keeper artifacts into this file directly from a running docker image. This script needs to run in the root of the project.
+    The script waits until the keeper contracts are deployed, and then copies the artifacts.
+
     ```
-    ./script/extract_keeper_artifacts.sh
+    ./scripts/wait_for_migration_and_extract_keeper_artifacts.sh
     ```
+
     The artifacts contain the addresses of all the deployed contracts and their ABI definitions required to interact with them.
 
 1. Run the unit tests
