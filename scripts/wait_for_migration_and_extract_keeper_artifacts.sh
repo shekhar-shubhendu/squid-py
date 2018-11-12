@@ -1,3 +1,5 @@
+#!/bin/bash
+
 RETRY_COUNT=0
 COMMAND_STATUS=1
 
