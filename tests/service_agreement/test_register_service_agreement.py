@@ -86,7 +86,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     'name': 'PaymentLocked',
                     'actorType': 'publisher',
                     'handler': {
-                        'moduleName': 'secretStore',
+                        'moduleName': 'accessControl',
                         'functionName': 'grantAccess',
                         'version': '0.1'
                     }
