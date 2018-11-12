@@ -19,6 +19,9 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
     events = []
 
     for event in service_definition['serviceAgreementContract']['events']:
+        if event['actorType'] != actor_type:
+                continue
+
         events.append((service_definition['serviceAgreementContract']['address'], event))
 
     for condition in service_definition['conditions']:
@@ -35,8 +38,11 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
         module = importlib.import_module(import_path, 'squid_py')
         fn = getattr(module, event_handler['functionName'])
 
-        def _callback(payload):
-            fn(web3, contract_path, account, service_agreement_id, service_definition, payload)
+        def _get_callback(fn):
+            def _callback(payload):
+                fn(web3, contract_path, account, service_agreement_id, service_definition, payload)
+
+            return _callback
 
         contract_abi = get_contract_abi_by_address(contract_path, contract_address)
         contract = web3.eth.contract(address=contract_address, abi=contract_abi)
@@ -44,7 +50,7 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
         watch_event(
             contract,
             event['name'],
-            _callback,
+            _get_callback(fn),
             fromBlock='latest',
             interval=0.5,
             filters=filters,
