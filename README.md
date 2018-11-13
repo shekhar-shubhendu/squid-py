@@ -15,11 +15,9 @@
 ## Table of Contents
 
   - [Features](#features)
-  - [Prerequisites](#prerequisites)
   - [Quick-start](#quick-start)
-  - [Code style](#code-style)
-  - [Testing](#testing)
-  - [New Version](#new-version)
+  - [Configuration](#configuration)
+  - [Development](#development)
   - [License](#license)
 
 ---
@@ -31,76 +29,40 @@ This repository include also the methods to encrypt and decrypt information.
 
 ## Prerequisites
 
-You should have running an instance of BigchainDB and ganache-cli. To get started quickly,
-you can start the docker instance in the docker directory:
-
-`docker-compose -f ./docker/docker-compose.yml up`
-
-The docker container has three main service images running;
-
-1. [bigchaindb/bigchaindb](https://hub.docker.com/r/bigchaindb/bigchaindb/):2.0.0-beta1 (with tendermint)
-1. [oceanprotocol/keeper-contracts](https://hub.docker.com/r/oceanprotocol/keeper-contracts/):0.1
-1. [oceanprotocol/aquarius](https://hub.docker.com/r/oceanprotocol/aquarius/):0.1 (API documentation exposed at http://localhost:5000/api/v1/docs/)
-
-Mac: 
-if you are running on mac, gnu-sed needs to be installed
-```
-brew install --with-default-names gnu-sed
-```
+Python 3.6
 
 ## Quick-start
 
-When you want to interact with the contracts you have to instantiate this class:
+Install Squid:
 
-```python
-from squid_py.ocean_contracts import OceanContractsWrapper
-ocean = OceanContractsWrapper(host='http://localhost', port=8545, config_path='config.ini')    
-ocean.init_contracts()
+```
+pip install squid-py
 ```
 
-If you do not pass the config_path you can pass using **$CONFIG_FILE** environment variable.
+The entry point into the Squid functionality is the Ocean class:
 
-It is possible do not pass the config file, but you should be sure of provide the host, port and addresses.
-If you opt for this you can pass the addresses using the following environment variables:
-
-- **MARKET_ADDRESS**  Address of your market contract deployed in the network
-- **AUTH_ADDRESS**    Address of your auth contract deployed in the network.
-- **TOKEN_ADDRESS**   Address of your token contract deployed in the network.
-- **KEEPER_HOST**     You can pass the host of your keeper instead of call it explicitly in class.
-- **KEEPER_PORT**     You can pass the port of your keeper instead of call it explicitly in class.
-
-
-After that you have to init the contracts. And you can start to use the methods in the different contracts.
-
-You will find as well two methods that allow you to register and consume an asset.
 ```python
-from squid_py.consumer import register, consume
-register(publisher_account=ocean.web3.eth.accounts[1],
-         aquarius_account=ocean.web3.eth.accounts[0],
-         price=10,
-         ocean_contracts_wrapper=ocean,
-         json_metadata=json_consume
-                          )
-consume(resource=resouce_id,
-        consumer_account=ocean.web3.eth.accounts[1],
-        aquarius_account=ocean.web3.eth.accounts[0],
-        ocean_contracts_wrapper=ocean,
-        json_metadata=json_request_consume)
+from squid_py.ocean import Ocean
+ocean = Ocean('config.ini')
 
+assert ocean.get_accounts()
 ```
 
 ## Configuration
 
-```yaml
-[keeper-contracts]
-market.address = # Address of your market contract deployed in the network. [Mandatory]
-auth.address = # Address of your auth contract deployed in the network. [Mandatory]
-token.address = # Address of your token contract deployed in the network. [Mandatory]
-keeper.host = # You can pass the host of your keeper instead of call it explicitly in class.
-keeper.port = 8545  # You can pass the port of your keeper instead of call it explicitly in class.
-contracts.folder =  # You can pass the directory of your contracts instead of use the library.
+`keeper.url` points to an Ethereum RPC client. Note that Squid learns the name of the network to work with from this client.
 
-```
+`keeper.path` points to the folder with keeper contracts definitions. When you install the package, the artifacts are
+automatically picked up from the `keeper-contracts` Python dependency.
+
+`storage.path` points to the local database file used for storing temporary information (for instance, pending service agreements).
+
+In addition to the configuration file, you may use the following environment variables (override the corresponding configuration file values):
+
+- KEEPER_PATH
+- KEEPER_URL
+- GAS_LIMIT
+- AQUARIUS_URL
 
 ## Development
 
@@ -112,24 +74,32 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
     pip install -r requirements_dev.txt
     ```
 
-1. Run Docker images as described in [the Prerequisites section](#prerequisites). Alternatively, setup an run some or all of the corresponding services locally.
+1. Run Docker images. Alternatively, set up and run some or all of the corresponding services locally.
+
+    ```
+    docker-compose -f ./docker/docker-compose.yml up
+    ```
+
+    It runs an Aquarius node and an Ethereum RPC client. For details, read `docker-compose.yml`.
 
 1. Create local configuration file
-    
-    A `config_local.ini` file is required to hold contract addresses and other parameters. 
-    
-    A bash script is available to copy these addresses into this file directly from a running docker image. This script needs to run in the root of the project. 
-    
+
     ```
-    source ./scripts/deploy.sh
+    cp config.ini config_local.ini
     ```
+
+   `config_local.ini` is used by unit tests.
+
+1. Copy keeper artifacts
     
-    Alternatively, you can manually enter the parameters in this file.
-    
+    A bash script is available to copy keeper artifacts into this file directly from a running docker image. This script needs to run in the root of the project.
+    The script waits until the keeper contracts are deployed, and then copies the artifacts.
+
     ```
-    cp config.init config_local.ini
+    ./scripts/wait_for_migration_and_extract_keeper_artifacts.sh
     ```
-    Fill in the configuration file with the keeper contract addresses.
+
+    The artifacts contain the addresses of all the deployed contracts and their ABI definitions required to interact with them.
 
 1. Run the unit tests
 

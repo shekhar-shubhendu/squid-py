@@ -20,6 +20,9 @@ class AquariusWrapper(object):
         logging.debug("Metadata Store API documentation at {}/api/v1/docs".format(aquarius_url))
         logging.debug("Metadata assets at {}".format(self._base_url))
 
+    def get_service_endpoint(self, did):
+        return self._base_url + '/ddo/%s' % did
+
     def list_assets(self):
         asset_list = json.loads(requests.get(self._base_url).content)
         if asset_list and 'ids' in asset_list:
@@ -34,7 +37,8 @@ class AquariusWrapper(object):
     def list_assets_metadata(self):
         return json.loads(requests.get(self._base_url + '/ddo').content)
 
-    def publish_asset_metadata(self, asset_did, asset_ddo):
+    def publish_asset_metadata(self, asset_ddo):
+        asset_did = asset_ddo.did
         response = requests.post(self._base_url + '/ddo', data=asset_ddo.as_text(), headers=self._headers)
         if response.status_code == 500:
             raise ValueError("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
