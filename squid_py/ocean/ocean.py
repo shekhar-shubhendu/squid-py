@@ -129,14 +129,17 @@ class Ocean:
         # Check if it's already registered first!
         if asset.asset_id in self.metadata.list_assets():
             raise OceanDIDAlreadyExist
-            
+
         # encrypt the contentUrls using the secret store
         metadata = None
         metadata_service = asset.ddo.get_service('Metadata')
         if 'metadata' in metadata_service.get_values():
             metadata = metadata_service.get_values()['metadata']
         if metadata and metadata['base']['contentUrls']:
-            metadata['base']['contentUrls'] = self.encrypt_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
+            content_urls_encrypted = self.encrypt_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
+            # only assign if the encryption worked
+            if content_urls_encrypted:
+                metadata['base']['contentUrls'] = content_urls_encrypted
             
         logging.info("Publishing {} in aquarius".format(asset.did))
         self.metadata.publish_asset_metadata(asset.did, asset.ddo)
@@ -178,10 +181,16 @@ class Ocean:
         pass
 
     def encrypt_content_urls(self, did, data):
-        result = data
+        """
+        encrypt string data using the DID as an secret store id, 
+        if secret store is enabled then return the result from secret store encryption
+
+        return None for no encryption performed
+        """
+        result = None
         if self.config.secret_store_url and self.config.parity_url and self.config.parity_address:
             publisher = Client(self.config.secret_store_url, self.config.parity_url,
-                        self.config.parity_address, self.config.parity_password)
+                               self.config.parity_address, self.config.parity_password)
 
             document_id = did_to_id(did)
             # TODO: need to remove below to stop multiple session testing so that we can encrypt using the id from the DID.
