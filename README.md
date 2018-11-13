@@ -50,8 +50,7 @@ assert ocean.get_accounts()
 
 ## Configuration
 
-`keeper.url` points to an Ethereum RPC client. For development we use Ganache CLI. Note that Squid learns the name
-of the network to work with from this client.
+`keeper.url` points to an Ethereum RPC client. Note that Squid learns the name of the network to work with from this client.
 
 `keeper.path` points to the folder with keeper contracts definitions. When you install the package, the artifacts are
 automatically picked up from the `keeper-contracts` Python dependency.
@@ -81,7 +80,7 @@ In addition to the configuration file, you may use the following environment var
     docker-compose -f ./docker/docker-compose.yml up
     ```
 
-    It runs a container with an instance of Aquarius, another one hosting MongoDB, and the one with Ganache CLI.
+    It runs an Aquarius node and an Ethereum RPC client. For details, read `docker-compose.yml`.
 
 1. Create local configuration file
 
