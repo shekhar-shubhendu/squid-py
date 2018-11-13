@@ -1,6 +1,9 @@
 import logging
+import json
+import secrets
 
 from web3 import Web3, HTTPProvider
+from secret_store_client.client import Client
 
 from squid_py.ocean.account import Account
 from squid_py.ocean.asset import Asset
@@ -10,6 +13,8 @@ from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist
+
+from squid_py.did import did_to_id
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -124,6 +129,15 @@ class Ocean:
         # Check if it's already registered first!
         if asset.asset_id in self.metadata.list_assets():
             raise OceanDIDAlreadyExist
+            
+        # encrypt the contentUrls using the secret store
+        metadata = None
+        metadata_service = asset.ddo.get_service('Metadata')
+        if 'metadata' in metadata_service.get_values():
+            metadata = metadata_service.get_values()['metadata']
+        if metadata and metadata['base']['contentUrls']:
+            metadata['base']['contentUrls'] = self.encrypt_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
+            
         logging.info("Publishing {} in aquarius".format(asset.did))
         self.metadata.publish_asset_metadata(asset.did, asset.ddo)
 
@@ -162,3 +176,15 @@ class Ocean:
 
     def get_service_agreement(self):
         pass
+
+    def encrypt_content_urls(self, did, data):
+        result = data
+        if self.config.secret_store_url and self.config.parity_url and self.config.parity_address:
+            publisher = Client(self.config.secret_store_url, self.config.parity_url,
+                        self.config.parity_address, self.config.parity_password)
+
+            document_id = did_to_id(did)
+            # TODO: need to remove below to stop multiple session testing so that we can encrypt using the id from the DID.
+            document_id = secrets.token_hex(32)
+            result = publisher.publish_document(document_id, data)
+        return result
