@@ -136,7 +136,7 @@ class Ocean:
         if 'metadata' in metadata_service.get_values():
             metadata = metadata_service.get_values()['metadata']
         if metadata and metadata['base']['contentUrls']:
-            content_urls_encrypted = self.encrypt_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
+            content_urls_encrypted = self.encrypt_metadata_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
             # only assign if the encryption worked
             if content_urls_encrypted:
                 metadata['base']['contentUrls'] = content_urls_encrypted
@@ -180,7 +180,7 @@ class Ocean:
     def get_service_agreement(self):
         pass
 
-    def encrypt_content_urls(self, did, data):
+    def encrypt_metadata_content_urls(self, did, data):
         """
         encrypt string data using the DID as an secret store id, 
         if secret store is enabled then return the result from secret store encryption
