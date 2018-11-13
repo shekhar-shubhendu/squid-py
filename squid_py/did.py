@@ -9,6 +9,7 @@ from web3 import Web3
 
 OCEAN_DID_METHOD = 'op'
 
+
 def did_generate(did_id, path=None, fragment=None, method=OCEAN_DID_METHOD):
     """generate a DID based in it's id, path, fragment and method"""
 
@@ -23,6 +24,7 @@ def did_generate(did_id, path=None, fragment=None, method=OCEAN_DID_METHOD):
         did.append(fragment)
     return "".join(did)
 
+
 def did_generate_base_id(did_id, ddo):
     """generate a base did-id, using user defined id, and ddo"""
     values = []
@@ -31,6 +33,7 @@ def did_generate_base_id(did_id, ddo):
     values.append(Web3.toHex(ddo.calculate_hash())[2:])
     # return the hash as a string with no leading '0x'
     return Web3.toHex(Web3.sha3(text="".join(values)))[2:]
+
 
 def did_generate_from_ddo(did_id, ddo, path=None, fragment=None, method=OCEAN_DID_METHOD):
     """
@@ -42,6 +45,7 @@ def did_generate_from_ddo(did_id, ddo, path=None, fragment=None, method=OCEAN_DI
     assigned_ddo = ddo.create_new(did)
     return did_generate(base_id, path, fragment, method), assigned_ddo
 
+
 def did_validate(did, did_id, ddo):
     """validate a DID and check to see it matches the user defined 'id', and DDO"""
     base_id = did_generate_base_id(did_id, ddo)
@@ -49,6 +53,7 @@ def did_validate(did, did_id, ddo):
     if did_items:
         return did_items['id'] == base_id
     return False
+
 
 def did_parse(did):
     """parse a DID into it's parts"""
@@ -59,7 +64,7 @@ def did_parse(did):
     match = re.match('^did:([a-z0-9]+):([a-zA-Z0-9-.]+)(.*)', did)
     if match:
         result = {
-            'method' : match.group(1),
+            'method': match.group(1),
             'id': match.group(2),
             'path': None,
             'fragment': None,
@@ -77,6 +82,7 @@ def did_parse(did):
 
     return result
 
+
 def is_did_valid(did):
     """
         Return True if the did is a valid DID with the method name 'op' and the id
@@ -88,10 +94,8 @@ def is_did_valid(did):
     return False
 
 
-def did_generate_from_id(did_id, method='op'):
-    """
-    generate a DID from a hex id, this at the moment is a valid asset_id
-    """
+def id_to_did(did_id, method='op'):
+    """returns an Ocean DID from given a hex id"""
     if isinstance(did_id, bytes):
         did_id = Web3.toHex(did_id)
 
@@ -106,13 +110,15 @@ def did_generate_from_id(did_id, method='op'):
         did_id = '0'
     return 'did:{0}:{1}'.format(method, did_id)
 
-def get_id_from_did(did):
+
+def did_to_id(did):
     """return an id extracted from a DID string"""
     if is_did_valid(did):
         result = did_parse(did)
         if result:
             return re.sub('^0x', '', Web3.toHex(hexstr=result['id']))
     return None
+
 
 def did_to_id_bytes(did):
     """

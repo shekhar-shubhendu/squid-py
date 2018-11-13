@@ -29,16 +29,13 @@ class AquariusWrapper(object):
     def get_asset_metadata(self, asset_did):
         response = requests.get(self._base_url + '/ddo/%s' % asset_did).content
         response_dict = json.loads(response)
-        # metadata_base = response_dict['base']
-        # metadata = dict()
-        # metadata['base'] = metadata_base
         return response_dict
 
     def list_assets_metadata(self):
         return json.loads(requests.get(self._base_url + '/ddo').content)
 
-    def publish_asset_metadata(self, asset):
-        response = requests.post(self._base_url + '/ddo', data=asset.ddo.as_text(), headers=self._headers)
+    def publish_asset_metadata(self, asset_did, asset_ddo):
+        response = requests.post(self._base_url + '/ddo', data=asset_ddo.as_text(), headers=self._headers)
         if response.status_code == 500:
             raise ValueError("This Asset ID already exists! \n\tHTTP Error message: \n\t\t{}".format(response.text))
         elif response.status_code == 400:
@@ -47,14 +44,14 @@ class AquariusWrapper(object):
             raise Exception("{} ERROR Full error: \n{}".format(response.status_code, response.text))
         elif response.status_code == 201:
             response = json.loads(response.content)
-            logging.debug("Published {}".format(asset))
+            logging.debug("Published asset DID {}".format(asset_did))
             return response
         else:
             raise Exception("ERROR")
 
-    def update_asset_metadata(self, asset):
+    def update_asset_metadata(self, asset_did, asset_ddo):
         return json.loads(
-            requests.put(self._base_url + '/ddo/%s' % asset.ddo.did, data=asset.ddo.as_text(),
+            requests.put(self._base_url + '/ddo/%s' % asset_did, data=asset_ddo.as_text(),
                          headers=self._headers).content)
 
     def text_search(self, text, sort=None, offset=100, page=0):
@@ -73,7 +70,7 @@ class AquariusWrapper(object):
             requests.post(self._base_url + '/ddo/query', data=json.dumps(search_query),
                           headers=self._headers).content))
 
-    def retire_asset_metadata(self, asset_id):
-        response = requests.delete(self._base_url + '/ddo/%s' % asset_id, headers=self._headers)
-        logging.debug("Removed asset_id: {} from metadata store".format(asset_id))
+    def retire_asset_metadata(self, asset_did):
+        response = requests.delete(self._base_url + '/ddo/%s' % asset_did, headers=self._headers)
+        logging.debug("Removed asset DID: {} from metadata store".format(asset_did))
         return response

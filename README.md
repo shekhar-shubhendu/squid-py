@@ -121,7 +121,7 @@ contracts.folder =  # You can pass the directory of your contracts instead of us
     A bash script is available to copy these addresses into this file directly from a running docker image. This script needs to run in the root of the project. 
     
     ```
-    source ./script/deploy.sh
+    source ./scripts/deploy.sh
     ```
     
     Alternatively, you can manually enter the parameters in this file.
@@ -150,6 +150,15 @@ Our test use pytest framework.
 #### New Version
 
 The `bumpversion.sh` script helps to bump the project version. You can execute the script using as first argument {major|minor|patch} to bump accordingly the version.
+- To bump the patch version: `./bumpversion.sh patch`
+- To bump the minor version: `./bumpversion.sh minor`
+- To bump the major version: `./bumpversion.sh major`
+
+To create a tag once the version and the code is ready, run the following commands:
+```bash
+git tag v<version>
+git push origin v<version>
+```
 
 ## License
 

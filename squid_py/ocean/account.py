@@ -1,3 +1,4 @@
+from squid_py.models.balance import Balance
 
 
 class Account:
@@ -10,12 +11,13 @@ class Account:
         """
         self.keeper = keeper
         self.address = address
+        self.balance = self.get_balance()
 
-    def request_tokens(self,amount):
-        return self.keeper.market.request_tokens(amount,self.address)
+    def request_tokens(self, amount):
+        return self.keeper.market.request_tokens(amount, self.address)
 
     def get_balance(self):
-        pass
+        return Balance(self.ether, self.ocean)
 
     def __str__(self):
         return "Account {} with {} Eth, {} Ocean".format(self.address, self.ether, self.ocean)

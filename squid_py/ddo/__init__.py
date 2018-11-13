@@ -11,7 +11,7 @@ Ocean Protocol DID/DDO Python Library
 __author__ = """Ocean Protocol Foundation"""
 __version__ = '0.0.1'
 
-from .main import (
+from .ddo import (
     DDO,
 )
 
