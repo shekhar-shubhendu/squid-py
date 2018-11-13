@@ -113,18 +113,15 @@ class Asset:
 
     def consume(self, order, consumer):
         """
+        Get access token (jwt).
+        Download the asset from the aquarius using the URL in access token
+        Decode the the access token, get service_endpoint and request_id
 
         :param order: Order object
         :param consumer: Consumer Account
         :return: access_url
         :rtype: string
-        :raises :
         """
-
-        # Get access token (jwt)
-
-        # Download the asset from the aquarius using the URL in access token
-        # Decode the the access token, get service_endpoint and request_id
 
         return
 
