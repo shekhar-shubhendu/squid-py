@@ -1,8 +1,23 @@
 squid\_py.keeper package
 ========================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    squid_py.keeper.conditions
+
 Submodules
 ----------
+
+squid\_py.keeper.ServiceAgreement module
+----------------------------------------
+
+.. automodule:: squid_py.keeper.ServiceAgreement
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 squid\_py.keeper.auth module
 ----------------------------
@@ -48,6 +63,14 @@ squid\_py.keeper.token module
 -----------------------------
 
 .. automodule:: squid_py.keeper.token
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+squid\_py.keeper.utils module
+-----------------------------
+
+.. automodule:: squid_py.keeper.utils
     :members:
     :undoc-members:
     :show-inheritance:

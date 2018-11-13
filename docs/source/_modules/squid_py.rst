@@ -9,7 +9,9 @@ Subpackages
     squid_py.ddo
     squid_py.keeper
     squid_py.models
+    squid_py.modules
     squid_py.ocean
+    squid_py.service_agreement
     squid_py.utils
 
 Submodules
@@ -39,10 +41,10 @@ squid\_py.config module
     :undoc-members:
     :show-inheritance:
 
-squid\_py.constants module
---------------------------
+squid\_py.ddo module
+--------------------
 
-.. automodule:: squid_py.constants
+.. automodule:: squid_py.ddo
     :members:
     :undoc-members:
     :show-inheritance:
@@ -75,6 +77,14 @@ squid\_py.log module
 --------------------
 
 .. automodule:: squid_py.log
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+squid\_py.services module
+-------------------------
+
+.. automodule:: squid_py.services
     :members:
     :undoc-members:
     :show-inheritance:

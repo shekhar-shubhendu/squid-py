@@ -15,19 +15,17 @@ class Parameter:
 
 class Event:
     """
-    Example:
-        {
-          "name": "PaymentLocked",
-          "actorType": [
-            "publisher"
-          ],
-          "handlers": {
-            "moduleName": "accessControl",
-            "functionName": "grantAccess",
-            "version": "0.1"
-          }
-        }
+    Example: (formatted to make Sphinx happy!)
 
+    {
+    "name": "PaymentLocked",
+    "actorType": ["publisher"],
+    "handlers": {
+    "moduleName": "accessControl",
+    "functionName": "grantAccess",
+    "version": "0.1"
+    }
+    }
     """
     def __init__(self, event_json):
         self.values_dict = dict(event_json)

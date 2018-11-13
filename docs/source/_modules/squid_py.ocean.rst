@@ -44,6 +44,14 @@ squid\_py.ocean.order module
     :undoc-members:
     :show-inheritance:
 
+squid\_py.ocean.service\_agreement module
+-----------------------------------------
+
+.. automodule:: squid_py.ocean.service_agreement
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
