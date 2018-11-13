@@ -134,7 +134,7 @@ class Config(configparser.ConfigParser):
     @property
     def secret_store_url(self):
         return self.get(self._section_name, NAME_SECRET_STORE_URL)
-        
+
     @property
     def parity_url(self):
         return self.get(self._section_name, NAME_PARITY_URL)

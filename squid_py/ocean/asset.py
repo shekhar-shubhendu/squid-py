@@ -106,7 +106,7 @@ class Asset:
         logging.debug("Asset {} created from metadata {} ".format(this_asset.asset_id, metadata))
         return this_asset
 
-        
+
     @property
     def metadata(self):
         """return the metadata for this asset"""
