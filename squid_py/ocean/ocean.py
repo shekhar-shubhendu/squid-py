@@ -5,7 +5,8 @@ import requests
 from web3 import Web3, HTTPProvider
 from secret_store_client.client import Client
 
-from squid_py.account import Account
+from squid_py.ocean.account import Account
+from squid_py.ocean.asset import Asset
 from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.asset import Asset
 from squid_py.config import Config
@@ -16,10 +17,15 @@ from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from squid_py.didresolver import VALUE_TYPE_URL, VALUE_TYPE_DID
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
+from squid_py.didresolver import DIDResolver
+from squid_py.exceptions import OceanDIDAlreadyExist
+
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.services import ServiceTypes, ServiceFactory
 from squid_py.utils import to_32byte_hex
 from squid_py.utils.utilities import get_publickey_from_address, generate_new_id, get_id_from_did
+
+CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 setup_logging()
 
@@ -59,6 +65,8 @@ class Ocean:
 
         assert self.accounts
 
+        self.did_resolver = DIDResolver(self._web3, self.keeper.didregistry)
+
     def print_config(self):
         # TODO: Cleanup
         print("Ocean object configuration:".format())
@@ -67,46 +75,39 @@ class Ocean:
         print("Ocean.config.gas_limit: {}".format(self.config.gas_limit))
         print("Ocean.config.aquarius_url: {}".format(self.config.aquarius_url))
 
-    def _update_accounts(self):
+    def get_accounts(self):
         """
-        Using the Web3 driver, get all account addresses
-        This is used for development to get an overview of all accounts
-        For each address, instantiate a new Account object
-        :return: List of Account instances
+        Returns all available accounts loaded via a wallet, or by Web3.
+        :return:
         """
-        logging.debug("Updating accounts")
         accounts_dict = dict()
         for account_address in self._web3.eth.accounts:
             accounts_dict[account_address] = Account(self.keeper, account_address)
-
-        self.accounts = accounts_dict
-
-    def get_accounts(self):
-        self._update_accounts()
-        return self.accounts
+        return accounts_dict
 
     def get_asset(self, asset_did):
         """
-        Given an assetID, return the Asset
+        Given an asset_did, return the Asset
         :return: Asset object
         """
-        # TODO: implement this
-        asset = None
-        return asset
 
-    def get_order(self, order_id):
-        # TODO: implement this
-        order = None
-        return order
+        return Asset.from_ddo_dict(self.metadata_store.get_asset_metadata(asset_did))
 
-    def search_assets(self, search_query):
+    def search_assets(self, text, sort=None, offset=100, page=0, aquarius_url=None):
         """
-
-        :return:
+        Search an asset in oceanDB using aquarius.
+        :param text String with the value that you are searching.
+        :param sort Dictionary to choose order base in some value.
+        :param offset Number of elements shows by page.
+        :param page Page number.
+        :param aquarius_url Url of the aquarius where you want to search. If there is not provided take the default.
+        :return: List of assets that match with the query.
         """
-        # TODO: implement this
-        assets = []
-        return assets
+        if aquarius_url is not None:
+            aquarius = AquariusWrapper(aquarius_url)
+            return [Asset.from_ddo_dict(i) for i in aquarius.text_search(text, sort, offset, page)]
+        else:
+            return [Asset.from_ddo_dict(i) for i in self.metadata.text_search(text, sort, offset, page)]
 
     def search_assets_by_text(self, search_text):
         # TODO: implement this
@@ -180,16 +181,67 @@ class Ocean:
 
         return
 
-    def resolve_did(self, did):
-        ddo_object = None
-        _id = Web3.toHex(get_id_from_did(did))
-        event_filter = self.keeper.didregistry.events.SetupAgreementTemplate.createFilter(
-            fromBlock='latest', argument_filters={'did': _id, 'type': VALUE_TYPE_DID, 'key': Web3.sha3('Metadata')})
-        logs = event_filter.get_all_entries()
-        if logs:
-            ddo_endpoint = logs[-1]
-            if ddo_endpoint:
-                response = requests.get(ddo_endpoint)
-                ddo_object = DDO(json_text=response)
+    def register(self, asset, asset_price, publisher_acct):
+        """
+        Register an asset in both the Market (on-chain) and in the Meta Data store
 
-        return ddo_object
+        Wrapper on both
+            - keeper.market.register
+            - metadata.publish_asset
+            - keeper.did_registry
+
+        :param asset: Asset object.
+        :param asset_price: Price of the asset.
+        :param publisher_acct: Account of the publisher.
+        :return:
+        """
+
+        # 1) Check that the asset is valid
+        assert asset.has_metadata
+        assert asset.is_valid
+
+        # 2) Check that the publisher is valid and has funds
+        assert publisher_acct.address in self.accounts
+
+        # 3) Publish to metadata store
+        # Check if it's already registered first!
+        if asset.asset_id in self.metadata.list_assets():
+            raise OceanDIDAlreadyExist
+        logging.info("Publishing {} in aquarius".format(asset.did))
+        self.metadata.publish_asset_metadata(asset.did, asset.ddo)
+
+        # 4) Register the asset onto blockchain
+        logging.info("Registering asset with did {} on chain.".format(asset.did))
+        self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
+        logging.info("Registering did {} in the registry.".format(asset.did))
+        self.keeper.didregistry.register(asset.did,
+                                         key=Web3.sha3(text='Metadata'),
+                                         url=self.config.aquarius_url,
+                                         account=publisher_acct.address)
+
+    def resolve_did(self, did):
+        """
+        When you pass a did retrieve the ddo associated.
+        :param did:
+        :return:
+        """
+        resolver = self.did_resolver.resolve(did)
+        if resolver.is_ddo:
+            return self.did_resolver.resolve(did).ddo
+        elif resolver.is_url:
+            aquarius = AquariusWrapper(resolver.url)
+            return aquarius.get_asset_metadata(did)
+        else:
+            return None
+
+    def get_order(self):
+        pass
+
+    def get_orders_by_account(self):
+        pass
+
+    def search_orders(self):
+        pass
+
+    def get_service_agreement(self):
+        pass

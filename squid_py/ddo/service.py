@@ -1,5 +1,4 @@
 """
-
     Service Class
     To handle service items in a DDO record
 """
@@ -8,9 +7,9 @@ import json
 import re
 
 
-class Service():
+class Service:
     """
-    Serivce class to create validate service in a DDO
+    Service class to create validate service in a DDO
     """
 
     def __init__(self, service_id, endpoint, service_type, values):

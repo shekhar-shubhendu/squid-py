@@ -1,18 +1,14 @@
 """
-
     Authentication Class
     To handle embedded public keys
-
 """
 
 import json
 import re
+from .public_key_base import PublicKeyBase
 
-from .public_key_base import (
-    PublicKeyBase,
-)
 
-class Authentication():
+class Authentication:
     """DDO Authentication"""
 
     def __init__(self, key_id, authentication_type):

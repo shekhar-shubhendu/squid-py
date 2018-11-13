@@ -121,6 +121,15 @@ Our test use pytest framework.
 #### New Version
 
 The `bumpversion.sh` script helps to bump the project version. You can execute the script using as first argument {major|minor|patch} to bump accordingly the version.
+- To bump the patch version: `./bumpversion.sh patch`
+- To bump the minor version: `./bumpversion.sh minor`
+- To bump the major version: `./bumpversion.sh major`
+
+To create a tag once the version and the code is ready, run the following commands:
+```bash
+git tag v<version>
+git push origin v<version>
+```
 
 ## License
 

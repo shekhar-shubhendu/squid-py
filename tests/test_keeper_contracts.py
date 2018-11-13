@@ -8,7 +8,7 @@
 import os
 import secrets
 
-from squid_py.ocean import Ocean
+from squid_py.ocean.ocean import Ocean
 
 def get_ocean_instance():
     path_config = 'config_local.ini'

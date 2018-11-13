@@ -25,7 +25,7 @@ aquarius.url = test_aquarius_url
 
 
 def test_load():
-    config = Config(text = test_config_text)
+    config = Config(text=test_config_text)
     assert config
     assert config.address_list['market'] == 'test_market_address'
     assert config.address_list['auth'] == 'test_auth_address'
@@ -38,5 +38,3 @@ def test_load():
 
     assert config.aquarius_url == 'test_aquarius_url'
     assert config.gas_limit == 200
-
-

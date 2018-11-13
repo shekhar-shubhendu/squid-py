@@ -6,7 +6,7 @@ import os
 import pathlib
 import secrets
 
-from did_ddo_lib.main import (
+from squid_py.did import (
     did_generate,
     did_generate_from_ddo,
     did_validate,

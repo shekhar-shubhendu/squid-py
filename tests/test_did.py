@@ -7,14 +7,15 @@ import pytest
 import secrets
 from web3 import Web3
 
-from did_ddo_lib import (
+from squid_py.did import (
     did_generate,
     did_generate_from_ddo,
     did_parse,
     did_validate,
     is_did_valid,
-    did_generate_from_id,
-    get_id_from_did,
+    id_to_did,
+    did_to_id,
+    did_to_id_bytes,
 )
 
 
@@ -99,26 +100,55 @@ def test_did():
 
 
     valid_did_text = 'did:op:{}'.format(test_id)
-    assert did_generate_from_id(test_id) == valid_did_text
+    assert id_to_did(test_id) == valid_did_text
 
     # accept hex string from Web3 py
-    assert did_generate_from_id(Web3.toHex(hexstr=test_id)) == valid_did_text
+    assert id_to_did(Web3.toHex(hexstr=test_id)) == valid_did_text
 
     #accepts binary value
-    assert did_generate_from_id(Web3.toBytes(hexstr=test_id)) == valid_did_text
+    assert id_to_did(Web3.toBytes(hexstr=test_id)) == valid_did_text
 
     with pytest.raises(TypeError):
-        did_generate_from_id(None)
+        id_to_did(None)
 
     with pytest.raises(TypeError):
-        did_generate_from_id({'bad': 'value'})
+        id_to_did({'bad': 'value'})
 
-    assert did_generate_from_id('') == 'did:op:0'
-    assert get_id_from_did(valid_did_text) == test_id
-    assert get_id_from_did('did:op1:011') == None
-    assert get_id_from_did('did:op:0') == '0'
-
-
+    assert id_to_did('') == 'did:op:0'
+    assert did_to_id(valid_did_text) == test_id
+    assert did_to_id('did:op1:011') == None
+    assert did_to_id('did:op:0') == '0'
 
 
+def test_did_to_bytes():
+    id_test = secrets.token_hex(32)
+    did_test = 'did:op:{}'.format(id_test)
+    id_bytes = Web3.toBytes(hexstr=id_test)
 
+    assert did_to_id_bytes(did_test) == id_bytes
+    assert did_to_id_bytes(id_bytes) == id_bytes
+
+    with pytest.raises(ValueError):
+        assert did_to_id_bytes(id_test) == id_bytes
+
+    with pytest.raises(ValueError):
+        assert did_to_id_bytes('0x' + id_test)
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes('did:opx:{}'.format(id_test))
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes('did:opx:Somebadtexstwithnohexvalue0x123456789abcdecfg')
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes('')
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes(None)
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes({})
+
+
+    with pytest.raises(ValueError):
+        did_to_id_bytes(42)

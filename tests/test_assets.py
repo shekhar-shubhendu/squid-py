@@ -6,10 +6,11 @@ import pathlib
 
 import pytest
 
-from squid_py.asset import Asset
+from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
-from squid_py.ocean import Ocean
+from squid_py.ocean.ocean import Ocean
 import secrets
+import json
 
 # Disable low level loggers
 from squid_py.services import ServiceDescriptor
@@ -22,9 +23,12 @@ def test_create_asset_simple():
     # An asset can be be created directly
     asset1 = Asset(ddo=None, publisher_id='TestPID')
 
-    # Can gen the DID locally BUT it requires a DDO!
-    with pytest.raises(AttributeError):
-        asset1.generate_did()
+    with open(sample_metadata_path) as file_handle:
+        metadata = json.load(file_handle)
+
+    # An asset can be be created directly from a metadata file/string
+    asset1 = Asset.create_from_metadata(metadata, 'http://localhost:5000')
+    assert asset1.is_valid
 
 
 def test_create_asset_ddo_file():
@@ -139,7 +143,7 @@ def test_publish_data_asset_aquarius():
     meta_data_assets = ocean.metadata_store.list_assets()
     if meta_data_assets:
         print("Currently registered assets:")
-        print(meta_data_assets['ids'])
+        print(meta_data_assets)
 
     if asset.ddo.did in meta_data_assets['ids']:
         ocean.metadata_store.get_asset_metadata(asset.ddo.did)
