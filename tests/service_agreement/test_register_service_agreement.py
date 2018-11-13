@@ -10,10 +10,10 @@ from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes
 from squid_py.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import (
     execute_pending_service_agreements,
-    get_service_agreements,
     record_service_agreement,
     register_service_agreement
 )
+from squid_py.service_agreement.storage import get_service_agreements
 
 
 CONFIG_PATH = 'config_local.ini'

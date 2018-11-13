@@ -4,9 +4,12 @@ from squid_py.keeper.ServiceAgreement import ServiceAgreement
 from squid_py.keeper.utils import get_contract_abi_by_address
 from squid_py.utils import watch_event
 
+from .storage import record_service_agreement
 
-def watch_service_agreement_events(web3, contract_path, account, service_agreement_id,
-                                   service_definition, actor_type, num_confirmations=12):
+
+def watch_service_agreement_events(web3, contract_path, storage_path, account, did,
+                                   service_agreement_id, service_definition, actor_type,
+                                   num_confirmations=12):
     """ Subscribes to the events defined in the given service definition, targeted
         for the given actor type. Filters events by the given service agreement ID.
 
@@ -14,6 +17,13 @@ def watch_service_agreement_events(web3, contract_path, account, service_agreeme
     """
 
     filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
+
+    # subscribe cleanup
+    def _cleanup(event):
+        record_service_agreement(storage_path, service_agreement_id, did, 'fulfilled')
+
+    watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id, service_definition,
+                                      _cleanup, num_confirmations=num_confirmations)
 
     # collect service agreement and condition events
     events = []
