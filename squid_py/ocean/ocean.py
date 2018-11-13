@@ -1,12 +1,11 @@
-import json
 import logging
 import json
 import secrets
 
-import requests
 from web3 import Web3, HTTPProvider
 from secret_store_client.client import Client
 
+from squid_py.ddo.metadata import Metadata
 from squid_py.ocean.account import Account
 from squid_py.ocean.asset import Asset
 from squid_py.aquariuswrapper import AquariusWrapper
@@ -19,12 +18,11 @@ from squid_py.didresolver import VALUE_TYPE_URL, VALUE_TYPE_DID
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
-from squid_py.exceptions import OceanDIDAlreadyExist
+from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.services import ServiceTypes, ServiceFactory
-from squid_py.utils import to_32byte_hex
 from squid_py.utils.utilities import get_publickey_from_address, generate_new_id, get_id_from_did
-from squid_py.did import did_to_id
+from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -115,24 +113,43 @@ class Ocean:
         assets = []
         return assets
 
-    def register_asset(self, metadata, publisher_account, service_descriptors):
-        # Create a DDO object
+    def register_asset(self, metadata, publisher_address, service_descriptors):
+        """
+        Register an asset in both the keeper's DIDRegistry (on-chain) and in the Meta Data store (Aquarius)
+
+        :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
+        :param publisher_address: Account of the publisher registering this asset
+        :param service_descriptors: list of ServiceDescriptor tuples of length 2. The first item must be one of ServiceTypes and the second
+            item is a dict of parameters and values required by the service.
+        :return:
+        """
+        assert publisher_address in self.accounts
+
+        if not metadata or not Metadata.validate(metadata):
+            raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')
+
         asset_id = generate_new_id(metadata)
-        did = 'did:op:%s' % asset_id
+        # Check if it's already registered first!
+        if asset_id in self.metadata_store.list_assets():
+            raise OceanDIDAlreadyExist('Asset id "%s" is already registered to another asset.' % asset_id)
+
+        # Create a DDO object
+        did = did_generate(asset_id)
         ddo = DDO(did)
         # set public key
-        public_key_value = get_publickey_from_address(self._web3, publisher_account)
-        pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_account, 'type': PUBLIC_KEY_STORE_TYPE_HEX})
+        public_key_value = get_publickey_from_address(self._web3, publisher_address)
+        pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_address, 'type': PUBLIC_KEY_STORE_TYPE_HEX})
         pub_key.assign_did(did)
         ddo.add_public_key(pub_key)
         # set authentication
         auth = Authentication(pub_key, PUBLIC_KEY_TYPE_RSA)
         ddo.add_authentication(auth, PUBLIC_KEY_TYPE_RSA)
 
-        # TODO: setup secret store encryption session and encrypt contents
-        # contents_url = metadata['base']['contentUrls']
-        # publisher = Client(secret_store_url, parity_client_publish_url,
-        #                    publisher_address, publisher_password)
+        assert metadata['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
+        content_urls_encrypted = self.encrypt_metadata_content_urls(did, json.dumps(metadata['base']['contentUrls']))
+        # only assign if the encryption worked
+        if content_urls_encrypted:
+            metadata['base']['contentUrls'] = content_urls_encrypted
 
         # DDO url and `Metadata` service
         ddo_service_endpoint = self.metadata_store.get_service_endpoint(did)
@@ -150,8 +167,12 @@ class Ocean:
         self.metadata_store.publish_asset_metadata(ddo)
 
         # register on-chain
-        self.keeper.didregistry.register_attribute(Web3.toBytes(hexstr=asset_id), VALUE_TYPE_DID, Web3.sha3(text='Metadata'), ddo_service_endpoint, publisher_account)
-
+        self.keeper.didregistry.register(
+            Web3.toBytes(hexstr=asset_id),
+            key=Web3.sha3(text='Metadata'),
+            url=ddo_service_endpoint,
+            account=publisher_address
+        )
         return ddo
 
     def sign_service_agreement(self, did, consumer, service_definition_id):
@@ -181,56 +202,6 @@ class Ocean:
         # Validate the signature before submitting service agreement on-chain
 
         return
-
-    def register(self, asset, asset_price, publisher_acct):
-        """
-        Register an asset in both the Market (on-chain) and in the Meta Data store
-
-        Wrapper on both
-            - keeper.market.register
-            - metadata.publish_asset
-            - keeper.did_registry
-
-        :param asset: Asset object.
-        :param asset_price: Price of the asset.
-        :param publisher_acct: Account of the publisher.
-        :return:
-        """
-
-        # 1) Check that the asset is valid
-        assert asset.has_metadata
-        assert asset.is_valid
-
-        # 2) Check that the publisher is valid and has funds
-        assert publisher_acct.address in self.accounts
-
-        # 3) Publish to metadata store
-        # Check if it's already registered first!
-        if asset.asset_id in self.metadata_store.list_assets():
-            raise OceanDIDAlreadyExist
-
-        # encrypt the contentUrls using the secret store
-        metadata = None
-        metadata_service = asset.ddo.get_service('Metadata')
-        if 'metadata' in metadata_service.get_values():
-            metadata = metadata_service.get_values()['metadata']
-        if metadata and metadata['base']['contentUrls']:
-            content_urls_encrypted = self.encrypt_metadata_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
-            # only assign if the encryption worked
-            if content_urls_encrypted:
-                metadata['base']['contentUrls'] = content_urls_encrypted
-
-        logging.info("Publishing {} in aquarius".format(asset.did))
-        self.metadata_store.publish_asset_metadata(asset.ddo)
-
-        # 4) Register the asset onto blockchain
-        logging.info("Registering asset with did {} on chain.".format(asset.did))
-        self.keeper.market.register_asset(asset, asset_price, publisher_acct.address)
-        logging.info("Registering did {} in the registry.".format(asset.did))
-        self.keeper.didregistry.register(asset.did,
-                                         key=Web3.sha3(text='Metadata'),
-                                         url=self.config.aquarius_url,
-                                         account=publisher_acct.address)
 
     def resolve_did(self, did):
         """
@@ -273,6 +244,6 @@ class Ocean:
 
             document_id = did_to_id(did)
             # TODO: need to remove below to stop multiple session testing so that we can encrypt using the id from the DID.
-            document_id = secrets.token_hex(32)
+            # document_id = secrets.token_hex(32)
             result = publisher.publish_document(document_id, data)
         return result
