@@ -45,7 +45,6 @@ environ_names = {
     NAME_PARITY_URL:  ['PARITY_URL', 'Parity URL'],
     NAME_PARITY_ADDRESS:  ['PARITY_ADDRESS', 'Parity address'],
     NAME_PARITY_PASSWORD:  ['PARITY_PASSWORD', 'Parity password'],
-    
 }
 
 config_defaults = {

@@ -89,10 +89,10 @@ class Asset:
         """return a new Asset object from a metadata dictionary"""
         # calc the asset id
         asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
-        
+
         # generate a DID from an asset_id
         new_did = id_to_did(asset_id)
-            
+
         # create a new DDO
         new_ddo = DDO(new_did)
         # add a signature

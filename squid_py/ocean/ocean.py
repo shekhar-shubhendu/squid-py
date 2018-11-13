@@ -140,7 +140,7 @@ class Ocean:
             # only assign if the encryption worked
             if content_urls_encrypted:
                 metadata['base']['contentUrls'] = content_urls_encrypted
-            
+
         logging.info("Publishing {} in aquarius".format(asset.did))
         self.metadata.publish_asset_metadata(asset.did, asset.ddo)
 
@@ -182,7 +182,7 @@ class Ocean:
 
     def encrypt_metadata_content_urls(self, did, data):
         """
-        encrypt string data using the DID as an secret store id, 
+        encrypt string data using the DID as an secret store id,
         if secret store is enabled then return the result from secret store encryption
 
         return None for no encryption performed
