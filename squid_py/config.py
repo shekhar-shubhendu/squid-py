@@ -22,12 +22,21 @@ NAME_GAS_LIMIT = 'gas_limit'
 NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
 
+NAME_SECRET_STORE_URL = 'secret_store.url'
+NAME_PARITY_URL = 'parity.url'
+NAME_PARITY_ADDRESS = 'parity.address'
+NAME_PARITY_PASSWORD = 'parity.password'
+
 environ_names = {
     NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
     NAME_KEEPER_PATH: ['KEEPER_PATH', 'Path to the keeper contracts'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
     NAME_AQUARIUS_URL: ['AQUARIUS_URL', 'Aquarius URL'],
     NAME_STORAGE_PATH: ['STORAGE_PATH', 'Path to the local database file'],
+    NAME_SECRET_STORE_URL: ['SECRET_STORE_URL', 'Secret Store URL'],
+    NAME_PARITY_URL: ['PARITY_URL', 'Parity URL'],
+    NAME_PARITY_ADDRESS: ['PARITY_ADDRESS', 'Parity address'],
+    NAME_PARITY_PASSWORD: ['PARITY_PASSWORD', 'Parity password'],
 }
 
 config_defaults = {
@@ -37,6 +46,10 @@ config_defaults = {
         NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
         NAME_AQUARIUS_URL: DEFAULT_NAME_AQUARIUS_URL,
         NAME_STORAGE_PATH: DEFAULT_STORAGE_PATH,
+        NAME_SECRET_STORE_URL: '',
+        NAME_PARITY_URL: '',
+        NAME_PARITY_ADDRESS: '',
+        NAME_PARITY_PASSWORD: '',
     }
 }
 
@@ -99,6 +112,22 @@ class Config(configparser.ConfigParser):
     @property
     def aquarius_url(self):
         return self.get(self._section_name, NAME_AQUARIUS_URL)
+
+    @property
+    def secret_store_url(self):
+        return self.get(self._section_name, NAME_SECRET_STORE_URL)
+
+    @property
+    def parity_url(self):
+        return self.get(self._section_name, NAME_PARITY_URL)
+
+    @property
+    def parity_address(self):
+        return self.get(self._section_name, NAME_PARITY_ADDRESS)
+
+    @property
+    def parity_password(self):
+        return self.get(self._section_name, NAME_PARITY_PASSWORD)
 
     # static methods
 

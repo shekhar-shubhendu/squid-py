@@ -9,3 +9,4 @@
 # and also the 'dev' list in the extras_require dict
 
 -e .[dev]
+

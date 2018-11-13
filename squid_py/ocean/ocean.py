@@ -1,5 +1,7 @@
 import json
 import logging
+import json
+import secrets
 
 import requests
 from web3 import Web3, HTTPProvider
@@ -18,11 +20,11 @@ from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist
-
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.services import ServiceTypes, ServiceFactory
 from squid_py.utils import to_32byte_hex
 from squid_py.utils.utilities import get_publickey_from_address, generate_new_id, get_id_from_did
+from squid_py.did import did_to_id
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -106,7 +108,7 @@ class Ocean:
             aquarius = AquariusWrapper(aquarius_url)
             return [Asset.from_ddo_dict(i) for i in aquarius.text_search(text, sort, offset, page)]
         else:
-            return [Asset.from_ddo_dict(i) for i in self.metadata.text_search(text, sort, offset, page)]
+            return [Asset.from_ddo_dict(i) for i in self.metadata_store.text_search(text, sort, offset, page)]
 
     def search_assets_by_text(self, search_text):
         # TODO: implement this
@@ -204,10 +206,22 @@ class Ocean:
 
         # 3) Publish to metadata store
         # Check if it's already registered first!
-        if asset.asset_id in self.metadata.list_assets():
+        if asset.asset_id in self.metadata_store.list_assets():
             raise OceanDIDAlreadyExist
+
+        # encrypt the contentUrls using the secret store
+        metadata = None
+        metadata_service = asset.ddo.get_service('Metadata')
+        if 'metadata' in metadata_service.get_values():
+            metadata = metadata_service.get_values()['metadata']
+        if metadata and metadata['base']['contentUrls']:
+            content_urls_encrypted = self.encrypt_metadata_content_urls(asset.did, json.dumps(metadata['base']['contentUrls']))
+            # only assign if the encryption worked
+            if content_urls_encrypted:
+                metadata['base']['contentUrls'] = content_urls_encrypted
+
         logging.info("Publishing {} in aquarius".format(asset.did))
-        self.metadata.publish_asset_metadata(asset.ddo)
+        self.metadata_store.publish_asset_metadata(asset.ddo)
 
         # 4) Register the asset onto blockchain
         logging.info("Registering asset with did {} on chain.".format(asset.did))
@@ -244,3 +258,21 @@ class Ocean:
 
     def get_service_agreement(self):
         pass
+
+    def encrypt_metadata_content_urls(self, did, data):
+        """
+        encrypt string data using the DID as an secret store id,
+        if secret store is enabled then return the result from secret store encryption
+
+        return None for no encryption performed
+        """
+        result = None
+        if self.config.secret_store_url and self.config.parity_url and self.config.parity_address:
+            publisher = Client(self.config.secret_store_url, self.config.parity_url,
+                               self.config.parity_address, self.config.parity_password)
+
+            document_id = did_to_id(did)
+            # TODO: need to remove below to stop multiple session testing so that we can encrypt using the id from the DID.
+            document_id = secrets.token_hex(32)
+            result = publisher.publish_document(document_id, data)
+        return result

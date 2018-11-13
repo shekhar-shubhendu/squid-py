@@ -25,6 +25,7 @@ install_requirements = [
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
+    'ocean-secret-store-client==0.0.1'
 ]
 
 # Required to run setup.py:
