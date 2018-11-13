@@ -11,7 +11,6 @@ from squid_py.didresolver import (
 from squid_py.did import did_to_id_bytes
 from squid_py.ddo import DDO
 from squid_py.exceptions import OceanDIDCircularReference
-from squid_py.constants import OCEAN_DID_REGISTRY_CONTRACT
 from squid_py.keeper.contract_base import ContractBase
 
 
@@ -20,8 +19,8 @@ class DIDRegistry(ContractBase):
     Class to register and update Ocean DID's
     """
 
-    def __init__(self, web3, contract_path, address):
-        ContractBase.__init__(self, web3, OCEAN_DID_REGISTRY_CONTRACT, 'didregistry', contract_path, address)
+    def __init__(self, web3, contract_path):
+        ContractBase.__init__(self, web3, contract_path, 'DIDRegistry')
 
     def register(self, did_source, url=None, ddo=None, did=None, key=None, account=None):
         """

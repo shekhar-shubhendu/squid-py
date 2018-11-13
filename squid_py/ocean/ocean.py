@@ -8,7 +8,6 @@ from secret_store_client.client import Client
 from squid_py.ocean.account import Account
 from squid_py.ocean.asset import Asset
 from squid_py.aquariuswrapper import AquariusWrapper
-from squid_py.asset import Asset
 from squid_py.config import Config
 from squid_py.ddo import DDO, PUBLIC_KEY_STORE_TYPE_HEX
 from squid_py.ddo.authentication import Authentication
@@ -146,7 +145,7 @@ class Ocean:
             ddo.add_service(service)
 
         # publish the new ddo in ocean-db/Aquarius
-        self.metadata_store.publish_asset_metadata(Asset(ddo))
+        self.metadata_store.publish_asset_metadata(ddo)
 
         # register on-chain
         self.keeper.didregistry.register_attribute(Web3.toBytes(hexstr=asset_id), VALUE_TYPE_DID, Web3.sha3(text='Metadata'), ddo_service_endpoint, publisher_account)
@@ -208,7 +207,7 @@ class Ocean:
         if asset.asset_id in self.metadata.list_assets():
             raise OceanDIDAlreadyExist
         logging.info("Publishing {} in aquarius".format(asset.did))
-        self.metadata.publish_asset_metadata(asset.did, asset.ddo)
+        self.metadata.publish_asset_metadata(asset.ddo)
 
         # 4) Register the asset onto blockchain
         logging.info("Registering asset with did {} on chain.".format(asset.did))

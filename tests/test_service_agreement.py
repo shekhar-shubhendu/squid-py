@@ -10,9 +10,8 @@ from web3 import Web3, HTTPProvider
 
 from squid_py.config import Config
 from squid_py.ddo import DDO
-from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes, get_fingerprint_bytes_by_name
-from squid_py.ocean import Ocean
-from squid_py.service_agreement.register_service_agreement import register_service_agreement
+from squid_py.keeper.utils import get_fingerprint_bytes_by_name
+from squid_py.ocean.ocean import Ocean
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 
 CONFIG_PATH = 'config_local.ini'

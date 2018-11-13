@@ -19,18 +19,6 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
 
 
-def test_create_asset_simple():
-    # An asset can be be created directly
-    asset1 = Asset(ddo=None, publisher_id='TestPID')
-
-    with open(sample_metadata_path) as file_handle:
-        metadata = json.load(file_handle)
-
-    # An asset can be be created directly from a metadata file/string
-    asset1 = Asset.create_from_metadata(metadata, 'http://localhost:5000')
-    assert asset1.is_valid
-
-
 def test_create_asset_ddo_file():
     # An asset can be created directly from a DDO .json file
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
@@ -145,15 +133,15 @@ def test_publish_data_asset_aquarius():
         print("Currently registered assets:")
         print(meta_data_assets)
 
-    if asset.ddo.did in meta_data_assets['ids']:
-        ocean.metadata_store.get_asset_metadata(asset.ddo.did)
-        ocean.metadata_store.retire_asset_metadata(asset.ddo.did)
+    if asset.did in meta_data_assets:
+        ocean.metadata_store.get_asset_metadata(asset.did)
+        ocean.metadata_store.retire_asset_metadata(asset.did)
     # Publish the metadata
-    this_metadata = ocean.metadata_store.publish_asset_metadata(asset)
+    this_metadata = ocean.metadata_store.publish_asset_metadata(asset.ddo)
 
     print("Publishing again should raise error")
     with pytest.raises(ValueError):
-        this_metadata = ocean.metadata_store.publish_asset_metadata(asset)
+        this_metadata = ocean.metadata_store.publish_asset_metadata(asset.ddo)
 
     # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
@@ -198,7 +186,7 @@ def test_ocean_publish():
 
     # For this test, ensure the asset does not exist in Aquarius
     meta_data_assets = ocean.metadata_store.list_assets()
-    if asset.ddo.did in meta_data_assets['ids']:
+    if asset.ddo.did in meta_data_assets:
         ocean.metadata_store.get_asset_metadata(asset.ddo.did)
         ocean.metadata_store.retire_asset_metadata(asset.ddo.did)
 
@@ -206,4 +194,4 @@ def test_ocean_publish():
     # Register using high-level interface
     ##########################################################
     service_descriptors = [ServiceDescriptor.access_service_descriptor(asset_price, '/purchaseEndpoint', '/serviceEndpoint', 600)]
-    ocean.register_asset(asset.get_metadata(), publisher_address, service_descriptors)
+    ocean.register_asset(asset.metadata, publisher_address, service_descriptors)
