@@ -1,22 +1,20 @@
 #!/bin/bash
 
-#set -x
-#set -e
+set -x
+set -e
 
 usage(){
   echo "Usage: $0 {major|minor|patch} [--tag]"
-#  exit 1
+  exit 1
 }
-
 
 if ! [ -x "$(command -v bumpversion)" ]; then
   echo 'Error: bumpversion is not installed.' >&2
-#  exit 1
+  exit 1
 elif ! git diff-index --quiet HEAD -- >/dev/null 2>&1; then
   echo 'There are local changes in your the git repository. Please commit or stash them before bumping version.' >&2
-#  exit 1
+  exit 1
 fi
-
 
 if [ "$#" -lt 1 ]; then
     echo "Illegal number of parameters"
@@ -31,8 +29,9 @@ if [[ $2 == '--tag' ]]; then
     bumpversion --tag --commit $1
   else
     echo "Only master tags can be tagged"
-#    exit 1
+    exit 1
   fi
-else # SUCCESS, RUN THE PROGRAM!
-  bumpversion $1
+else
+  bumpversion --no-tag $1
 fi
+
