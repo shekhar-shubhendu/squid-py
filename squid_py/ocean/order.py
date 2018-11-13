@@ -3,8 +3,8 @@ from .ocean_base import OceanBase
 
 class Order(OceanBase):
 
-    def __init__(self, id, asset, timeout, pub_key, key, paid, status):
-        OceanBase.__init__(id)
+    def __init__(self, order_id, asset, timeout, pub_key, key, paid, status):
+        OceanBase.__init__(order_id)
         self.asset = asset
         self.asset_id = self.asset.id
         self.timeout = timeout
@@ -13,14 +13,17 @@ class Order(OceanBase):
         self.paid = paid
         self.status = status
 
+    def get_status(self):
+        return 0
+
     def verify_payment(self):
-        return
+        return False
 
     def pay(self):
-        return
+        return ''
 
     def commit(self):
-        return
+        return False
 
     def consume(self):
-        return
+        return ''
