@@ -24,11 +24,11 @@ project = 'squid-py'
 copyright = 'squid-py contributors'
 author = 'squid-py contributors'
 
-# The short X.Y version
-version = '0.2.1'
 # The full version, including alpha/beta/rc tags
 release = '0.2.1'
-
+# The short X.Y version
+release_parts = release.split('.')  # a list
+version = release_parts[0] + '.' + release_parts[1]
 
 # -- General configuration ---------------------------------------------------
 
