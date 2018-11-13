@@ -27,6 +27,11 @@ NAME_AUTH_ADDRESS = 'auth.address'
 NAME_TOKEN_ADDRESS = 'token.address'
 NAME_DID_REGISTRY_ADDRESS = 'didregistry.address'
 
+NAME_SECRET_STORE_URL = 'secret_store.url'
+NAME_PARITY_URL = 'parity.url'
+NAME_PARITY_ADDRESS = 'parity.address'
+NAME_PARITY_PASSWORD = 'parity.password'
+
 environ_names = {
     NAME_KEEPER_URL: ['KEEPER_URL', 'Keeper URL'],
     NAME_KEEPER_PATH: ['KEEPER_PATH', 'Path to the keeper contracts'],
@@ -36,6 +41,11 @@ environ_names = {
     NAME_AUTH_ADDRESS: ['AUTH_ADDRESS', 'Auth address'],
     NAME_TOKEN_ADDRESS: ['TOKEN_ADDRESS', 'Token address'],
     NAME_DID_REGISTRY_ADDRESS: ['DID_REGISTRY_ADDRESS', 'DIDRegistry address'],
+    NAME_SECRET_STORE_URL:  ['SECRET_STORE_URL', 'Secret Store URL'],
+    NAME_PARITY_URL:  ['PARITY_URL', 'Parity URL'],
+    NAME_PARITY_ADDRESS:  ['PARITY_ADDRESS', 'Parity address'],
+    NAME_PARITY_PASSWORD:  ['PARITY_PASSWORD', 'Parity password'],
+    
 }
 
 config_defaults = {
@@ -48,6 +58,10 @@ config_defaults = {
         NAME_AUTH_ADDRESS: '',
         NAME_TOKEN_ADDRESS: '',
         NAME_DID_REGISTRY_ADDRESS: '',
+        NAME_SECRET_STORE_URL: '',
+        NAME_PARITY_URL: '',
+        NAME_PARITY_ADDRESS: '',
+        NAME_PARITY_PASSWORD: '',
     }
 }
 
@@ -118,6 +132,22 @@ class Config(configparser.ConfigParser):
             'didregistry': self.get(self._section_name, NAME_DID_REGISTRY_ADDRESS),
         }
 
+    @property
+    def secret_store_url(self):
+        return self.get(self._section_name, NAME_SECRET_STORE_URL)
+        
+    @property
+    def parity_url(self):
+        return self.get(self._section_name, NAME_PARITY_URL)
+
+    @property
+    def parity_address(self):
+        return self.get(self._section_name, NAME_PARITY_ADDRESS)
+
+    @property
+    def parity_password(self):
+        return self.get(self._section_name, NAME_PARITY_PASSWORD)
+        
     # static methods
 
     @staticmethod
