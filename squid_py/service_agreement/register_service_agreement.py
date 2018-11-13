@@ -34,8 +34,7 @@ def record_service_agreement(storage_path, service_agreement_id, did, status='pe
                (id VARCHAR PRIMARY KEY, did VARCHAR, status VARCHAR(10));'''
         )
         cursor.execute(
-            '''INSERT INTO service_agreements VALUES (?,?,?)
-               ON CONFLICT(id) DO UPDATE SET did=excluded.did, status=excluded.status;''',
+            'INSERT OR REPLACE INTO service_agreements VALUES (?,?,?)',
             [service_agreement_id, did, status],
         )
         conn.commit()
