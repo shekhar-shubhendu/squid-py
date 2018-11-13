@@ -32,7 +32,6 @@ class DIDRegistry(ContractBase):
         :param did: DID to resovlve too, can be a 32 byte value or 64 hex string
         :param key: Optional 32 byte key ( 64 char hex )
         :param account: Ethereum account to use to register/update the DID
-        :
         """
 
         value_type = VALUE_TYPE_DID

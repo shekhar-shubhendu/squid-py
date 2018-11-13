@@ -48,22 +48,11 @@ class Market(ContractBase):
     def register_asset(self, asset, price, publisher_address):
         """
         Register an asset on chain.
-
-        Calls the OceanMarket.register function, .sol code below:
-
-            function register(bytes32 assetId, uint256 price) public validAddress(msg.sender) returns (bool success) {
-                require(mAssets[assetId].owner == address(0), 'Owner address is not 0x0.');
-                mAssets[assetId] = Asset(msg.sender, price, false);
-                mAssets[assetId].active = true;
-
-                emit AssetRegistered(assetId, msg.sender);
-                return true;
-            }
+        Calls the OceanMarket.register function.
 
         :param asset:
         :param price:
         :param publisher_address:
-        :return:
         """
         asset_id_bytes = Web3.toBytes(hexstr=asset.asset_id)
         assert asset_id_bytes
