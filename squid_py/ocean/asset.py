@@ -159,7 +159,6 @@ class Asset:
         :param consumer: Consumer Account
         :return: access_url
         :rtype: string
-        :raises :
         """
 
         # Get access token (jwt)

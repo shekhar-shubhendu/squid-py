@@ -21,7 +21,8 @@ install_requirements = [
     'PyJWT',  # not jwt
     'PyYAML',
     'web3==4.5.0',
-    # web3 requires eth-abi, requests, and more, so those will be installed too.
+    # web3 requires eth-abi, requests, and more,
+    # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
     'ocean-secret-store-client==0.0.1'
 ]
@@ -50,6 +51,7 @@ dev_requirements = [
 
 docs_requirements = [
     'Sphinx',
+    'sphinx-rtd-theme',
 ]
 
 setup(
