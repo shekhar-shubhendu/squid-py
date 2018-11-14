@@ -4,14 +4,11 @@
   "name": "dataAssetAccessServiceAgreement",
   "description": "This service agreement defines the flow for accessing a data asset on the ocean network. Any file or bundle of files can be access using this service agreement",
   "creator": "",
-  "conditions": [
-    {
-      "name": "executeAgreement",
-      "timeout": 0,
-      "conditionKey": "0x123",
-      "contractAddress": "",
-      "functionName": "executeAgreement",
-      "events": [{
+  "serviceAgreementContract": {
+    "address": "0x...",
+    "fulfillmentOperator": 0,
+    "events": [
+      {
         "name": "ExecuteAgreement",
         "actorType": "consumer",
         "handler": {
@@ -19,8 +16,11 @@
           "functionName": "lockPayment",
           "version": "0.1"
         }
-      }]
-    }, {
+      }
+    ]
+  },
+  "conditions": [
+    {
       "name": "lockPayment",
       "timeout": 0,
       "conditionKey": "0x...",
@@ -52,7 +52,8 @@
         }
       ],
       "dependencies": [],
-      "dependencyTimeoutFlags": []
+      "dependencyTimeoutFlags": [],
+      "isTerminalCondition": false
     }, {
       "name": "grantAccess",
       "timeout": 0,
@@ -81,7 +82,8 @@
         }
       ],
       "dependencies": ["lockPayment"],
-      "dependencyTimeoutFlags": [0]
+      "dependencyTimeoutFlags": [0],
+      "isTerminalCondition": false
     }, {
       "name": "releasePayment",
       "timeout": 0,
@@ -114,7 +116,8 @@
         }
       ],
       "dependencies": ["grantAccess"],
-      "dependencyTimeoutFlags": [0]
+      "dependencyTimeoutFlags": [0],
+      "isTerminalCondition": true
     }, {
       "name": "refundPayment",
       "timeout": 1,
@@ -147,7 +150,8 @@
         }
       ],
       "dependencies": ["lockPayment", "grantAccess"],
-      "dependencyTimeoutFlags": [0, 1]
+      "dependencyTimeoutFlags": [0, 1],
+      "isTerminalCondition": true
     }
   ]
 }
