@@ -1,5 +1,7 @@
 import logging
 import uuid
+import json
+import hashlib
 import time
 from collections import namedtuple
 from threading import Thread
@@ -17,7 +19,7 @@ def get_publickey_from_address(web3, address):
 
 
 def generate_new_id(metadata):
-    return uuid.uuid4().hex
+    return uuid.uuid4().hex + uuid.uuid4().hex
 
 
 def get_id_from_did(did):

@@ -60,14 +60,26 @@ class AquariusWrapper(object):
 
     def text_search(self, text, sort=None, offset=100, page=0):
         payload = {"text": text, "sort": sort, "offset": offset, "page": page}
-        request = json.loads(
-            requests.get(self._base_url + '/ddo/query',
-                         params=payload,
-                         headers=self._headers).content)
-        if request is None:
+        response = requests.get(
+            self._base_url + '/ddo/query',
+            params=payload,
+            headers=self._headers
+        ).content
+
+        if not response:
             return {}
+
+        try:
+            parsed_response = json.loads(response)
+        except TypeError:
+            parsed_response = None
+
+        if parsed_response is None:
+            return []
+        elif isinstance(parsed_response, list):
+            return parsed_response
         else:
-            return json.loads(request)
+            raise ValueError('Unknown search response, expecting a list got "%s.' % type(parsed_response ))
 
     def query_search(self, search_query):
         return json.loads(json.loads(
