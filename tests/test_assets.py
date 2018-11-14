@@ -9,11 +9,9 @@ import pytest
 from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
 from squid_py.ocean.ocean import Ocean
-import secrets
-import json
 
 # Disable low level loggers
-from squid_py.services import ServiceDescriptor
+from squid_py.service_agreement.service_factory import ServiceDescriptor
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
