@@ -110,7 +110,7 @@ class Ocean:
         assets = []
         return assets
 
-    def register_asset(self, metadata, publisher_address, service_descriptors):
+    def register_asset(self, metadata, publisher_address, service_descriptors, threshold=None):
         """
         Register an asset in both the keeper's DIDRegistry (on-chain) and in the Meta Data store (Aquarius)
 
@@ -192,13 +192,43 @@ class Ocean:
         # payload = json.puts()
         # requests.post(purchase_endpoint, '', payload)
 
+        # subscribe to events related to this service_agreement_id
+
         return service_id
 
-    def execute_service_agreement(self, sa_id, signature, sa_message_hash, consumer_address, ddo, price, timeout):
+    def execute_service_agreement(self, service_agreement_id, service_definition_id, asset_did, signature, consumer_address):
+        """
+        Execute the service agreement on-chain using keeper's ServiceAgreement contract.
+        The on-chain executeAgreement method requires the following arguments:
+        templateId, signature, consumer, hashes, timeouts, serviceAgreementId, did
+
+        `agreement_message_hash` is necessary to verify the signature.
+        The consumer `signature` includes the conditions timeouts and parameters value which is used on-chain to verify the values actually
+        match the signed hashes.
+
+        :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
+        :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
+        :param asset_did: str representation fo the asset DID. Use this to retrieve the asset DDO.
+        :param signature: str the signed agreement message hash which includes conditions and their parametres values and other details
+            of the agreement.
+        :param consumer_address: ethereum account address
+        :return:
+        """
         # Extract all of the params necessary for execute agreement from the ddo
         # Validate the signature before submitting service agreement on-chain
 
         return
+
+    def check_permissions(self, service_agreement_id, asset_did, consumer_address):
+        """
+        Verify on-chain that the `consumer_address` has permission to access the given `asset_did` according to the `service_agreement_id`.
+
+        :param service_agreement_id:
+        :param asset_did:
+        :param consumer_address:
+        :return: bool True if user has permission
+        """
+        return True
 
     def resolve_did(self, did):
         """

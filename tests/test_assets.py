@@ -3,15 +3,16 @@
 
 import logging
 import pathlib
+from unittest.mock import Mock
 
 import pytest
 
 from squid_py.ocean.asset import Asset
 from squid_py.ddo import DDO
-from squid_py.ocean.ocean import Ocean
+import squid_py.ocean.ocean as ocean
 
 # Disable low level loggers
-from squid_py.service_agreement.service_factory import ServiceDescriptor
+from squid_py.services import ServiceDescriptor
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("web3").setLevel(logging.WARNING)
@@ -36,7 +37,7 @@ def test_register_data_asset_market():
     Setup accounts and asset, register this asset in Keeper node (On-chain only)
     """
     logging.debug("".format())
-    ocean = Ocean('config_local.ini')
+    ocean_inst = ocean.Ocean('config_local.ini')
     asset_price = 100
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
@@ -44,18 +45,18 @@ def test_register_data_asset_market():
     ##########################################################
     # Setup 2 accounts
     ##########################################################
-    aquarius_address = list(ocean.accounts)[0]
-    consumer_address = list(ocean.accounts)[1]
-    aquarius_acct = ocean.accounts[aquarius_address]
-    consumer_acct = ocean.accounts[consumer_address]
+    aquarius_address = list(ocean_inst.accounts)[0]
+    consumer_address = list(ocean_inst.accounts)[1]
+    aquarius_acct = ocean_inst.accounts[aquarius_address]
+    consumer_acct = ocean_inst.accounts[consumer_address]
 
     # ensure Ocean token balance
     if aquarius_acct.ocean_balance == 0:
         rcpt = aquarius_acct.request_tokens(200)
-        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+        ocean_inst._web3.eth.waitForTransactionReceipt(rcpt)
     if consumer_acct.ocean_balance == 0:
         rcpt = consumer_acct.request_tokens(200)
-        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+        ocean_inst._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!
     assert aquarius_acct.ocean_balance > 0
@@ -76,15 +77,15 @@ def test_register_data_asset_market():
     asset.generate_did()
 
     # Call the Register function
-    result = ocean.keeper.market.register_asset(asset, asset_price, aquarius_acct.address)
+    result = ocean_inst.keeper.market.register_asset(asset, asset_price, aquarius_acct.address)
 
     # Check exists
-    chain_asset_exists = ocean.keeper.market.check_asset(asset.asset_id)
+    chain_asset_exists = ocean_inst.keeper.market.check_asset(asset.asset_id)
     logging.info("check_asset = {}".format(chain_asset_exists))
     assert chain_asset_exists
 
     # Check price
-    chain_asset_price = ocean.keeper.market.get_asset_price(asset.asset_id)
+    chain_asset_price = ocean_inst.keeper.market.get_asset_price(asset.asset_id)
     assert asset_price == chain_asset_price
     logging.info("chain_asset_price = {}".format(chain_asset_price))
 
@@ -94,25 +95,25 @@ def test_publish_data_asset_aquarius():
     Setup accounts and asset, register this asset on Aquarius (MetaData store)
     """
     logging.debug("".format())
-    ocean = Ocean('config_local.ini')
+    ocean_inst = ocean.Ocean('config_local.ini')
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample1.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ##########################################################
     # Setup 2 accounts
     ##########################################################
-    aquarius_address = list(ocean.accounts)[0]
-    consumer_address = list(ocean.accounts)[1]
-    aquarius_acct = ocean.accounts[aquarius_address]
-    consumer_acct = ocean.accounts[consumer_address]
+    aquarius_address = list(ocean_inst.accounts)[0]
+    consumer_address = list(ocean_inst.accounts)[1]
+    aquarius_acct = ocean_inst.accounts[aquarius_address]
+    consumer_acct = ocean_inst.accounts[consumer_address]
 
     # ensure Ocean token balance
     if aquarius_acct.ocean_balance == 0:
         rcpt = aquarius_acct.request_tokens(200)
-        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+        ocean_inst._web3.eth.waitForTransactionReceipt(rcpt)
     if consumer_acct.ocean_balance == 0:
         rcpt = consumer_acct.request_tokens(200)
-        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+        ocean_inst._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!
     assert aquarius_acct.ocean_balance > 0
@@ -126,24 +127,24 @@ def test_publish_data_asset_aquarius():
     ##########################################################
     # List currently published assets
     ##########################################################
-    meta_data_assets = ocean.metadata_store.list_assets()
+    meta_data_assets = ocean_inst.metadata_store.list_assets()
     if meta_data_assets:
         print("Currently registered assets:")
         print(meta_data_assets)
 
     if asset.did in meta_data_assets:
-        ocean.metadata_store.get_asset_metadata(asset.did)
-        ocean.metadata_store.retire_asset_metadata(asset.did)
+        ocean_inst.metadata_store.get_asset_metadata(asset.did)
+        ocean_inst.metadata_store.retire_asset_metadata(asset.did)
     # Publish the metadata
-    this_metadata = ocean.metadata_store.publish_asset_metadata(asset.ddo)
+    this_metadata = ocean_inst.metadata_store.publish_asset_metadata(asset.ddo)
 
     print("Publishing again should raise error")
     with pytest.raises(ValueError):
-        this_metadata = ocean.metadata_store.publish_asset_metadata(asset.ddo)
+        this_metadata = ocean_inst.metadata_store.publish_asset_metadata(asset.ddo)
 
     # TODO: Ensure returned metadata equals sent!
     # get_asset_metadata only returns 'base' key, is this correct?
-    published_metadata = ocean.metadata_store.get_asset_metadata(asset.ddo.did)
+    published_metadata = ocean_inst.metadata_store.get_asset_metadata(asset.ddo.did)
 
     assert published_metadata
     # only compare top level keys
@@ -156,7 +157,7 @@ def test_ocean_publish():
     Setup accounts and asset, register this asset on Aquarius (MetaData store)
     """
     logging.debug("".format())
-    ocean = Ocean('config_local.ini')
+    ocean_inst = ocean.Ocean('config_local.ini')
     asset_price = 100
     sample_ddo_path = pathlib.Path.cwd() / 'tests/resources/ddo' / 'ddo_sample2.json'
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
@@ -164,13 +165,13 @@ def test_ocean_publish():
     ##########################################################
     # Setup account
     ##########################################################
-    publisher_address = list(ocean.accounts)[0]
-    publisher_acct = ocean.accounts[publisher_address]
+    publisher_address = list(ocean_inst.accounts)[0]
+    publisher_acct = ocean_inst.accounts[publisher_address]
 
     # ensure Ocean token balance
     if publisher_acct.ocean_balance == 0:
         rcpt = publisher_acct.request_tokens(200)
-        ocean._web3.eth.waitForTransactionReceipt(rcpt)
+        ocean_inst._web3.eth.waitForTransactionReceipt(rcpt)
 
     # You will need some token to make this transfer!
     assert publisher_acct.ocean_balance > 0
@@ -183,13 +184,14 @@ def test_ocean_publish():
     ######################
 
     # For this test, ensure the asset does not exist in Aquarius
-    meta_data_assets = ocean.metadata_store.list_assets()
+    meta_data_assets = ocean_inst.metadata_store.list_assets()
     if asset.ddo.did in meta_data_assets:
-        ocean.metadata_store.get_asset_metadata(asset.ddo.did)
-        ocean.metadata_store.retire_asset_metadata(asset.ddo.did)
+        ocean_inst.metadata_store.get_asset_metadata(asset.ddo.did)
+        ocean_inst.metadata_store.retire_asset_metadata(asset.ddo.did)
 
     ##########################################################
     # Register using high-level interface
     ##########################################################
     service_descriptors = [ServiceDescriptor.access_service_descriptor(asset_price, '/purchaseEndpoint', '/serviceEndpoint', 600)]
-    ocean.register_asset(asset.metadata, publisher_address, service_descriptors)
+    ocean.Client = Mock({'publish_document': '!encrypted_message!'})
+    ocean_inst.register_asset(asset.metadata, publisher_address, service_descriptors)
