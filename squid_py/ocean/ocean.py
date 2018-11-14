@@ -1,6 +1,4 @@
-import logging
 import json
-import secrets
 
 from web3 import Web3, HTTPProvider
 from secret_store_client.client import Client
@@ -113,7 +111,7 @@ class Ocean:
         assets = []
         return assets
 
-    def register_asset(self, metadata, publisher_address, service_descriptors):
+    def register_asset(self, metadata, publisher_address, service_descriptors, threshold=None):
         """
         Register an asset in both the keeper's DIDRegistry (on-chain) and in the Meta Data store (Aquarius)
 
@@ -199,8 +197,7 @@ class Ocean:
 
         return service_id
 
-    def execute_service_agreement(self, service_agreement_id, service_definition_id, asset_did, signature,
-                                  agreement_message_hash, consumer_address):
+    def execute_service_agreement(self, service_agreement_id, service_definition_id, asset_did, signature, consumer_address):
         """
         Execute the service agreement on-chain using keeper's ServiceAgreement contract.
         The on-chain executeAgreement method requires the following arguments:
@@ -213,9 +210,8 @@ class Ocean:
         :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
         :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
         :param asset_did: str representation fo the asset DID. Use this to retrieve the asset DDO.
-        :param signature: str the signed `agreement_message_hash`
-        :param agreement_message_hash: str hash of the agreement parameters and ids to prevent tampering with the original agreement signed by
-            consumer.
+        :param signature: str the signed agreement message hash which includes conditions and their parametres values and other details
+            of the agreement.
         :param consumer_address: ethereum account address
         :return:
         """
