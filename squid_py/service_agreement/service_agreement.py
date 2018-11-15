@@ -1,5 +1,5 @@
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
-from squid_py.service_agreement.utils import get_condition_value_hash, generate_condition_keys
+from squid_py.service_agreement.utils import get_condition_value_hash
 
 
 class ServiceAgreement(object):
