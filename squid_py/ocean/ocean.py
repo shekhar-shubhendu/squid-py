@@ -175,17 +175,11 @@ class Ocean:
         )
         return ddo
 
-    def sign_service_agreement(self, did, consumer, service_definition_id):
+    def sign_service_agreement(self, did, service_definition_id, consumer):
         service_agreement_id = generate_new_id()
         # Extract all of the params necessary for execute agreement from the ddo
-        service = None
-        sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
         ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
-        for s in ddo.services:
-            if sa_def_key in s.get_values() and s.get_values()[sa_def_key] == service_definition_id:
-                service = s
-                break
-
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
         if not service:
             raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
 
@@ -209,7 +203,8 @@ class Ocean:
 
         return service_agreement_id
 
-    def execute_service_agreement(self, service_agreement_id, service_definition_id, did, signature, consumer_address, publisher_address):
+    def execute_service_agreement(self, did, service_definition_id, service_agreement_id,
+                                  service_agreement_signature, consumer_address, publisher_address):
         """
         Execute the service agreement on-chain using keeper's ServiceAgreement contract.
         The on-chain executeAgreement method requires the following arguments:
@@ -219,38 +214,39 @@ class Ocean:
         The consumer `signature` includes the conditions timeouts and parameters value which is used on-chain to verify the values actually
         match the signed hashes.
 
-        :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
-        :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
         :param did: str representation fo the asset DID. Use this to retrieve the asset DDO.
-        :param signature: str the signed agreement message hash which includes conditions and their parametres values and other details
-            of the agreement.
+        :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
+        :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
+        :param service_agreement_signature: str the signed agreement message hash which includes conditions and their parameters
+            values and other details of the agreement.
         :param consumer_address: ethereum account address of consumer
         :param publisher_address: ethereum account address of publisher
         :return:
         """
         # Extract all of the params necessary for execute agreement from the ddo
-        # Validate the signature before submitting service agreement on-chain
-        service = None
-        sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
         ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
-        for s in ddo.services:
-            if sa_def_key in s.get_values() and s.get_values()[sa_def_key] == service_definition_id:
-                service = s
-                break
-
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
         if not service:
             raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
 
+        asset_id = did_to_id(did)
         service = service.as_dictionary()
         sa = ServiceAgreement.from_service_dict(service)
+
+        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
+            sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
+            sa.conditions_timeouts, service_agreement_id, asset_id
+        )
+        # :TODO: Validate the signature against the agreement_hash before submitting service agreement on-chain
+
         receipt = self.keeper.service_agreement.execute_service_agreement(
             sa.sla_template_id,
-            signature,
+            service_agreement_signature,
             consumer_address,
             sa.conditions_params_value_hashes,
             sa.conditions_timeouts,
             service_agreement_id,
-            did,
+            asset_id,
             publisher_address
         )
 
@@ -260,7 +256,7 @@ class Ocean:
 
         return receipt
 
-    def check_permissions(self, service_agreement_id, asset_did, consumer_address):
+    def check_permissions(self, service_agreement_id, did, consumer_address):
         """
         Verify on-chain that the `consumer_address` has permission to access the given `asset_did` according to the `service_agreement_id`.
 

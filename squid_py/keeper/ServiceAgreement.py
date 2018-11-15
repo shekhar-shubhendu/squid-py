@@ -23,9 +23,9 @@ class ServiceAgreement(ContractBase):
         self.web3.eth.waitForTransactionReceipt(receipt)
         return receipt
 
-    def execute_service_agreement(self, template_id, signature, consumer, hashes, timeouts, service_agreement_id, did, publisher):
+    def execute_service_agreement(self, template_id, signature, consumer, hashes, timeouts, service_agreement_id, did_id, publisher):
         receipt = self.contract_concise.executeAgreement(
-            template_id, signature, consumer, hashes, timeouts, service_agreement_id, did,
+            template_id, signature, consumer, hashes, timeouts, service_agreement_id, did_id,
             {'from': publisher, 'gas': DEFAULT_GAS_LIMIT}
         )
         self.web3.eth.waitForTransactionReceipt(receipt)

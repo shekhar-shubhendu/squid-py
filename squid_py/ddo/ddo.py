@@ -289,6 +289,13 @@ class DDO:
                 return service
         return None
 
+    def find_service_by_key_value(self, service_key, value):
+        for s in self._services:
+            if service_key in s.get_values() and s.get_values()[service_key] == value:
+                return s
+
+        return None
+
     def validate(self):
         """validate the ddo data structure"""
         if self._public_keys and self._authentications:
