@@ -18,7 +18,7 @@ def get_publickey_from_address(web3, address):
     return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(signature))
 
 
-def generate_new_id(metadata):
+def generate_new_id():
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 

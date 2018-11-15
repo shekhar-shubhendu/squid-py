@@ -1,5 +1,6 @@
 import json
 
+import requests
 from web3 import Web3, HTTPProvider
 from secret_store_client.client import Client
 
@@ -16,7 +17,9 @@ from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
+from squid_py.service_agreement.register_service_agreement import register_service_agreement
 from squid_py.service_agreement.service_agreement import ServiceAgreement
+from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_factory import ServiceFactory
 from squid_py.utils.utilities import get_publickey_from_address, generate_new_id
 from squid_py.did import did_to_id, did_generate
@@ -125,7 +128,7 @@ class Ocean:
         if not metadata or not Metadata.validate(metadata):
             raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')
 
-        asset_id = generate_new_id(metadata)
+        asset_id = generate_new_id()
         # Check if it's already registered first!
         if asset_id in self.metadata_store.list_assets():
             raise OceanDIDAlreadyExist('Asset id "%s" is already registered to another asset.' % asset_id)
@@ -173,7 +176,7 @@ class Ocean:
         return ddo
 
     def sign_service_agreement(self, did, consumer, service_definition_id):
-        service_id = ''
+        service_agreement_id = generate_new_id()
         # Extract all of the params necessary for execute agreement from the ddo
         service = None
         sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
@@ -187,16 +190,26 @@ class Ocean:
             raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
 
         service = service.as_dictionary()
-        purchase_endpoint = service['purchaseEndpoint']
+        sa = ServiceAgreement.from_service_dict(service)
+        purchase_endpoint = sa.purchase_endpoint
+
         # Prepare a payload to send to `Brizo`
-        # payload = json.puts()
-        # requests.post(purchase_endpoint, '', payload)
+        payload = json.dumps({
+            'did': did,
+            'serviceAgreementId': service_agreement_id,
+            'serviceDefinitionId': service_definition_id,
+            'signature': sa.get_signed_agreement_hash(self._web3, did_to_id(did), service_agreement_id, consumer)[0],
+            'consumerPublicKey': consumer
+        })
+        requests.post(purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
 
         # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path,Config.storage_path, consumer,
+                                   service_agreement_id, did, service_definition_id, 'consumer', 3)
 
-        return service_id
+        return service_agreement_id
 
-    def execute_service_agreement(self, service_agreement_id, service_definition_id, asset_did, signature, consumer_address):
+    def execute_service_agreement(self, service_agreement_id, service_definition_id, did, signature, consumer_address, publisher_address):
         """
         Execute the service agreement on-chain using keeper's ServiceAgreement contract.
         The on-chain executeAgreement method requires the following arguments:
@@ -208,16 +221,44 @@ class Ocean:
 
         :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
         :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
-        :param asset_did: str representation fo the asset DID. Use this to retrieve the asset DDO.
+        :param did: str representation fo the asset DID. Use this to retrieve the asset DDO.
         :param signature: str the signed agreement message hash which includes conditions and their parametres values and other details
             of the agreement.
-        :param consumer_address: ethereum account address
+        :param consumer_address: ethereum account address of consumer
+        :param publisher_address: ethereum account address of publisher
         :return:
         """
         # Extract all of the params necessary for execute agreement from the ddo
         # Validate the signature before submitting service agreement on-chain
+        service = None
+        sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
+        ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
+        for s in ddo.services:
+            if sa_def_key in s.get_values() and s.get_values()[sa_def_key] == service_definition_id:
+                service = s
+                break
 
-        return
+        if not service:
+            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
+
+        service = service.as_dictionary()
+        sa = ServiceAgreement.from_service_dict(service)
+        receipt = self.keeper.service_agreement.execute_service_agreement(
+            sa.sla_template_id,
+            signature,
+            consumer_address,
+            sa.conditions_params_value_hashes,
+            sa.conditions_timeouts,
+            service_agreement_id,
+            did,
+            publisher_address
+        )
+
+        # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path, Config.storage_path, publisher_address,
+                                   service_agreement_id, did, service_definition_id, 'publisher', 3)
+
+        return receipt
 
     def check_permissions(self, service_agreement_id, asset_did, consumer_address):
         """

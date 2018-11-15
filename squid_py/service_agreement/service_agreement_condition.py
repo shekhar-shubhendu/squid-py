@@ -1,3 +1,5 @@
+from web3 import Web3
+
 
 class Parameter:
     def __init__(self, param_json):
@@ -95,6 +97,10 @@ class ServiceAgreementCondition(object):
     @property
     def param_values(self):
         return [parameter.value for parameter in self.parameters]
+
+    @property
+    def values_hash(self):
+        return Web3.soliditySha3(self.param_types, self.param_values)
 
     @staticmethod
     def example_dict():

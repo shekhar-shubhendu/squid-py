@@ -1,3 +1,5 @@
+import json
+
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
 from squid_py.service_agreement.service_agreement_contract import ServiceAgreementContract
 
@@ -15,6 +17,12 @@ class ServiceAgreementTemplate(object):
         self.service_agreement_contract = None
         if template_json:
             self.parse_template_json(template_json)
+
+    @classmethod
+    def from_json_file(cls, path):
+        with open(path) as jsf:
+            template_json = json.load(jsf)
+            return cls(template_json=template_json)
 
     def parse_template_json(self, template_json):
         assert template_json['type'] == self.DOCUMENT_TYPE, ''

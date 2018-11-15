@@ -78,7 +78,9 @@ setup(
     keywords='squid-py',
     name='squid-py',
     packages=find_packages(
-        include=['squid_py', 'squid_py.keeper', 'squid_py.utils', 'squid_py.ddo', 'squid_py.models', 'squid_py.ocean']),
+        include=[
+            'squid_py', 'squid_py.keeper', 'squid_py.utils', 'squid_py.ddo', 'squid_py.models',
+            'squid_py.modules', 'squid_py.ocean', 'squid_py.service_agreement', ]),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

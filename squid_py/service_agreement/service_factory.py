@@ -6,7 +6,6 @@ from web3 import Web3
 from squid_py.ddo.service import Service
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
-from squid_py.service_agreement.utils import load_service_agreement_template_json
 from squid_py.utils.utilities import get_id_from_did
 
 
@@ -56,7 +55,7 @@ class ServiceFactory(object):
             'price': price
         }
         sla_template_path = os.path.join(pathlib.Path.cwd(), 'squid_py', 'service_agreement', 'sla_template.json')
-        sla_template = load_service_agreement_template_json(sla_template_path)
+        sla_template = ServiceAgreementTemplate.from_json_file(sla_template_path)
         conditions = sla_template.conditions[:]
         conditions_json_list = []
         for cond in conditions:
