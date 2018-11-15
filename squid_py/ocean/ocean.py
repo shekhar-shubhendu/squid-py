@@ -12,14 +12,13 @@ from squid_py.ddo import DDO, PUBLIC_KEY_STORE_TYPE_HEX
 from squid_py.ddo.authentication import Authentication
 from squid_py.ddo.public_key_base import PublicKeyBase
 from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from squid_py.didresolver import VALUE_TYPE_URL, VALUE_TYPE_DID
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
 from squid_py.service_agreement.service_agreement import ServiceAgreement
-from squid_py.services import ServiceTypes, ServiceFactory
-from squid_py.utils.utilities import get_publickey_from_address, generate_new_id, get_id_from_did
+from squid_py.service_agreement.service_factory import ServiceFactory
+from squid_py.utils.utilities import get_publickey_from_address, generate_new_id
 from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'

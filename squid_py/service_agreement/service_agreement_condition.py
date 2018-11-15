@@ -41,6 +41,7 @@ class ServiceAgreementCondition(object):
         self.contract_address = ''
         self.function_fingerprint = ''
         self.function_name = ''
+        self.is_terminal = False
         self.dependencies = []
         self.timeout_flags = []
         self.parameters = []
@@ -55,6 +56,7 @@ class ServiceAgreementCondition(object):
         self.contract_address = condition_json['contractAddress']
         self.condition_key = condition_json['conditionKey']
         self.function_name = condition_json['functionName']
+        self.is_terminal = condition_json['isTerminalCondition']
         self.events = [Event(e) for e in condition_json['events']]
         if 'fingerprint' in condition_json:
             self.function_fingerprint = condition_json['fingerprint']
@@ -73,6 +75,7 @@ class ServiceAgreementCondition(object):
             "conditionKey": self.condition_key,
             "contractAddress": self.contract_address,
             "functionName": self.function_name,
+            "isTerminalCondition": self.is_terminal,
             "events": [e.as_dictionary() for e in self.events]
         }
         if self.function_fingerprint:
@@ -92,3 +95,36 @@ class ServiceAgreementCondition(object):
     @property
     def param_values(self):
         return [parameter.value for parameter in self.parameters]
+
+    @staticmethod
+    def example_dict():
+        return {
+            "name": "lockPayment",
+            "dependencies": [],
+            "isTerminalCondition": False,
+            "canBeFulfilledBeforeTimeout": True,
+            "conditionKey": {
+                "contractAddress": "0x...",
+                "fingerprint": "0x..."
+            },
+            "parameters": [
+                {
+                    "name": "assetId",
+                    "type": "bytes32",
+                    "value": "08a429b8529856d59867503f8056903a680935a76950bb9649785cc97869a43d"
+                }, {
+                    "name": "price",
+                    "type": "uint",
+                    "value": 10
+                }
+            ],
+            "events": [{
+                "name": "PaymentLocked",
+                "actorType": "publisher",
+                "handler": {
+                    "moduleName": "accessControl",
+                    "functionName": "grantAccess",
+                    "version": "0.1"
+                }
+            }]
+        }

@@ -68,12 +68,11 @@ class ServiceFactory(object):
 
             conditions_json_list.append(cond)
 
-        sa = ServiceAgreement('services-1', sla_template.conditions)
+        sa = ServiceAgreement('services-1', sla_template.template_id, sla_template.conditions, sla_template.service_agreement_contract)
         other_values = {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: sa.sa_definition_id,
             ServiceAgreementTemplate.TEMPLATE_ID_KEY: sla_template.template_id,
             ServiceAgreement.SERVICE_CONDITIONS_KEY: conditions,
-            'serviceEndpoint': service_endpoint,
             'purchaseEndpoint': purchase_endpoint
         }
 
