@@ -6,24 +6,19 @@ from web3 import Web3
 from squid_py.ddo.service import Service
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
+from squid_py.service_agreement.service_types import ServiceTypes
 from squid_py.utils.utilities import get_id_from_did
-
-
-class ServiceTypes:
-    METADATA = 'Metadata'
-    ACCESS_ASSET = 'Access'
-    COMPUTE_SERVICE = 'Compute'
 
 
 class ServiceDescriptor(object):
     @staticmethod
     def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
-        return (ServiceTypes.ACCESS_ASSET,
+        return (ServiceTypes.ASSET_ACCESS,
                 {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
 
     @staticmethod
     def compute_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
-        return (ServiceTypes.COMPUTE_SERVICE,
+        return (ServiceTypes.CLOUD_COMPUTE,
                 {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
 
 
@@ -32,12 +27,12 @@ class ServiceFactory(object):
     def build_service(service_descriptor, did):
         assert isinstance(service_descriptor, tuple) and len(service_descriptor) == 2, 'Unknown service descriptor format.'
         service_type, kwargs = service_descriptor
-        if service_type == ServiceTypes.ACCESS_ASSET:
+        if service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
                 did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
 
-        if service_type == ServiceTypes.COMPUTE_SERVICE:
+        if service_type == ServiceTypes.CLOUD_COMPUTE:
             return ServiceFactory.build_compute_service(
                 did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
@@ -54,7 +49,7 @@ class ServiceFactory(object):
             'assetId': Web3.toHex(get_id_from_did(did)),
             'price': price
         }
-        sla_template_path = os.path.join(pathlib.Path.cwd(), 'squid_py', 'service_agreement', 'sla_template.json')
+        sla_template_path = os.path.join(pathlib.Path.cwd(), 'squid_py', 'service_agreement', 'access_sla_template.json')
         sla_template = ServiceAgreementTemplate.from_json_file(sla_template_path)
         conditions = sla_template.conditions[:]
         conditions_json_list = []
@@ -75,7 +70,7 @@ class ServiceFactory(object):
             'purchaseEndpoint': purchase_endpoint
         }
 
-        return Service(did, service_endpoint, ServiceTypes.ACCESS_ASSET, values=other_values)
+        return Service(did, service_endpoint, ServiceTypes.ASSET_ACCESS, values=other_values)
 
     @staticmethod
     def build_compute_service(did, price, purchase_endpoint, service_endpoint, timeout):

@@ -123,7 +123,7 @@ class Ocean:
             item is a dict of parameters and values required by the service.
         :return:
         """
-        assert publisher_address in self.accounts
+        assert publisher_address in self.accounts, 'Unrecognized publisher address %s' % publisher_address
 
         if not metadata or not Metadata.validate(metadata):
             raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')

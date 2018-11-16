@@ -111,6 +111,13 @@ class DDO:
     def as_text(self, is_proof=True, is_pretty=False):
         """return the DDO as a JSON text
         if is_proof == False then do not include the 'proof' element"""
+        data = self.as_dictionary(is_proof)
+        if is_pretty:
+            return json.dumps(data, indent=2, separators=(',', ': '))
+
+        return json.dumps(data)
+
+    def as_dictionary(self, is_proof=True):
         if self._created is None:
             self._created = DDO.get_timestamp()
 
@@ -137,10 +144,7 @@ class DDO:
         if self._proof and is_proof:
             data['proof'] = self._proof
 
-        if is_pretty:
-            return json.dumps(data, indent=2, separators=(',', ': '))
-
-        return json.dumps(data)
+        return data
 
     def _read_dict(self, dictionary):
         """import a JSON dict into this DDO"""

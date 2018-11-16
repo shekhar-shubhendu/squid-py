@@ -43,21 +43,6 @@ class ServiceAgreement(object):
     def conditions_fingerprints(self):
         return [cond.function_fingerprint for cond in self.conditions]
 
-    @property
-    def conditions_dependencies(self):
-        name_to_i = {cond.name: i for i, cond in enumerate(self.conditions)}
-        i_to_name = {i: cond.name for i, cond in enumerate(self.conditions)}
-        for i, cond in enumerate(self.conditions):
-            dep = []
-            for j in range(len(self.conditions)):
-                if i == j:
-                    dep.append(0)
-                elif self.conditions[j].name in cond.dependencies:
-                    dep.append(1)
-        # TODO:
-
-        return
-
     @classmethod
     def from_service_dict(cls, service_dict):
         return cls(
