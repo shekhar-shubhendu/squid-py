@@ -20,7 +20,7 @@ class Ocean():
     def register_asset(self, metadata, did):
         """
         Register an asset by writing it's meta data to the meta storage agent
-        :param metadata: dict of the metadata, munt contain the key ['base']
+        :param metadata: dict of the metadata
         :param did: did of the meta storage agent
         :return The new asset registered, or return None on error
         """

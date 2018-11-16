@@ -3,11 +3,14 @@
 """
 import json
 import requests
+from web3 import Web3
 
 from ocean.agent import Agent
 
+
 # service endpoint type name to use for this agent
 METADATA_AGENT_ENDPOINT_NAME = 'metadata-storage'
+METADATA_BASE_URI = '/api/v1/meta/data'
 
 class MetadataAgent(Agent):
     def __init__(self, client, did):
@@ -17,13 +20,13 @@ class MetadataAgent(Agent):
         if self._client.metadata_agent_auth:
             self._headers['Authorization'] = 'Basic {}'.format(self._client.metadata_agent_auth)
 
-    def save(self, asset_id, metadata):
+    def save(self, asset_id, metadata_text):
         """save metadata to the agent server, using the asset_id and metadata"""
         endpoint = self._get_endpoint(METADATA_AGENT_ENDPOINT_NAME)
         if endpoint:
-            metadata_text = json.dumps(metadata)
-            response = requests.put(endpoint + '/' + asset_id, data=metadata_text, headers=self._headers)
-            print(response)
+            url = endpoint + METADATA_BASE_URI + '/' + asset_id
+            response = requests.put(url, data=metadata_text, headers=self._headers)
+            print(response.content)
         # TODO: server not running on travis build, so always return success !
         return asset_id
 

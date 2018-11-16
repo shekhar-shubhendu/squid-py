@@ -21,7 +21,7 @@ class Asset():
         """
         self._client = client
         self._id = None
-        self._metadata = None
+        self._metadata_text = None
         self._agent_did = None
         if did:
             # look for did:op:xxxx/yyy, where xxx is the agent and yyy is the asset id
@@ -33,31 +33,31 @@ class Asset():
     def register(self, metadata, did):
         """
         Register an asset by writing it's meta data to the meta storage agent
-        :param metadata: dict of the metadata, munt contain the key ['base']
+        :param metadata: dict of the metadata
         :param agent_did: did of the meta stroage agent
         :return The new asset registered, or return None on error
-        :raise IndexError if no 'base' field is found in the metadata
         """
 
-        asset_id = Asset._get_asset_id_from_metadata(metadata)
+        metadata_text = json.dumps(metadata)
+        asset_id = Asset._get_asset_id_from_metadata(metadata_text)
         if asset_id:
             agent = MetadataAgent(self._client, did)
             if agent.is_valid:
-                if agent.save(asset_id, metadata):
+                if agent.save(asset_id, metadata_text):
                     self._id = asset_id
                     self._agent_did = did
-                    self._metadata = metadata
+                    self._metadata_text = metadata_text
                     return True
         return None
 
     def read_metadata(self):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
         agent = MetadataAgent(self._client, self._agent_did)
-        metadata = agent.read(self._id)
+        metadata_text = agent.read(self._id)
         # only return the valid metadata
-        if Asset.is_metadata_valid(self._id, metadata):
-            self._metadata = metadata
-            return self._metadata
+        if Asset.is_metadata_valid(self._id, metadata_text):
+            self._metadata_text = metadata_text
+            return self.metadata
         return None
 
     @property
@@ -68,7 +68,9 @@ class Asset():
     @property
     def metadata(self):
         """return the associated metadata for this assset"""
-        return self._metadata
+        if self._metadata_text:
+            return json.loads(self._metadata_text)
+        return None
 
     @property
     def is_empty(self):
@@ -87,7 +89,7 @@ class Asset():
         return None
 
     @staticmethod
-    def is_metadata_valid(asset_id, metadata):
+    def is_metadata_valid(asset_id, metadata_text):
         """
         validate metadata, by calcualating the hash (asset_id) and compare this to the 
         given asset_id, if both are equal then the metadata is valid
@@ -95,23 +97,18 @@ class Asset():
         :param metadata: dict of metadata to calculate the hash ( asset_id)
         :return bool True if metadata is valid for the asset_id provided
         """
-        if metadata:
+        if metadata_text:
             # the calc asset_id from the metadata should be same as this asset_id
-            metadata_id = Asset._get_asset_id_from_metadata(metadata)
+            metadata_id = Asset._get_asset_id_from_metadata(metadata_text)
             return metadata_id == asset_id
         return False
 
     @staticmethod
-    def _get_asset_id_from_metadata(metadata):
+    def _get_asset_id_from_metadata(metadata_text):
         """
         return the asset_id calculated from the metadata
-        :param metadata: dict of metadata to hash, the field 'base' is hashed to return
+        :param metadata: dict of metadata to hash
         a 64 char hex string, which is the asset id
         :return 64 char hex string, with no leading '0x'
         """
-        asset_id = None
-        if 'base' in metadata:
-            asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
-        else:
-            raise IndexError('Cannot find "base" field in the metadata structure')
-        return asset_id
+        return Web3.toHex(Web3.sha3(metadata_text.encode()))[2:]
