@@ -53,13 +53,13 @@ class Ocean():
             return agent
         return None
 
-    def get_asset(self, did, asset_id):
-        """return a registered asset given a DID of the agent and asset id"""
-        asset = Asset(self._client, asset_id)
-        if asset.read_metadata(did):
-            return asset
+    def get_asset(self, did):
+        """return a registered asset given a DID of the asset"""
+        asset = Asset(self._client, did)
+        if not asset.is_empty:
+            if asset.read_metadata():
+                return asset
         return None
-
 
     @property
     def client(self):
