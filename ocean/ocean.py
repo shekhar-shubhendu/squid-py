@@ -7,6 +7,8 @@ import secrets
 from ocean.client import Client
 from ocean.asset import Asset
 from ocean.agent import Agent
+from ocean.metadata_agent import METADATA_AGENT_ENDPOINT_NAME
+
 from squid_py.did import id_to_did
 
 class Ocean():
@@ -45,6 +47,9 @@ class Ocean():
             return agent, ddo_password
         return None
 
+    def register_agent_metadata(self, endpoint, account, did=None):
+        """convenience method to register a metadata storage agent URL"""
+        return self.register_agent(METADATA_AGENT_ENDPOINT_NAME, endpoint, account, did)
 
     def get_agent(self, did):
         """return an agent that is registered with the did"""

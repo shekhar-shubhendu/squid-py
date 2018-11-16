@@ -28,8 +28,8 @@ def test_ocean_instance():
     assert ocean.client.accounts
     agent_account = ocean.client.accounts[0]
 
-    # test register a new agent
-    agent, password = ocean.register_agent(METADATA_AGENT_ENDPOINT_NAME, METADATA_STORAGE_URL, agent_account)
+    # test register a new metadata storage agent
+    agent, password = ocean.register_agent_metadata(METADATA_STORAGE_URL, agent_account)
     assert agent
     assert password
     assert agent.did
