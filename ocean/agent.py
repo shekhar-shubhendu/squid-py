@@ -33,7 +33,7 @@ class Agent():
         # add the static proof
         ddo.add_proof(0, private_password)
         if self.register_ddo(did, ddo, account):
-            # save this to the class once the registration has occured
+            # save this to the object once the registration has occured
             self._did = did
             self._ddo = ddo
             return private_password
