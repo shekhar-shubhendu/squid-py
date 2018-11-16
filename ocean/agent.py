@@ -10,7 +10,6 @@ class Agent():
         self._client = client
         self._did = did
         self._ddo = None
-        self._ddo_password = None
         # if DID then try to load in the linked DDO
         if did:
             self._ddo = self._resolve_did_to_ddo(self._did)
@@ -28,17 +27,17 @@ class Agent():
         # create a new DDO
         ddo = DDO(did)
         # add a signature
-        self._ddo_password = ddo.add_signature()
+        private_password = ddo.add_signature()
         # add the service endpoint with the meta data
         ddo.add_service(name, endpoint)
         # add the static proof
-        ddo.add_proof(0, self._ddo_password)
+        ddo.add_proof(0, private_password)
         if self.register_ddo(did, ddo, account):
             # save this to the class once the registration has occured
             self._did = did
             self._ddo = ddo
-            return True
-        return False
+            return private_password
+        return None
 
     def register_ddo(self, did, ddo, account):
         """register a ddo object on the block chain for this agent"""
@@ -64,11 +63,6 @@ class Agent():
     def is_valid(self):
         """return True if this agent has a valid ddo"""
         return self._ddo and self._ddo.is_valid
-
-    @property
-    def ddo_password(self):
-        """ return the ddo private password in PEM format when creating a new DDO"""
-        return self._ddo_password
         
     def _resolve_did_to_ddo(self, did):
         """resolve a DID to a given DDO, return the DDO if found"""

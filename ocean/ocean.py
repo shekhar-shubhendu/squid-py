@@ -34,14 +34,15 @@ class Ocean():
         :param endpoint: url of the agents end point.
         :param account: ethereum account to register for.
         :param did: optional did of the current DID to update.
-        :returns a valid agent object
+        :returns a valid agent object, and the DDO private password 
         """
         agent = Agent(self._client)
         if did is None:
             # if no did then we need to create a new one
             did = id_to_did(secrets.token_hex(32))
-        if agent.register(did, name, endpoint, account): 
-            return agent
+        ddo_password = agent.register(did, name, endpoint, account)
+        if ddo_password:
+            return agent, ddo_password
         return None
 
 

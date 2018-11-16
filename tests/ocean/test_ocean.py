@@ -29,11 +29,11 @@ def test_ocean_instance():
     agent_account = ocean.client.accounts[0]
 
     # test register a new agent
-    agent = ocean.register_agent(METADATA_AGENT_ENDPOINT_NAME, METADATA_STORAGE_URL, agent_account)
+    agent, password = ocean.register_agent(METADATA_AGENT_ENDPOINT_NAME, METADATA_STORAGE_URL, agent_account)
     assert agent
+    assert password
     assert agent.did
     assert agent.ddo
-    assert agent.ddo_password
 
     # test getting the agent from a DID
     agent = ocean.get_agent(agent.did)
