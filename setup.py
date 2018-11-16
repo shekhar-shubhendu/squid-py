@@ -4,6 +4,8 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
+import os
+from os.path import join
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
@@ -55,6 +57,11 @@ docs_requirements = [
     'sphinx-rtd-theme',
 ]
 
+packages = []
+for d, _, _ in os.walk('squid_py'):
+    if os.path.exists(join(d, '__init__.py')):
+        packages.append(d.replace(os.path.sep, '.'))
+
 setup(
     author="leucothia",
     author_email='devops@oceanprotocol.com',
@@ -77,14 +84,11 @@ setup(
     include_package_data=True,
     keywords='squid-py',
     name='squid-py',
-    packages=find_packages(
-        include=[
-            'squid_py', 'squid_py.keeper', 'squid_py.utils', 'squid_py.ddo', 'squid_py.models',
-            'squid_py.modules', 'squid_py.ocean', 'squid_py.service_agreement', ]),
+    packages=packages,
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/oceanprotocol/squid-py',
-    version='0.2.4',
+    version='0.2.5',
     zip_safe=False,
 )
