@@ -33,4 +33,3 @@ class MetadataAgent(Agent):
             if response:
                 return json.loads(response)
         return None
-

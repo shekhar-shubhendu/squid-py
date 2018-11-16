@@ -38,11 +38,11 @@ class Agent():
         return private_password
 
     def register_ddo(self, did, ddo, account):
-        """register a ddo object on the block chain"""
+        """register a ddo object on the block chain for this agent"""
         self._ddo = ddo
         # register/update the did->ddo to the block chain
         self._client.keeper.didregistry.register(did, ddo=ddo, account=account)
-        
+
     @property
     def ddo(self):
         """return the DDO stored for this agent"""
@@ -57,13 +57,13 @@ class Agent():
     def is_empty(self):
         """return True if this agent object is empty"""
         return self._did is None
-        
+
     def _resolve_did_to_ddo(self, did):
         """resolve a DID to a given DDO, return the DDO if found"""
         did_resolver = DIDResolver(self._client.web3, self._client.keeper.didregistry)
         resolved = did_resolver.resolve(did)
         if resolved and resolved.is_ddo:
-            ddo = DDO(json_text = resolved.value)
+            ddo = DDO(json_text=resolved.value)
             return ddo
         return None
 
@@ -74,5 +74,3 @@ class Agent():
             if service:
                 return service.get_endpoint()
         return None
-
-

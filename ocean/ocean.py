@@ -6,7 +6,6 @@ import secrets
 
 from ocean.client import Client
 from ocean.asset import Asset
-from ocean.metadata_agent import MetadataAgent
 from ocean.agent import Agent
 from squid_py.did import id_to_did
 
@@ -28,7 +27,7 @@ class Ocean():
             return asset
         return None
 
-    def register_agent(self, name, endpoint, account, did = None):
+    def register_agent(self, name, endpoint, account, did=None):
         """
         Register an agent with the ocean network
         :param name: name of the agent's endpoint in the DDO record

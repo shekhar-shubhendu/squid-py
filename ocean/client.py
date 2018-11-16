@@ -9,6 +9,7 @@ from web3 import (
 from squid_py.keeper import Keeper
 
 class Client():
+
     def __init__(self, ocean_url, contracts_path):
         """
         init the connection with URL for the ethereum node and the path

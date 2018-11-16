@@ -4,11 +4,10 @@
 import hashlib
 import json
 
-from ocean.client import Client
 from ocean.metadata_agent import MetadataAgent
 
 class Asset():
-    def __init__(self, client, asset_id = None):
+    def __init__(self, client, asset_id=None):
         """
         init an asset class with the following:
         :param client: OceanClient to use to connect to the ocean network
@@ -17,6 +16,7 @@ class Asset():
         """
         self._client = client
         self._id = asset_id
+        self._metadata = None
 
     def register(self, metadata, did):
         """
@@ -26,23 +26,23 @@ class Asset():
         :return The new asset registered, or return None on error
         :raise IndexError if no 'base' field is found in the metadata
         """
-        
+
         if 'base' in metadata:
             self._id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
         else:
             raise IndexError('Cannot find "base" field in the metadata structure')
-            
+
         agent = MetadataAgent(self._client, did)
         return agent.save(self._id, metadata)
 
     def read_metadata(self, did):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
         agent = MetadataAgent(self._client, did)
-        self._metadata = agent.read_metadat(self._id)
+        self._metadata = agent.read(self._id)
         return self._metadata
 
     @property
-    def id(self):
+    def asset_id(self):
         """return the asset id"""
         return self._id
 
