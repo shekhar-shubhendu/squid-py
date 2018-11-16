@@ -4,7 +4,7 @@
 import hashlib
 import json
 
-from ocean.ocean_client import OceanClient
+from ocean.client import Client
 from ocean.metadata_agent import MetadataAgent
 
 class Asset():

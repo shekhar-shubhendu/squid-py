@@ -4,15 +4,15 @@
 import json
 import requests
 
-from ocean.ocean_agent import OceanAgent
+from ocean.agent import Agent
 
 # service endpoint type name to use for this agent
 METADATA_AGENT_ENDPOINT_NAME = 'metadata-storage'
 
-class MetadataAgent(OceanAgent):
+class MetadataAgent(Agent):
     def __init__(self, ocean_client, did):
         """init a standard ocean agent, with a given DID"""
-        OceanAgent.__init__(self, ocean_client, did)
+        Agent.__init__(self, ocean_client, did)
         self._headers = {'content-type': 'application/json'}
 
     def save(self, asset_id, metadata):

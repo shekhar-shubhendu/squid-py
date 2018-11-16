@@ -4,17 +4,17 @@
 """
 import secrets
 
-from ocean.ocean_client import OceanClient
+from ocean.client import Client
 from ocean.asset import Asset
 from ocean.metadata_agent import MetadataAgent
-from ocean.ocean_agent import OceanAgent
+from ocean.agent import Agent
 from squid_py.did import id_to_did
 
 class Ocean():
 
     def __init__(self, ocean_url, contracts_path):
         """init the basic OceanClient for the connection and contract info"""
-        self._client = OceanClient(ocean_url, contracts_path)
+        self._client = Client(ocean_url, contracts_path)
 
     def register_asset(self, metadata, agent_did):
         """
@@ -36,7 +36,7 @@ class Ocean():
         :return registered did of the agent, and DDO private password in PEM format
         of the signed DDO record
         """
-        agent = OceanAgent(self._client)
+        agent = Agent(self._client)
         if did is None:
             did = id_to_did(secrets.token_hex(32))
         return did, agent.register(did, name, endpoint, account)
@@ -44,7 +44,7 @@ class Ocean():
 
     def get_agent(self, did):
         """return an agent that is registered with the did"""
-        agent = OceanAgent(self._client, did)
+        agent = Agent(self._client, did)
         if agent.ddo:
             return agent
         return None
