@@ -51,3 +51,6 @@ class Asset():
         """return the associated metadata for this assset"""
         return self._metadata
 
+    @property
+    def is_empty(self):
+        return self._id is None
