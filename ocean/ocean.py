@@ -30,15 +30,19 @@ class Ocean():
     def register_agent(self, name, endpoint, account, did=None):
         """
         Register an agent with the ocean network
-        :param name: name of the agent's endpoint in the DDO record
-        :param endpoint: url of the agents end point
-        :return registered did of the agent, and DDO private password in PEM format
-        of the signed DDO record
+        :param name: name of the agent's endpoint in the DDO record.
+        :param endpoint: url of the agents end point.
+        :param account: ethereum account to register for.
+        :param did: optional did of the current DID to update.
+        :returns a valid agent object
         """
         agent = Agent(self._client)
         if did is None:
+            # if no did then we need to create a new one
             did = id_to_did(secrets.token_hex(32))
-        return did, agent.register(did, name, endpoint, account)
+        if agent.register(did, name, endpoint, account): 
+            return agent
+        return None
 
 
     def get_agent(self, did):

@@ -29,12 +29,14 @@ def test_ocean_instance():
     agent_account = ocean.client.accounts[0]
 
     # test register a new agent
-    agent_did, ddo_password = ocean.register_agent(METADATA_AGENT_ENDPOINT_NAME, METADATA_STORAGE_URL, agent_account)
-    assert agent_did
-    assert ddo_password
+    agent = ocean.register_agent(METADATA_AGENT_ENDPOINT_NAME, METADATA_STORAGE_URL, agent_account)
+    assert agent
+    assert agent.did
+    assert agent.ddo
+    assert agent.ddo_password
 
     # test getting the agent from a DID
-    agent = ocean.get_agent(agent_did)
+    agent = ocean.get_agent(agent.did)
     assert agent
 
     # load in the sample metadata
@@ -45,6 +47,6 @@ def test_ocean_instance():
     assert metadata
 
     # test registering an asset
-    asset = ocean.register_asset(metadata, agent_did)
+    asset = ocean.register_asset(metadata, agent.did)
     assert asset
 
