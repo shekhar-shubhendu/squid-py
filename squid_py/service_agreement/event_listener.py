@@ -1,6 +1,6 @@
 import importlib
 
-from squid_py.keeper.ServiceAgreement import ServiceAgreement
+from squid_py.keeper.service_agreement import ServiceAgreement
 from squid_py.keeper.utils import get_contract_abi_by_address
 from squid_py.utils import watch_event
 
