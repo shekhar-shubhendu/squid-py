@@ -17,6 +17,7 @@ class Asset():
         self._client = client
         self._id = asset_id
         self._metadata = None
+        self._metadata_did = None
 
     def register(self, metadata, did):
         """
@@ -34,14 +35,19 @@ class Asset():
 
         agent = MetadataAgent(self._client, did)
         if agent.is_valid:
-            return agent.save(self._id, metadata)
+            if agent.save(self._id, metadata):
+                self._metadata_did = did
+                return True
         return None
 
     def read_metadata(self, did):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
         agent = MetadataAgent(self._client, did)
         self._metadata = agent.read(self._id)
-        return self._metadata
+        if self._metadata:
+            self._metadata_did = did
+            return self._metadata
+        return None
 
     @property
     def asset_id(self):
@@ -56,3 +62,8 @@ class Asset():
     @property
     def is_empty(self):
         return self._id is None
+
+    @property
+    def metadata_did(self):
+        """DID of the metadata agent for this asset"""
+        return self._metadata_did
