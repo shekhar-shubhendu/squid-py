@@ -16,17 +16,17 @@ class Ocean():
         """init the basic OceanClient for the connection and contract info"""
         self._client = Client(ocean_url, contracts_path)
 
-    def register_asset(self, metadata, agent_did):
+    def register_asset(self, metadata, did):
         """
         Register an asset by writing it's meta data to the meta storage agent
         :param metadata: dict of the metadata, munt contain the key ['base']
-        :param agent_did: did of the meta stroage agent
+        :param did: did of the meta storage agent
         :return The new asset registered, or return None on error
         """
-        asset = Asset(self._client, metadata)
-        agent = MetadataAgent(self._client, agent_did)
-        agent.save(asset.id, metadata)
-        return asset
+        asset = Asset(self._client)
+        if asset.register(metadata, did):
+            return asset
+        return None
 
     def register_agent(self, name, endpoint, account, did = None):
         """
