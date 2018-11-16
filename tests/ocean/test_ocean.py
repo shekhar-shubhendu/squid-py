@@ -38,6 +38,7 @@ def test_ocean_instance():
     # test getting the agent from a DID
     agent = ocean.get_agent(agent.did)
     assert agent
+    assert not agent.is_empty
 
     # load in the sample metadata
     assert METADATA_SAMPLE_PATH.exists(), "{} does not exist!".format(METADATA_SAMPLE_PATH)
