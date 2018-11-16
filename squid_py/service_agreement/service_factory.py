@@ -60,7 +60,7 @@ class ServiceFactory(object):
             'assetId': Web3.toHex(get_id_from_did(did)),
             'price': price
         }
-        sla_template_path = os.path.join('/', *os.path.realpath(__file__).split('/')[1:-1], 'sla_template.json')
+        sla_template_path = os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[1:-1], 'sla_template.json')
         sla_template = load_service_agreement_template_json(sla_template_path)
         conditions = sla_template.conditions[:]
         conditions_json_list = []
