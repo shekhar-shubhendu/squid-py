@@ -88,6 +88,13 @@ class Asset():
 
     @staticmethod
     def is_metadata_valid(asset_id, metadata):
+        """
+        validate metadata, by calcualating the hash (asset_id) and compare this to the 
+        given asset_id, if both are equal then the metadata is valid
+        :param asset_id: asset id to compare with
+        :param metadata: dict of metadata to calculate the hash ( asset_id)
+        :return bool True if metadata is valid for the asset_id provided
+        """
         if metadata:
             # the calc asset_id from the metadata should be same as this asset_id
             metadata_id = Asset._get_asset_id_from_metadata(metadata)
@@ -96,6 +103,12 @@ class Asset():
 
     @staticmethod
     def _get_asset_id_from_metadata(metadata):
+        """
+        return the asset_id calculated from the metadata
+        :param metadata: dict of metadata to hash, the field 'base' is hashed to return
+        a 64 char hex string, which is the asset id
+        :return 64 char hex string, with no leading '0x'
+        """
         asset_id = None
         if 'base' in metadata:
             asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
