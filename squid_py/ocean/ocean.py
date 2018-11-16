@@ -124,9 +124,12 @@ class Ocean:
         :return:
         """
         assert publisher_address in self.accounts, 'Unrecognized publisher address %s' % publisher_address
-
+        assert isinstance(metadata, dict), 'Expected metadata of type dict, got "%s"' % type(metadata)
         if not metadata or not Metadata.validate(metadata):
             raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')
+
+        # copy metadata so we don't change the original
+        metadata_copy = metadata.copy()
 
         asset_id = generate_new_id()
         # Check if it's already registered first!
@@ -145,15 +148,15 @@ class Ocean:
         auth = Authentication(pub_key, PUBLIC_KEY_TYPE_RSA)
         ddo.add_authentication(auth, PUBLIC_KEY_TYPE_RSA)
 
-        assert metadata['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
-        content_urls_encrypted = self.encrypt_metadata_content_urls(did, json.dumps(metadata['base']['contentUrls']))
+        assert metadata_copy['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
+        content_urls_encrypted = self.encrypt_metadata_content_urls(did, json.dumps(metadata_copy['base']['contentUrls']))
         # only assign if the encryption worked
         if content_urls_encrypted:
-            metadata['base']['contentUrls'] = content_urls_encrypted
+            metadata_copy['base']['contentUrls'] = content_urls_encrypted
 
         # DDO url and `Metadata` service
         ddo_service_endpoint = self.metadata_store.get_service_endpoint(did)
-        metadata_service = ServiceFactory.build_metadata_service(did, metadata, ddo_service_endpoint)
+        metadata_service = ServiceFactory.build_metadata_service(did, metadata_copy, ddo_service_endpoint)
         ddo.add_service(metadata_service)
         # Other services for consuming the asset
         sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY

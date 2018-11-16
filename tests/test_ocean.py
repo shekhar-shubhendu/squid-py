@@ -9,6 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from squid_py.ocean import ocean
 from squid_py.ddo.metadata import Metadata
 from squid_py.did import did_generate
 from squid_py.exceptions import OceanDIDNotFound
@@ -112,7 +113,7 @@ def test_register_asset(ocean_instance):
     # Register using high-level interface
     ##########################################################
     service_descriptors = [ServiceDescriptor.access_service_descriptor(asset_price, '/purchaseEndpoint', '/serviceEndpoint', 600)]
-    ocean_instance.Client = Mock({'publish_document': '!encrypted_message!'})
+    ocean.Client = Mock({'publish_document': '!encrypted_message!'})
     ocean_instance.register_asset(asset.metadata, publisher_address, service_descriptors)
 
 
@@ -120,6 +121,7 @@ def test_resolve_did(ocean_instance):
     # prep ddo
     metadata = Metadata.get_example()
     publisher = list(ocean_instance.get_accounts().values())[0]
+    ocean.Client = Mock({'publish_document': '!encrypted_message!'})
     original_ddo = ocean_instance.register_asset(
         metadata, publisher.address,
         [ServiceDescriptor.access_service_descriptor(7, '/dummy/url', '/service/endpoint', 3)]
@@ -146,6 +148,7 @@ def test_resolve_did(ocean_instance):
 def test_sign_agreement(ocean_instance):
     metadata = Metadata.get_example()
     publisher = list(ocean_instance.get_accounts().values())[0]
+    ocean.Client = Mock({'publish_document': '!encrypted_message!'})
     ddo = ocean_instance.register_asset(
         metadata, publisher.address,
         [ServiceDescriptor.access_service_descriptor(7, '/dummy/url', '/service/endpoint', 3)]
