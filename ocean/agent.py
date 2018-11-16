@@ -53,6 +53,11 @@ class Agent():
         """return the DID used for this agent"""
         return self._did
 
+    @property
+    def is_empty(self):
+        """return True if this agent object is empty"""
+        return self._did is None
+        
     def _resolve_did_to_ddo(self, did):
         """resolve a DID to a given DDO, return the DDO if found"""
         did_resolver = DIDResolver(self._client.web3, self._client.keeper.didregistry)
