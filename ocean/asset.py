@@ -39,27 +39,26 @@ class Asset():
         :raise IndexError if no 'base' field is found in the metadata
         """
 
-        asset_id = None
-        if 'base' in metadata:
-            asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
-        else:
-            raise IndexError('Cannot find "base" field in the metadata structure')
-
-        agent = MetadataAgent(self._client, did)
-        if agent.is_valid:
-            if agent.save(asset_id, metadata):
-                self._id = asset_id
-                self._agent_did = did
-                return True
+        asset_id = Asset._get_asset_id_from_metadata(metadata)
+        if asset_id:
+            agent = MetadataAgent(self._client, did)
+            if agent.is_valid:
+                if agent.save(asset_id, metadata):
+                    self._id = asset_id
+                    self._agent_did = did
+                    return True
         return None
 
     def read_metadata(self):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
         agent = MetadataAgent(self._client, self._agent_did)
-        self._metadata = agent.read(self._id)
-        if self._metadata:
+        metadata = agent.read(self._id)
+        # only return the valid metadata
+        if Asset.is_metadata_valid(self._id, metadata):
+            self._metadata = metadata
             return self._metadata
         return None
+
 
     @property
     def asset_id(self):
@@ -86,3 +85,20 @@ class Asset():
         if not is_empty:
             return self._agent_did + '/' + self._id
         return None
+
+    @staticmethod
+    def is_metadata_valid(asset_id, metadata):
+        if metadata:
+            # the calc asset_id from the metadata should be same as this asset_id
+            metadata_id = Asset._get_asset_id_from_metadata(metadata)
+            return metadata_id == asset_id
+        return False
+
+    @staticmethod
+    def _get_asset_id_from_metadata(metadata):
+        asset_id = None
+        if 'base' in metadata:
+            asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
+        else:
+            raise IndexError('Cannot find "base" field in the metadata structure')
+        return asset_id
