@@ -10,10 +10,12 @@ from ocean.agent import Agent
 METADATA_AGENT_ENDPOINT_NAME = 'metadata-storage'
 
 class MetadataAgent(Agent):
-    def __init__(self, ocean_client, did):
+    def __init__(self, client, did):
         """init a standard ocean agent, with a given DID"""
-        Agent.__init__(self, ocean_client, did)
+        Agent.__init__(self, client, did)
         self._headers = {'content-type': 'application/json'}
+        if self._client.metadata_agent_auth:
+            self._headers['Authorization'] = 'Basic {}'.format(self._client.metadata_agent_auth)
 
     def save(self, asset_id, metadata):
         """save metadata to the agent server, using the asset_id and metadata"""

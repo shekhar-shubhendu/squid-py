@@ -15,13 +15,14 @@ from ocean.metadata_agent import METADATA_AGENT_ENDPOINT_NAME
 CONTRACTS_PATH = './artifacts'
 OCEAN_URL = 'http://localhost:8545'
 
-METADATA_STORAGE_URL = 'http://localhost:8080'
+METADATA_STORAGE_URL = 'http://13.67.33.157:8080'
+METADATA_STORAGE_AUTH = 'QWxhZGRpbjpPcGVuU2VzYW1l'
 METADATA_SAMPLE_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'metadata' / 'sample_metadata1.json'
 
 
 def test_ocean_instance():
     # create an ocean object
-    ocean = Ocean(OCEAN_URL, CONTRACTS_PATH)
+    ocean = Ocean(OCEAN_URL, CONTRACTS_PATH, metadata_agent_auth=METADATA_STORAGE_AUTH)
     assert ocean.client
     assert ocean.client.keeper
     assert ocean.client.web3

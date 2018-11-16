@@ -13,9 +13,9 @@ from squid_py.did import id_to_did
 
 class Ocean():
 
-    def __init__(self, ocean_url, contracts_path):
+    def __init__(self, ocean_url, contracts_path, metadata_agent_auth=None):
         """init the basic OceanClient for the connection and contract info"""
-        self._client = Client(ocean_url, contracts_path)
+        self._client = Client(ocean_url, contracts_path, metadata_agent_auth)
 
     def register_asset(self, metadata, did):
         """
