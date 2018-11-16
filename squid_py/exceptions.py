@@ -24,3 +24,6 @@ class OceanDIDUnknownValueType(Exception):
 # raised when a requested DID is already published in OceanDB
 class OceanDIDAlreadyExist(Exception):
     pass
+
+class OceanInvalidMetadata(Exception):
+    pass

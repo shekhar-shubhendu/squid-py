@@ -2,16 +2,14 @@ import logging
 
 from web3 import Web3
 
-from squid_py.constants import OCEAN_MARKET_CONTRACT
+from squid_py.config import DEFAULT_GAS_LIMIT
 from squid_py.keeper.contract_base import ContractBase
-
-DEFAULT_GAS_LIMIT = 400000
 
 
 class Market(ContractBase):
 
-    def __init__(self, web3, contract_path, address):
-        ContractBase.__init__(self, web3, OCEAN_MARKET_CONTRACT, 'market', contract_path, address)
+    def __init__(self, web3, contract_path):
+        ContractBase.__init__(self, web3, contract_path, 'OceanMarket')
         self._defaultGas = DEFAULT_GAS_LIMIT
 
     # call functions (costs no gas)
@@ -50,22 +48,11 @@ class Market(ContractBase):
     def register_asset(self, asset, price, publisher_address):
         """
         Register an asset on chain.
-
-        Calls the OceanMarket.register function, .sol code below:
-
-            function register(bytes32 assetId, uint256 price) public validAddress(msg.sender) returns (bool success) {
-                require(mAssets[assetId].owner == address(0), 'Owner address is not 0x0.');
-                mAssets[assetId] = Asset(msg.sender, price, false);
-                mAssets[assetId].active = true;
-
-                emit AssetRegistered(assetId, msg.sender);
-                return true;
-            }
+        Calls the OceanMarket.register function.
 
         :param asset:
         :param price:
         :param publisher_address:
-        :return:
         """
         asset_id_bytes = Web3.toBytes(hexstr=asset.asset_id)
         assert asset_id_bytes
@@ -82,10 +69,17 @@ class Market(ContractBase):
         logging.info("Registered Asset {} into blockchain".format(asset.asset_id))
         return result
 
+    def pay_order(self, order_id, publisher_address, price, timeout, sender_address, gas_amount=None):
+        tx_hash = self.contract_concise.sendPayment(order_id, publisher_address, price, timeout, {
+            'from': sender_address,
+            'gas': gas_amount if gas_amount else self._defaultGas
+        })
+        return self.get_tx_receipt(tx_hash)
+
     def purchase_asset(self, asset_id, order, publisher_address, sender_address):
         asset_id_bytes = Web3.toBytes(hexstr=asset_id)
-        asset_price = self.contract.getAssetPrice(asset_id_bytes)
-        return self.contract.sendPayment(order.id, publisher_address, asset_price, order.timeout, {
+        asset_price = self.contract_concise.getAssetPrice(asset_id_bytes)
+        return self.contract_concise.sendPayment(order.id, publisher_address, asset_price, order.timeout, {
             'from': sender_address,
             'gas': self._defaultGas
         })
