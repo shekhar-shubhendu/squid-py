@@ -15,8 +15,8 @@ from ocean.metadata_agent import METADATA_AGENT_ENDPOINT_NAME
 CONTRACTS_PATH = './artifacts'
 OCEAN_URL = 'http://localhost:8545'
 
-# METADATA_STORAGE_URL = 'http://13.67.33.157:8080'
-METADATA_STORAGE_URL = 'http://localhost:8080'
+METADATA_STORAGE_URL = 'http://13.67.33.157:8080'
+# METADATA_STORAGE_URL = 'http://localhost:8080'
 METADATA_STORAGE_AUTH = 'QWxhZGRpbjpPcGVuU2VzYW1l'
 METADATA_SAMPLE_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'metadata' / 'sample_metadata1.json'
 
