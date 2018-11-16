@@ -34,7 +34,7 @@ class Ocean():
         :param endpoint: url of the agents end point.
         :param account: ethereum account to register for.
         :param did: optional did of the current DID to update.
-        :returns a valid agent object, and the DDO private password 
+        :returns a valid agent object, and the DDO private password
         """
         agent = Agent(self._client)
         if did is None:

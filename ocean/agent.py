@@ -58,12 +58,12 @@ class Agent():
     def is_empty(self):
         """return True if this agent object is empty"""
         return self._did is None
-        
+
     @property
     def is_valid(self):
         """return True if this agent has a valid ddo"""
         return self._ddo and self._ddo.is_valid
-        
+
     def _resolve_did_to_ddo(self, did):
         """resolve a DID to a given DDO, return the DDO if found"""
         did_resolver = DIDResolver(self._client.web3, self._client.keeper.didregistry)

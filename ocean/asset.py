@@ -59,7 +59,6 @@ class Asset():
             return self._metadata
         return None
 
-
     @property
     def asset_id(self):
         """return the asset id"""
@@ -82,7 +81,7 @@ class Asset():
     @property
     def did(self):
         """return the DID of the asset"""
-        if not is_empty:
+        if not self.is_empty:
             return self._agent_did + '/' + self._id
         return None
 
