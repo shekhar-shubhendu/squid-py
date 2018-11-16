@@ -65,14 +65,14 @@ services:
         ipv4_address: 172.15.0.14
     environment:
       LOCAL_CONTRACTS: "true"
-      DEPLOY_CONTRACTS: ${DEPLOY_CONTRACTS}
+      DEPLOY_CONTRACTS: "true"
       DATABASE_PATH: "/ganache-db"
-      REUSE_DATABASE: ${REUSE_DATABASE}
-      NETWORK_NAME: ${KEEPER_NETWORK_NAME}
+      REUSE_DATABASE: "false"
+      NETWORK_NAME: "ocean_poa_net_local"
       POA_HOST: "parity-node"
     volumes:
-    - ${ARTIFACTS_FOLDER}:/keeper-contracts/artifacts/
-    - ${GANACHE_DATABASE_PATH}/ganache-db:/ganache-db
+    - ~/parity/keeper-contracts/artifacts/:/keeper-contracts/artifacts/
+    - ~/parity/ganache-db:/ganache-db
 
   aquarius:
     image: oceanprotocol/aquarius:develop
@@ -88,7 +88,7 @@ services:
       DB_HOSTNAME: mongodb
       LOCAL_CONTRACTS: 'true'
     volumes:
-    - ${ARTIFACTS_FOLDER}:/usr/local/keeper-contracts/:ro
+    - ~/parity/keeper-contracts/artifacts/:/usr/local/keeper-contracts/:ro
 
 
 networks:
