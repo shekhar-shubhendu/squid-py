@@ -33,7 +33,7 @@ class Agent():
         ddo.add_service(name, endpoint)
         # add the static proof
         ddo.add_proof(0, private_password)
-        self.register_ddo(self, did, ddo, account)
+        self.register_ddo(did, ddo, account)
 
         return private_password
 
@@ -57,6 +57,11 @@ class Agent():
     def is_empty(self):
         """return True if this agent object is empty"""
         return self._did is None
+        
+    @property
+    def is_valid(self):
+        """return True if this agent has a valid ddo"""
+        return self._ddo and self._ddo.is_valid
 
     def _resolve_did_to_ddo(self, did):
         """resolve a DID to a given DDO, return the DDO if found"""

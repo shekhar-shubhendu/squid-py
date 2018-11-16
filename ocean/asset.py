@@ -33,7 +33,9 @@ class Asset():
             raise IndexError('Cannot find "base" field in the metadata structure')
 
         agent = MetadataAgent(self._client, did)
-        return agent.save(self._id, metadata)
+        if agent.is_valid:
+            return agent.save(self._id, metadata)
+        return None
 
     def read_metadata(self, did):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
