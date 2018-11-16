@@ -3,6 +3,7 @@
 """
 import hashlib
 import json
+from web3 import Web3
 
 from ocean.metadata_agent import MetadataAgent
 from squid_py.did import (
@@ -27,7 +28,7 @@ class Asset():
             data = did_parse(did)
             if data['id_hex'] and data['path']:
                 self._agent_did = id_to_did(data['id_hex'])
-                self._id = Web3.toHex(hextstr=data['path'])
+                self._id = Web3.toHex(hexstr=data['path'])
 
     def register(self, metadata, did):
         """
