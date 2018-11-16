@@ -24,7 +24,7 @@ class Asset():
         self._metadata = None
         self._agent_did = None
         if did:
-            # look for did:op:xxxx/yyy, where xxx is the agent and yyy is the asset
+            # look for did:op:xxxx/yyy, where xxx is the agent and yyy is the asset id
             data = did_parse(did)
             if data['id_hex'] and data['path']:
                 self._agent_did = id_to_did(data['id_hex'])
@@ -46,6 +46,7 @@ class Asset():
                 if agent.save(asset_id, metadata):
                     self._id = asset_id
                     self._agent_did = did
+                    self._metadata = metadata
                     return True
         return None
 
