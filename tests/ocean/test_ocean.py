@@ -51,3 +51,5 @@ def test_ocean_instance():
     asset = ocean.register_asset(metadata, agent.did)
     assert asset
 
+    asset_did = "{0}/{1}".format(agent.did, asset_id)
+    found_asset = ocean.get_asset(asset_did)
