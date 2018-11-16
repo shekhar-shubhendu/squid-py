@@ -40,7 +40,7 @@ class Ocean():
         if did is None:
             # if no did then we need to create a new one
             did = id_to_did(secrets.token_hex(32))
-        if agent.register(did, name, endpoint, account): 
+        if agent.register(did, name, endpoint, account):
             return agent
         return None
 
@@ -52,11 +52,12 @@ class Ocean():
             return agent
         return None
 
-    def get_asset(self, did, asset_id):
-        """return a registered asset given a DID of the agent and asset id"""
-        asset = Asset(self._client, asset_id)
-        if asset.read_metadata(did):
-            return asset
+    def get_asset(self, did):
+        """return a registered asset given a DID of the asset"""
+        asset = Asset(self._client, did)
+        if not asset.is_empty:
+            if asset.read_metadata():
+                return asset
         return None
 
 

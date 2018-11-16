@@ -5,9 +5,13 @@ import hashlib
 import json
 
 from ocean.metadata_agent import MetadataAgent
+from squid_py.did import (
+    did_parse,
+    id_to_did,
+)
 
 class Asset():
-    def __init__(self, client, asset_id=None):
+    def __init__(self, client, did=None):
         """
         init an asset class with the following:
         :param client: OceanClient to use to connect to the ocean network
@@ -15,9 +19,15 @@ class Asset():
         :param asset_id: Optional asset id to use for an already existing asset
         """
         self._client = client
-        self._id = asset_id
+        self._id = None
         self._metadata = None
-        self._metadata_did = None
+        self._agent_did = None
+        if did:
+            # look for did:op:xxxx/yyy, where xxx is the agent and yyy is the asset
+            data = did_parse(did)
+            if data['id_hex'] and data['path']:
+                self._agent_did = id_to_did(data['id_hex'])
+                self._id = Web3.toHex(hextstr=data['path'])
 
     def register(self, metadata, did):
         """
@@ -28,24 +38,25 @@ class Asset():
         :raise IndexError if no 'base' field is found in the metadata
         """
 
+        asset_id = None
         if 'base' in metadata:
-            self._id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
+            asset_id = hashlib.sha256(json.dumps(metadata['base']).encode('utf-8')).hexdigest()
         else:
             raise IndexError('Cannot find "base" field in the metadata structure')
 
         agent = MetadataAgent(self._client, did)
         if agent.is_valid:
-            if agent.save(self._id, metadata):
-                self._metadata_did = did
+            if agent.save(asset_id, metadata):
+                self._id = asset_id
+                self._agent_did = did
                 return True
         return None
 
-    def read_metadata(self, did):
+    def read_metadata(self):
         """read the asset metadata from an Ocean Agent, using the agents DID"""
-        agent = MetadataAgent(self._client, did)
+        agent = MetadataAgent(self._client, self._agent_did)
         self._metadata = agent.read(self._id)
         if self._metadata:
-            self._metadata_did = did
             return self._metadata
         return None
 
@@ -61,9 +72,16 @@ class Asset():
 
     @property
     def is_empty(self):
-        return self._id is None
+        return self._id is None or self._agent_did is None
 
     @property
-    def metadata_did(self):
+    def agent_did(self):
         """DID of the metadata agent for this asset"""
-        return self._metadata_did
+        return self._agent_did
+
+    @property
+    def did(self):
+        """return the DID of the asset"""
+        if not is_empty:
+            return self._agent_did + '/' + self._id
+        return None
