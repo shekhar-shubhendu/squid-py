@@ -40,7 +40,8 @@ services:
       DB_HOSTNAME: mongodb
       LOCAL_CONTRACTS: 'true'
     volumes:
-    - artifacts:/usr/local/keeper-contracts/:ro
+    - ${ARTIFACTS_FOLDER}:/usr/local/keeper-contracts/:ro
+
 
 networks:
   backend:
