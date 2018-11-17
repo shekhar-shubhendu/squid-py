@@ -149,7 +149,7 @@ class Ocean:
         ddo.add_authentication(auth, PUBLIC_KEY_TYPE_RSA)
 
         assert metadata_copy['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
-        content_urls_encrypted = self.encrypt_metadata_content_urls(did, json.dumps(metadata_copy['base']['contentUrls']))
+        content_urls_encrypted = self._encrypt_metadata_content_urls(did, json.dumps(metadata_copy['base']['contentUrls']))
         # only assign if the encryption worked
         if content_urls_encrypted:
             metadata_copy['base']['contentUrls'] = content_urls_encrypted
@@ -241,7 +241,7 @@ class Ocean:
             sa.conditions_timeouts, service_agreement_id, asset_id
         )
         # :TODO: Validate the signature against the agreement_hash before submitting service agreement on-chain
-
+        self.verify_signed_service_agreement(service_agreement_id, service_definition_id, consumer_address, service_agreement_signature)
         receipt = self.keeper.service_agreement.execute_service_agreement(
             sa.sla_template_id,
             service_agreement_signature,
@@ -268,6 +268,10 @@ class Ocean:
         :param consumer_address:
         :return: bool True if user has permission
         """
+        return True
+
+    def verify_signed_service_agreement(self, service_agreement_id, service_definition_id, consumer_address, signature):
+
         return True
 
     def resolve_did(self, did):
@@ -297,7 +301,7 @@ class Ocean:
     def get_service_agreement(self):
         pass
 
-    def encrypt_metadata_content_urls(self, did, data):
+    def _encrypt_metadata_content_urls(self, did, data):
         """
         encrypt string data using the DID as an secret store id,
         if secret store is enabled then return the result from secret store encryption
