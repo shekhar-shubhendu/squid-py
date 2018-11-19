@@ -23,9 +23,7 @@ def get_sla_template_path(service_type=ServiceTypes.ASSET_ACCESS):
     else:
         raise ValueError('Invalid/unsupported service agreement type "%s"' % service_type)
 
-    os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[1:-1], 'access_sla_template.json')
-
-    return os.path.join(pathlib.Path.cwd(), 'squid_py', 'service_agreement', name)
+    return os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[1:-1], name)
 
 
 def get_sla_template_dict(path):
@@ -75,7 +73,8 @@ def register_service_agreement_template(keeper, owner_address, sla_template_inst
 def make_public_key_and_authentication(did, publisher_address, web3):
     # set public key
     public_key_value = get_publickey_from_address(web3, publisher_address)
-    pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_address, 'type': PUBLIC_KEY_STORE_TYPE_HEX})
+    pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_address,
+                                         'type': PUBLIC_KEY_STORE_TYPE_HEX})
     pub_key.assign_did(did)
     # set authentication
     auth = Authentication(pub_key, PUBLIC_KEY_TYPE_RSA)
