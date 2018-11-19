@@ -12,6 +12,8 @@ class AquariusWrapper(object):
 
         :param aquarius_url:
         """
+        if '/api/v1/aquarius/assets' in aquarius_url:
+            aquarius_url = aquarius_url[:aquarius_url.find('/api/v1/aquarius/assets')]
 
         self._base_url = '{}/api/v1/aquarius/assets'.format(aquarius_url)
         self._headers = {'content-type': 'application/json'}
@@ -31,8 +33,19 @@ class AquariusWrapper(object):
 
     def get_asset_metadata(self, asset_did):
         response = requests.get(self._base_url + '/ddo/%s' % asset_did).content
-        response_dict = json.loads(response)
-        return response_dict
+        if not response:
+            return {}
+
+        print('url: ', self._base_url, self._base_url + '/ddo/%s' % asset_did)
+        print('response: ', response)
+        try:
+            parsed_response = json.loads(response)
+        except TypeError:
+            parsed_response = None
+
+        if parsed_response is None:
+            return {}
+        return parsed_response
 
     def list_assets_metadata(self):
         return json.loads(requests.get(self._base_url + '/ddo').content)

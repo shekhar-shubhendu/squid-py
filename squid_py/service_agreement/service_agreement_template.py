@@ -1,3 +1,5 @@
+import json
+
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
 from squid_py.service_agreement.service_agreement_contract import ServiceAgreementContract
 
@@ -15,6 +17,61 @@ class ServiceAgreementTemplate(object):
         self.service_agreement_contract = None
         if template_json:
             self.parse_template_json(template_json)
+
+    @classmethod
+    def from_json_file(cls, path):
+        with open(path) as jsf:
+            template_json = json.load(jsf)
+            return cls(template_json=template_json)
+
+    @staticmethod
+    def compress_dep_timeout_values(dependency_list, timeout_flags_list):
+        compressed_dep_value = 0
+        num_bits = 2  # 1st for dependency, 2nd for timeout flag
+        for i, d in enumerate(dependency_list):
+            t = timeout_flags_list[i]
+            offset = i * num_bits
+            compressed_dep_value |= d * 2**(offset + 0)  # the dependency bit
+            compressed_dep_value |= t * 2**(offset + 1)  # the timeout bit
+
+        return compressed_dep_value
+
+    @property
+    def conditions_dependencies(self):
+        """
+        Build a list of dependencies to represent how each condition in this service agreement template depend on other conditions.
+        Each value in the dependencies list is an integer that compresses the dependency and timeout flag corresponding to each
+        condition in the list of all conditions.
+        Each condition is assigned 2 bits:
+          - first/right bit denotes dependency: 1 is a dependency, 0 not a dependency
+          - second/left bit denotes timeout flag: 1 means dependency relies on timeout of parent condition, 0 no timeout necessary
+            note that timeout flag must not be set to 1 if the dependency is 0
+
+        This compress format is necessary to avoid limitations of the `solidity` language which is used to implement the EVM smart
+        contracts.
+        :return: list of integers
+        """
+        compressed_dependencies = []
+        for i, cond in enumerate(self.conditions):
+            assert len(cond.dependencies) == len(cond.timeout_flags), 'Invalid dependencies and timeout_flags, they are required to have the same length.'
+            dep = []
+            tout_flags = []
+            for j in range(len(self.conditions)):
+                other_cond_name = self.conditions[j].name
+                if i != j and other_cond_name in cond.dependencies:
+                    dep.append(1)
+                    tout_flags.append(cond.timeout_flags[cond.dependencies.index(other_cond_name)])
+                else:
+                    dep.append(0)
+                    tout_flags.append(0)
+
+            assert len(dep) == len(tout_flags), ''
+            assert len(dep) == len(self.conditions)
+            compressed_dependencies.append(
+                ServiceAgreementTemplate.compress_dep_timeout_values(dep, tout_flags)
+            )
+
+        return compressed_dependencies
 
     def parse_template_json(self, template_json):
         assert template_json['type'] == self.DOCUMENT_TYPE, ''
