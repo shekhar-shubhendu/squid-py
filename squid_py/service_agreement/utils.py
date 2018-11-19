@@ -1,12 +1,11 @@
 import os
-import pathlib
 import json
 
 from squid_py.ddo import PUBLIC_KEY_STORE_TYPE_HEX
 from squid_py.ddo.authentication import Authentication
 from squid_py.ddo.public_key_base import PublicKeyBase
 from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from squid_py.keeper.utils import get_contract_by_name, get_fingerprint_by_name
+from squid_py.keeper.utils import get_fingerprint_by_name, get_contract_abi_and_address, hexstr_to_bytes
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_types import ServiceTypes
 from squid_py.utils import network_name
@@ -31,37 +30,57 @@ def get_sla_template_dict(path):
         return json.load(template_file)
 
 
-def register_service_agreement_template(keeper, owner_address, sla_template_instance=None, sla_template_path=None):
+def build_condition_key(web3, contract_address, fingerprint, sla_template_id):
+    assert isinstance(fingerprint, bytes), 'Expecting `fingerprint` of type bytes, got %s' % type(fingerprint)
+    return web3.soliditySha3(
+        ['bytes32', 'address', 'bytes4'],
+        [sla_template_id.encode(), contract_address, fingerprint]
+    ).hex()
+
+
+def build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id):
+    return [build_condition_key(web3, address, fingerprints[i], sla_template_id)
+                       for i, address in enumerate(contract_addresses)]
+
+
+def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, sla_template_id):
+    _network_name = network_name(web3)
+    names = {cond.contract_name for cond in conditions}
+    name_to_contract_abi_n_address = {
+        name: get_contract_abi_and_address(web3, contract_path, name, _network_name)
+        for name in names
+    }
+    contract_addresses = [
+        web3.toChecksumAddress(name_to_contract_abi_n_address[cond.contract_name][1])
+        for cond in conditions
+    ]
+    fingerprints = [
+        hexstr_to_bytes(web3, get_fingerprint_by_name(
+            name_to_contract_abi_n_address[cond.contract_name][0],
+            cond.function_name
+        ))
+        for i, cond in enumerate(conditions)
+    ]
+    fulfillment_indices = [i for i, cond in enumerate(conditions) if cond.is_terminal]
+    conditions_keys = build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id)
+    for i, address in enumerate(conditions):
+        conditions[i].condition_key = conditions_keys[i]
+
+    return contract_addresses, fingerprints, fulfillment_indices, conditions_keys
+
+
+def register_service_agreement_template(service_agreement_contract, contract_path, owner_address, sla_template_instance=None, sla_template_path=None):
     if sla_template_instance is None:
         if sla_template_path is None:
             raise AssertionError('Invalid arguments, a template instance or a template json path is required.')
 
         sla_template_instance = ServiceAgreementTemplate.from_json_file(sla_template_path)
 
-    _network_name = network_name(keeper.web3)
-    contract_addresses = [
-        get_contract_by_name(keeper.contract_path, _network_name, cond.contract_name)['address']
-        for cond in sla_template_instance.conditions
-    ]
-    fingerprints = [
-        get_fingerprint_by_name(
-            get_contract_by_name(keeper.contract_path, _network_name, cond.contract_name)['abi'],
-            cond.function_name
-        )
-        for i, cond in enumerate(sla_template_instance.conditions)
-    ]
-    fulfillment_indices = [i for i, cond in enumerate(sla_template_instance.conditions) if cond.is_terminal]
-    keys = []
-    for i, address in enumerate(contract_addresses):
-        f = fingerprints[i]
-        key = keeper.web3.soliditySha3(
-            ['bytes32', 'address', 'bytes4'],
-            [sla_template_instance.template_id.encode(), address, f]
-        ).hex()
-        sla_template_instance.conditions[i].condition_key = key
-        keys.append(key)
-
-    return keeper.service_agreement.setup_agreement_template(
+    conditions_data = get_conditions_data_from_keeper_contracts(
+        service_agreement_contract.web3, contract_path, sla_template_instance.conditions, sla_template_instance.template_id
+    )
+    contract_addresses, fingerprints, fulfillment_indices, condition_keys = conditions_data
+    return service_agreement_contract.setup_agreement_template(
         sla_template_instance.template_id,
         contract_addresses, fingerprints, sla_template_instance.conditions_dependencies,
         sla_template_instance.description,

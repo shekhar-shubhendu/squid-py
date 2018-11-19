@@ -2,8 +2,6 @@ from squid_py.config import DEFAULT_GAS_LIMIT
 from squid_py.keeper.contract_base import ContractBase
 from web3 import Web3
 
-from squid_py.keeper.utils import hexstr_to_bytes
-import uuid
 
 class ServiceAgreement(ContractBase):
     """
@@ -22,12 +20,10 @@ class ServiceAgreement(ContractBase):
         assert dependencies_bits and isinstance(dependencies_bits, list), 'dependencies_bits arg: expected list, got {0}'.format(type(dependencies_bits))
 
         service_bytes = Web3.toHex(Web3.sha3(text=service_description))
-        _contracts = [self.to_checksum_address(contr) for contr in contracts]
-        _fingerprints = [hexstr_to_bytes(self.web3, f) for f in fingerprints]
         receipt = self.contract_concise.setupAgreementTemplate(
             template_id,
-            _contracts,
-            _fingerprints,
+            contracts,
+            fingerprints,
             dependencies_bits,
             service_bytes,
             fulfillment_indices,
@@ -35,8 +31,6 @@ class ServiceAgreement(ContractBase):
             transact={'from': owner_address, 'gas': DEFAULT_GAS_LIMIT}
         )
         tx = self.web3.eth.waitForTransactionReceipt(receipt)
-        result = self.events.SetupAgreementTemplate().processReceipt(tx)
-        print('result::::: ', result)
         return tx
 
     def execute_service_agreement(self, template_id, signature, consumer, hashes, timeouts, service_agreement_id, did_id, publisher):
@@ -74,3 +68,6 @@ class ServiceAgreement(ContractBase):
 
     def get_condition_by_fingerprint(self, service_agreement_id, contract_address, function_fingerprint):
         return self.contract_concise.getConditionByFingerprint(service_agreement_id, contract_address, function_fingerprint)
+
+    def isValidSignature(self, prefixed_msg_hash, signature, signing_address, caller_address):
+        return self.contract_concise.isValidSignature(prefixed_msg_hash, signature, signing_address, call={'from': caller_address})

@@ -1,6 +1,8 @@
 import json
 import os
 
+from squid_py.utils import network_name
+
 
 def get_contract_abi_by_address(contract_path, address):
     contract_tree = os.walk(contract_path)
@@ -25,6 +27,18 @@ def get_contract_by_name(contract_path, network_name, contract_name):
     with open(os.path.join(contract_path, file_name)) as f:
         contract = json.loads(f.read())
         return contract
+
+
+def get_contract_abi_and_address(web3, contract_path, contract_name, keeper_network_name=None):
+    if not keeper_network_name:
+        keeper_network_name = network_name(web3)
+    contract_json = get_contract_by_name(contract_path, keeper_network_name, contract_name)
+    return contract_json['abi'], web3.toChecksumAddress(contract_json['address'])
+
+
+def get_contract_instance(web3, contract_path, contract_name, keeper_network_name=None):
+    abi, address = get_contract_abi_and_address(web3, contract_path, contract_name, keeper_network_name)
+    return web3.eth.contract(address=address, abi=abi)
 
 
 def get_fingerprint_by_name(abi, name):

@@ -15,6 +15,7 @@ from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
+from squid_py.service_agreement.register_service_agreement import register_service_agreement
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
@@ -196,10 +197,9 @@ class Ocean:
         })
         requests.post(purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
 
-        # :TODO: enable event handling
-        # # subscribe to events related to this service_agreement_id
-        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
-        #                            service_agreement_id, did, service, 'consumer', 3)
+        # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
+                                   service_agreement_id, did, service, 'consumer', 3)
 
         return service_agreement_id
 
@@ -245,10 +245,9 @@ class Ocean:
             publisher_address
         )
 
-        # :TODO: enable event handling
-        # # subscribe to events related to this service_agreement_id
-        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
-        #                            service_agreement_id, did, service, 'publisher', 3)
+        # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
+                                   service_agreement_id, did, service, 'publisher', 3)
 
         return receipt
 
@@ -280,16 +279,15 @@ class Ocean:
             self._web3, sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
             sa.conditions_timeouts, service_agreement_id
         )
-        # :TODO: complete the signature verification below. This is disabled because the KeyAPI recovery does not match the original
-        # consumer address/public key.
-        return True
-        # pub_key = KeyAPI.PublicKey.recover_from_msg_hash(agreement_hash, KeyAPI.Signature(self._web3.toBytes(hexstr=signature)))
-        # address = pub_key.to_address()
-        # return address == consumer_address
+        prefixed_hash = self._web3.soliditySha3(['string', 'bytes32'], ["\x19Ethereum Signed Message:\n32", agreement_hash])
+        valid = self.keeper.service_agreement.isValidSignature(prefixed_hash, signature, consumer_address, consumer_address)
+        return valid
 
     def _register_service_agreement_template(self, template_dict, owner_address):
         sla_template = ServiceAgreementTemplate(template_json=template_dict)
-        return register_service_agreement_template(self.keeper, owner_address, sla_template)
+        return register_service_agreement_template(
+            self.keeper.service_agreement, self.keeper.contract_path, owner_address, sla_template
+        )
 
     def resolve_did(self, did):
         """
