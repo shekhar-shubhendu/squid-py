@@ -9,19 +9,17 @@ from squid_py.ocean.account import Account
 from squid_py.ocean.asset import Asset
 from squid_py.aquariuswrapper import AquariusWrapper
 from squid_py.config import Config
-from squid_py.ddo import DDO, PUBLIC_KEY_STORE_TYPE_HEX
-from squid_py.ddo.authentication import Authentication
-from squid_py.ddo.public_key_base import PublicKeyBase
+from squid_py.ddo import DDO
 from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
-from squid_py.service_agreement.register_service_agreement import register_service_agreement
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
-from squid_py.service_agreement.service_factory import ServiceFactory
-from squid_py.utils.utilities import get_publickey_from_address, generate_new_id
+from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
+from squid_py.service_agreement.utils import make_public_key_and_authentication, register_service_agreement_template
+from squid_py.utils.utilities import generate_new_id
 from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -128,26 +126,25 @@ class Ocean:
         if not metadata or not Metadata.validate(metadata):
             raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')
 
-        # copy metadata so we don't change the original
-        metadata_copy = metadata.copy()
-
         asset_id = generate_new_id()
         # Check if it's already registered first!
         if asset_id in self.metadata_store.list_assets():
             raise OceanDIDAlreadyExist('Asset id "%s" is already registered to another asset.' % asset_id)
 
+        # copy metadata so we don't change the original
+        metadata_copy = metadata.copy()
+
         # Create a DDO object
         did = did_generate(asset_id)
         ddo = DDO(did)
-        # set public key
-        public_key_value = get_publickey_from_address(self._web3, publisher_address)
-        pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_address, 'type': PUBLIC_KEY_STORE_TYPE_HEX})
-        pub_key.assign_did(did)
+
+        # Add public key and authentication
+        pub_key, auth = make_public_key_and_authentication(did, publisher_address, self._web3)
         ddo.add_public_key(pub_key)
-        # set authentication
-        auth = Authentication(pub_key, PUBLIC_KEY_TYPE_RSA)
         ddo.add_authentication(auth, PUBLIC_KEY_TYPE_RSA)
 
+        # Setup metadata service
+        # First replace `contentUrls` with encrypted `contentUrls`
         assert metadata_copy['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
         content_urls_encrypted = self._encrypt_metadata_content_urls(did, json.dumps(metadata_copy['base']['contentUrls']))
         # only assign if the encryption worked
@@ -156,14 +153,11 @@ class Ocean:
 
         # DDO url and `Metadata` service
         ddo_service_endpoint = self.metadata_store.get_service_endpoint(did)
-        metadata_service = ServiceFactory.build_metadata_service(did, metadata_copy, ddo_service_endpoint)
-        ddo.add_service(metadata_service)
-        # Other services for consuming the asset
-        sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
-        for i, service_desc in enumerate(service_descriptors):
-            service = ServiceFactory.build_service(service_desc, did)
-            # set serviceDefinitionId for each service
-            service.update_value(sa_def_key, 'services-{}'.format(i+1))
+        metadata_service_desc = ServiceDescriptor.metadata_service_descriptor(metadata_copy, ddo_service_endpoint)
+
+        # Add all services to ddo
+        _service_descriptors = service_descriptors + [metadata_service_desc]
+        for service in ServiceFactory.build_services(did, _service_descriptors):
             ddo.add_service(service)
 
         # publish the new ddo in ocean-db/Aquarius
@@ -176,10 +170,11 @@ class Ocean:
             url=ddo_service_endpoint,
             account=publisher_address
         )
+
         return ddo
 
     def sign_service_agreement(self, did, service_definition_id, consumer):
-        service_agreement_id = generate_new_id()
+        service_agreement_id = '0x%s' % generate_new_id()
         # Extract all of the params necessary for execute agreement from the ddo
         ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
         service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
@@ -190,19 +185,21 @@ class Ocean:
         sa = ServiceAgreement.from_service_dict(service)
         purchase_endpoint = sa.purchase_endpoint
 
+        signature, sa_hash = sa.get_signed_agreement_hash(self._web3, did_to_id(did), service_agreement_id, consumer)
         # Prepare a payload to send to `Brizo`
         payload = json.dumps({
             'did': did,
             'serviceAgreementId': service_agreement_id,
             'serviceDefinitionId': service_definition_id,
-            'signature': sa.get_signed_agreement_hash(self._web3, did_to_id(did), service_agreement_id, consumer)[0],
+            'signature': signature,
             'consumerPublicKey': consumer
         })
         requests.post(purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
 
-        # subscribe to events related to this service_agreement_id
-        register_service_agreement(self._web3, self.keeper.contract_path,Config.storage_path, consumer,
-                                   service_agreement_id, did, service_definition_id, 'consumer', 3)
+        # :TODO: enable event handling
+        # # subscribe to events related to this service_agreement_id
+        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
+        #                            service_agreement_id, did, service, 'consumer', 3)
 
         return service_agreement_id
 
@@ -235,13 +232,8 @@ class Ocean:
         asset_id = did_to_id(did)
         service = service.as_dictionary()
         sa = ServiceAgreement.from_service_dict(service)
+        self.verify_service_agreement_signature(did, service_agreement_id, service_definition_id, consumer_address, service_agreement_signature, ddo=ddo)
 
-        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-            sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
-            sa.conditions_timeouts, service_agreement_id, asset_id
-        )
-        # :TODO: Validate the signature against the agreement_hash before submitting service agreement on-chain
-        self.verify_signed_service_agreement(service_agreement_id, service_definition_id, consumer_address, service_agreement_signature)
         receipt = self.keeper.service_agreement.execute_service_agreement(
             sa.sla_template_id,
             service_agreement_signature,
@@ -253,9 +245,10 @@ class Ocean:
             publisher_address
         )
 
-        # subscribe to events related to this service_agreement_id
-        register_service_agreement(self._web3, self.keeper.contract_path, Config.storage_path, publisher_address,
-                                   service_agreement_id, did, service_definition_id, 'publisher', 3)
+        # :TODO: enable event handling
+        # # subscribe to events related to this service_agreement_id
+        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
+        #                            service_agreement_id, did, service, 'publisher', 3)
 
         return receipt
 
@@ -268,11 +261,35 @@ class Ocean:
         :param consumer_address:
         :return: bool True if user has permission
         """
+        # :TODO:
+        #   1. ensure service_agreement_id is actually executed on-chain and is associated to both asset_id and consumer_address
+
         return True
 
-    def verify_signed_service_agreement(self, service_agreement_id, service_definition_id, consumer_address, signature):
+    def verify_service_agreement_signature(self, did, service_agreement_id, service_definition_id, consumer_address, signature, ddo=None):
+        if not ddo:
+            ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
 
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
+        if not service:
+            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
+
+        service = service.as_dictionary()
+        sa = ServiceAgreement.from_service_dict(service)
+        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
+            self._web3, sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
+            sa.conditions_timeouts, service_agreement_id
+        )
+        # :TODO: complete the signature verification below. This is disabled because the KeyAPI recovery does not match the original
+        # consumer address/public key.
         return True
+        # pub_key = KeyAPI.PublicKey.recover_from_msg_hash(agreement_hash, KeyAPI.Signature(self._web3.toBytes(hexstr=signature)))
+        # address = pub_key.to_address()
+        # return address == consumer_address
+
+    def _register_service_agreement_template(self, template_dict, owner_address):
+        sla_template = ServiceAgreementTemplate(template_json=template_dict)
+        return register_service_agreement_template(self.keeper, owner_address, sla_template)
 
     def resolve_did(self, did):
         """
