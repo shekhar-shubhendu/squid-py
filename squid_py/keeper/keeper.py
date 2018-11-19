@@ -7,7 +7,7 @@ import logging
 
 from squid_py.keeper.conditions.access_conditions import AccessConditions
 from squid_py.keeper.conditions.payment_conditions import PaymentConditions
-from squid_py.keeper.ServiceAgreement import ServiceAgreement
+from squid_py.keeper.service_agreement import ServiceAgreement
 from squid_py.keeper.auth import Auth
 from squid_py.keeper.didregistry import DIDRegistry
 from squid_py.keeper.market import Market
