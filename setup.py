@@ -62,6 +62,8 @@ for d, _, _ in os.walk('squid_py'):
     if os.path.exists(join(d, '__init__.py')):
         packages.append(d.replace(os.path.sep, '.'))
 
+data_files = [('./squid_py/service_agreement',['./squid_py/service_agreement/access_sla_template.json'])]
+
 setup(
     author="leucothia",
     author_email='devops@oceanprotocol.com',
@@ -77,6 +79,7 @@ setup(
         'test': test_requirements,
         'dev': dev_requirements + test_requirements + docs_requirements,
     },
+    data_files=data_files,
     install_requires=install_requirements,
     license="Apache Software License 2.0",
     long_description=readme,
