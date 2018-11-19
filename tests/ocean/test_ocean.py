@@ -3,14 +3,11 @@
 
 """
 
-import logging
-import os
 import pathlib
 import json
 
-import pytest
 from ocean.ocean import Ocean
-from ocean.metadata_agent import METADATA_AGENT_ENDPOINT_NAME
+# from ocean.metadata_agent import METADATA_AGENT_ENDPOINT_NAME
 
 CONTRACTS_PATH = './artifacts'
 OCEAN_URL = 'http://localhost:8545'
@@ -55,4 +52,4 @@ def test_ocean_instance():
 
     # start to test getting the asset from storage
     asset_did = "{0}/{1}".format(agent.did, asset.asset_id)
-    found_asset = ocean.get_asset(asset_did)
+    ocean.get_asset(asset_did)

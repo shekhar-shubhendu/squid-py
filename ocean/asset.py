@@ -1,7 +1,6 @@
 """
     Asset class to hold Ocean asset information such as asset id and metadata
 """
-import hashlib
 import json
 from web3 import Web3
 
@@ -91,7 +90,7 @@ class Asset():
     @staticmethod
     def is_metadata_valid(asset_id, metadata_text):
         """
-        validate metadata, by calcualating the hash (asset_id) and compare this to the 
+        validate metadata, by calcualating the hash (asset_id) and compare this to the
         given asset_id, if both are equal then the metadata is valid
         :param asset_id: asset id to compare with
         :param metadata: dict of metadata to calculate the hash ( asset_id)
