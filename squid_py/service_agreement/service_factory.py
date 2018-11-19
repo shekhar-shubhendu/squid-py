@@ -1,5 +1,7 @@
 import os.path
 import pathlib
+import sys
+import site
 
 from web3 import Web3
 
@@ -14,18 +16,21 @@ class ServiceDescriptor(object):
     @staticmethod
     def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
         return (ServiceTypes.ASSET_ACCESS,
-                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
+                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint,
+                 'timeout': timeout})
 
     @staticmethod
     def compute_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
         return (ServiceTypes.CLOUD_COMPUTE,
-                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint, 'timeout': timeout})
+                {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint,
+                 'timeout': timeout})
 
 
 class ServiceFactory(object):
     @staticmethod
     def build_service(service_descriptor, did):
-        assert isinstance(service_descriptor, tuple) and len(service_descriptor) == 2, 'Unknown service descriptor format.'
+        assert isinstance(service_descriptor, tuple) and len(
+            service_descriptor) == 2, 'Unknown service descriptor format.'
         service_type, kwargs = service_descriptor
         if service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
@@ -49,7 +54,9 @@ class ServiceFactory(object):
             'assetId': Web3.toHex(get_id_from_did(did)),
             'price': price
         }
-        sla_template_path = os.path.join(pathlib.Path.cwd(), 'squid_py', 'service_agreement', 'access_sla_template.json')
+
+        sla_template_path = os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[1:-1],
+                                         'access_sla_template.json')
         sla_template = ServiceAgreementTemplate.from_json_file(sla_template_path)
         conditions = sla_template.conditions[:]
         conditions_json_list = []
@@ -62,7 +69,8 @@ class ServiceFactory(object):
 
             conditions_json_list.append(cond)
 
-        sa = ServiceAgreement('services-1', sla_template.template_id, sla_template.conditions, sla_template.service_agreement_contract)
+        sa = ServiceAgreement('services-1', sla_template.template_id, sla_template.conditions,
+                              sla_template.service_agreement_contract)
         other_values = {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: sa.sa_definition_id,
             ServiceAgreementTemplate.TEMPLATE_ID_KEY: sla_template.template_id,
