@@ -1,6 +1,6 @@
 
 class AdditionalInfoMeta(object):
-    KEY = 'additionalInfo'
+    KEY = 'additionalInformation'
     VALUES_KEYS = (
         "updateFrequency",
         "structuredMarkup"

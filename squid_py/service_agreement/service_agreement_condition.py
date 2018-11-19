@@ -39,54 +39,47 @@ class Event:
 class ServiceAgreementCondition(object):
     def __init__(self, condition_json=None):
         self.name = ''
+        self.timeout = 0
         self.condition_key = ''
-        self.contract_address = ''
-        self.function_fingerprint = ''
+        self.contract_name = ''
         self.function_name = ''
         self.is_terminal = False
         self.dependencies = []
         self.timeout_flags = []
         self.parameters = []
         self.events = []
-        self.timeout = 0
         if condition_json:
             self.init_from_condition_json(condition_json)
 
     def init_from_condition_json(self, condition_json):
         self.name = condition_json['name']
         self.timeout = condition_json['timeout']
-        self.contract_address = condition_json['contractAddress']
         self.condition_key = condition_json['conditionKey']
+        self.contract_name = condition_json['contractName']
         self.function_name = condition_json['functionName']
-        self.is_terminal = condition_json['isTerminalCondition']
-        self.events = [Event(e) for e in condition_json['events']]
-        if 'fingerprint' in condition_json:
-            self.function_fingerprint = condition_json['fingerprint']
-            self.dependencies = condition_json['dependencies']
-            self.timeout_flags = condition_json['dependencyTimeoutFlags']
-            assert len(self.dependencies) == len(self.timeout_flags)
-            if self.dependencies:
-                assert sum(self.timeout_flags) == 0 or self.timeout > 0, 'timeout must be set when any dependency is set to rely on a timeout.'
+        self.is_terminal = bool(condition_json['isTerminalCondition'])
+        self.dependencies = condition_json['dependencies']
+        self.timeout_flags = condition_json['dependencyTimeoutFlags']
+        assert len(self.dependencies) == len(self.timeout_flags)
+        if self.dependencies:
+            assert sum(self.timeout_flags) == 0 or self.timeout > 0, 'timeout must be set when any dependency is set to rely on a timeout.'
 
-            self.parameters = [Parameter(p) for p in condition_json['parameters']]
+        self.parameters = [Parameter(p) for p in condition_json['parameters']]
+        self.events = [Event(e) for e in condition_json['events']]
 
     def as_dictionary(self):
         condition_dict = {
             "name": self.name,
             "timeout": self.timeout,
             "conditionKey": self.condition_key,
-            "contractAddress": self.contract_address,
+            "contractName": self.contract_name,
             "functionName": self.function_name,
-            "isTerminalCondition": self.is_terminal,
-            "events": [e.as_dictionary() for e in self.events]
+            "isTerminalCondition": int(self.is_terminal),
+            "events": [e.as_dictionary() for e in self.events],
+            "parameters": [p.as_dictionary() for p in self.parameters],
+            "dependencies": self.dependencies,
+            "dependencyTimeoutFlags": self.timeout_flags
         }
-        if self.function_fingerprint:
-            condition_dict.update({
-                "fingerprint": self.function_fingerprint,
-                "dependencies": self.dependencies,
-                "dependencyTimeoutFlags": self.timeout_flags,
-                "parameters": [p.as_dictionary() for p in self.parameters]
-            }),
 
         return condition_dict
 
@@ -100,19 +93,19 @@ class ServiceAgreementCondition(object):
 
     @property
     def values_hash(self):
-        return Web3.soliditySha3(self.param_types, self.param_values)
+        return Web3.soliditySha3(self.param_types, self.param_values).hex()
 
     @staticmethod
     def example_dict():
         return {
             "name": "lockPayment",
+            "timeout": 0,
             "dependencies": [],
-            "isTerminalCondition": False,
-            "canBeFulfilledBeforeTimeout": True,
-            "conditionKey": {
-                "contractAddress": "0x...",
-                "fingerprint": "0x..."
-            },
+            "dependencyTimeoutFlags": [],
+            "isTerminalCondition": 0,
+            "conditionKey": "",
+            "contractName": "PaymentConditions",
+            "functionName": "lockPayment",
             "parameters": [
                 {
                     "name": "assetId",

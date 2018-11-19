@@ -61,7 +61,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             'type': 'Access',
             'templateId': self.template_id,
             'serviceAgreementContract': {
-                'address': self.service_agreement.contract.address,
+                'contractName': 'ServiceAgreement',
                 'events': [{
                     'name': 'ExecuteAgreement',
                     'actorType': 'consumer',
@@ -74,14 +74,21 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             },
             'conditions': [{
                 'name': 'lockPayment',
-                'conditionKey': {
-                    'contractAddress': self.payment_conditions.contract.address,
-                    'fingerprint': lock_payment_fingerprint,
-                },
-                'parameters': {
-                    'did': did,
-                    'price': price,
-                },
+                'conditionKey': "",
+                'contractName': 'PaymentConditions',
+                'functionName': 'lockPayment',
+                'parameters': [
+                    {
+                        'name': 'did',
+                        'type': 'byte32',
+                        'value': did,
+                    },
+                    {
+                        'name': 'price',
+                        'type': 'uint256',
+                        'value': price,
+                    }
+                ],
                 'events': [{
                     'name': 'PaymentLocked',
                     'actorType': 'publisher',
@@ -93,14 +100,21 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 }],
             }, {
                 'name': 'grantAccess',
-                'conditionKey': {
-                    'contractAddress': self.access_conditions.contract.address,
-                    'fingerprint': grant_access_fingerprint,
-                },
-                'parameters': {
-                    'did': did,
-                    'price': price,
-                },
+                'conditionKey': "",
+                'contractName': 'AccessConditions',
+                'functionName': 'grantAccess',
+                'parameters': [
+                    {
+                        'name': 'did',
+                        'type': 'byte32',
+                        'value': did,
+                    },
+                    {
+                        'name': 'price',
+                        'type': 'uint256',
+                        'value': price,
+                    }
+                ],
                 'events': [{
                     'name': 'AccessGranted',
                     'actorType': 'publisher',
@@ -112,14 +126,21 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 }],
             }, {
                 'name': 'releasePayment',
-                'conditionKey': {
-                    'contractAddress': self.payment_conditions.contract.address,
-                    'fingerprint': release_payment_fingerprint,
-                },
-                'parameters': {
-                    'did': did,
-                    'price': price,
-                },
+                'conditionKey': "",
+                'contractName': 'PaymentConditions',
+                'functionName': 'releasePayment',
+                'parameters': [
+                    {
+                        'name': 'did',
+                        'type': 'byte32',
+                        'value': did,
+                    },
+                    {
+                        'name': 'price',
+                        'type': 'uint256',
+                        'value': price,
+                    }
+                ],
                 'events': [],
             }]
         }
@@ -137,7 +158,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             {
                 'serviceAgreementContract': {
-                    'address': self.service_agreement.contract.address,
+                    'contractName': 'ServiceAgreement',
                     'events': []
                 },
                 'conditions': []

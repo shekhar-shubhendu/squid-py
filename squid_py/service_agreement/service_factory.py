@@ -1,18 +1,19 @@
-import os.path
-import pathlib
-import sys
-import site
-
 from web3 import Web3
 
 from squid_py.ddo.service import Service
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_types import ServiceTypes
+from squid_py.service_agreement.utils import get_sla_template_path
 from squid_py.utils.utilities import get_id_from_did
 
 
 class ServiceDescriptor(object):
+    @staticmethod
+    def metadata_service_descriptor(metadata, service_endpoint):
+        return (ServiceTypes.METADATA,
+                {'metadata': metadata, 'serviceEndpoint': service_endpoint})
+
     @staticmethod
     def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
         return (ServiceTypes.ASSET_ACCESS,
@@ -28,16 +29,31 @@ class ServiceDescriptor(object):
 
 class ServiceFactory(object):
     @staticmethod
+    def build_services(did, service_descriptors):
+        services = []
+        sa_def_key = ServiceAgreement.SERVICE_DEFINITION_ID_KEY
+        for i, service_desc in enumerate(service_descriptors):
+            service = ServiceFactory.build_service(service_desc, did)
+            # set serviceDefinitionId for each service
+            service.update_value(sa_def_key, 'services-{}'.format(i + 1))
+            services.append(service)
+
+        return services
+
+    @staticmethod
     def build_service(service_descriptor, did):
         assert isinstance(service_descriptor, tuple) and len(
             service_descriptor) == 2, 'Unknown service descriptor format.'
         service_type, kwargs = service_descriptor
-        if service_type == ServiceTypes.ASSET_ACCESS:
+        if service_type == ServiceTypes.METADATA:
+            return ServiceFactory.build_metadata_service(did, kwargs['metadata'], kwargs['serviceEndpoint'])
+
+        elif service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
                 did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
 
-        if service_type == ServiceTypes.CLOUD_COMPUTE:
+        elif service_type == ServiceTypes.CLOUD_COMPUTE:
             return ServiceFactory.build_compute_service(
                 did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
             )
@@ -46,7 +62,7 @@ class ServiceFactory(object):
 
     @staticmethod
     def build_metadata_service(did, metadata, service_endpoint):
-        Service(did, service_endpoint, ServiceTypes.METADATA, values={'metadata': metadata})
+        return Service(did, service_endpoint, ServiceTypes.METADATA, values={'metadata': metadata})
 
     @staticmethod
     def build_access_service(did, price, purchase_endpoint, service_endpoint, timeout):
@@ -54,9 +70,7 @@ class ServiceFactory(object):
             'assetId': Web3.toHex(get_id_from_did(did)),
             'price': price
         }
-
-        sla_template_path = os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[1:-1],
-                                         'access_sla_template.json')
+        sla_template_path = get_sla_template_path()
         sla_template = ServiceAgreementTemplate.from_json_file(sla_template_path)
         conditions = sla_template.conditions[:]
         conditions_json_list = []
@@ -74,6 +88,7 @@ class ServiceFactory(object):
         other_values = {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: sa.sa_definition_id,
             ServiceAgreementTemplate.TEMPLATE_ID_KEY: sla_template.template_id,
+            ServiceAgreement.SERVICE_CONTRACT_KEY: sa.service_agreement_contract,
             ServiceAgreement.SERVICE_CONDITIONS_KEY: conditions,
             'purchaseEndpoint': purchase_endpoint
         }

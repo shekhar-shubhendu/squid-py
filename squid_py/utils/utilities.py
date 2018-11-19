@@ -1,7 +1,4 @@
-import logging
 import uuid
-import json
-import hashlib
 import time
 from collections import namedtuple
 from threading import Thread
@@ -26,40 +23,20 @@ def get_id_from_did(did):
     return convert_to_bytes(Web3, did.split(':')[-1])
 
 
-def sign(web3, account_address, message):
-    return web3.eth.sign(account_address, message)
-
-
-def get_balance(web3, account_address, block_identifier):
-    return web3.eth.getBalance(account_address, block_identifier)
-
-
-def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
-                filters=None, num_confirmations=12):
-    event_filter = install_filter(
-        contract_name, event_name, fromBlock, toBlock, filters
-    )
-    event_filter.poll_interval = interval
-    Thread(
-        target=watcher,
-        args=(event_filter, callback),
-        kwargs={'num_confirmations': num_confirmations},
-        daemon=True,
-    ).start()
-    return event_filter
-
-
-def install_filter(contract, event_name, fromBlock=0, toBlock='latest', filters=None):
-    # contract_instance = self.contracts[contract_name][1]
-    event = getattr(contract.events, event_name)
-    event_filter = event.createFilter(
-        fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
-    )
-    return event_filter
-
-
 def to_32byte_hex(web3, val):
     return web3.toBytes(val).rjust(32, b'\0')
+
+
+def convert_to_bytes(web3, data):
+    return web3.toBytes(text=data)
+
+
+def convert_to_string(web3, data):
+    return web3.toHex(data)
+
+
+def convert_to_text(web3, data):
+    return web3.toText(data)
 
 
 def split_signature(web3, signature):
@@ -84,6 +61,30 @@ def network_name(web3):
         42: 'Kovan',
     }
     return switcher.get(network_id, 'development')
+
+
+def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
+                filters=None, num_confirmations=12):
+    event_filter = install_filter(
+        contract_name, event_name, fromBlock, toBlock, filters
+    )
+    event_filter.poll_interval = interval
+    Thread(
+        target=watcher,
+        args=(event_filter, callback),
+        kwargs={'num_confirmations': num_confirmations},
+        daemon=True,
+    ).start()
+    return event_filter
+
+
+def install_filter(contract, event_name, fromBlock=0, toBlock='latest', filters=None):
+    # contract_instance = self.contracts[contract_name][1]
+    event = getattr(contract.events, event_name)
+    event_filter = event.createFilter(
+        fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
+    )
+    return event_filter
 
 
 def watcher(event_filter, callback, num_confirmations=12):
@@ -134,15 +135,3 @@ def await_confirmations(event_filter, block_number, block_hash, num_confirmation
             break
 
         time.sleep(0.1)
-
-
-def convert_to_bytes(web3, data):
-    return web3.toBytes(text=data)
-
-
-def convert_to_string(web3, data):
-    return web3.toHex(data)
-
-
-def convert_to_text(web3, data):
-    return web3.toText(data)
