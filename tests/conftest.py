@@ -1,11 +1,8 @@
 import os
-import pathlib
 
 import pytest
 
-from squid_py.ddo.metadata import Metadata
 from squid_py.ocean.ocean import Ocean
-from squid_py.service_agreement.service_factory import ServiceDescriptor
 
 
 @pytest.fixture
