@@ -36,8 +36,6 @@ class AquariusWrapper(object):
         if not response:
             return {}
 
-        print('url: ', self._base_url, self._base_url + '/ddo/%s' % asset_did)
-        print('response: ', response)
         try:
             parsed_response = json.loads(response)
         except TypeError:

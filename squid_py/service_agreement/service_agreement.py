@@ -1,5 +1,7 @@
 from web3 import Web3
 
+from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
+from squid_py.service_agreement.service_agreement_contract import ServiceAgreementContract
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 
 
@@ -47,15 +49,16 @@ class ServiceAgreement(object):
     def from_service_dict(cls, service_dict):
         return cls(
             service_dict[cls.SERVICE_DEFINITION_ID_KEY], service_dict[ServiceAgreementTemplate.TEMPLATE_ID_KEY],
-            service_dict[cls.SERVICE_CONDITIONS_KEY], service_dict[cls.SERVICE_CONTRACT_KEY],
+            [ServiceAgreementCondition(cond) for cond in service_dict[cls.SERVICE_CONDITIONS_KEY]],
+            ServiceAgreementContract(service_dict[cls.SERVICE_CONTRACT_KEY]),
             service_dict.get(cls.PURCHASE_ENDPOINT_KEY), service_dict.get(cls.SERVICE_ENDPOINT_KEY)
         )
 
     @staticmethod
-    def generate_service_agreement_hash(sa_template_id, condition_keys, values_hash_list, timeouts, service_agreement_id, did_id):
-        return Web3.soliditySha3(
-            ['bytes32', 'bytes32[]', 'bytes32[]', 'bytes32[]', 'bytes32', 'bytes32'],
-            [sa_template_id, condition_keys, values_hash_list, timeouts, service_agreement_id, did_id]
+    def generate_service_agreement_hash(web3, sa_template_id, condition_keys, values_hash_list, timeouts, service_agreement_id):
+        return web3.soliditySha3(
+            ['bytes32', 'bytes32[]', 'bytes32[]', 'uint256[]', 'bytes32'],
+            [sa_template_id, condition_keys, values_hash_list, timeouts, service_agreement_id]
         )
 
     def get_signed_agreement_hash(self, web3, did_id, service_agreement_id, consumer):
@@ -69,9 +72,9 @@ class ServiceAgreement(object):
         :return: signed_msg_hash, msg_hash
         """
         agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-            self.sla_template_id, self.conditions_keys, self.conditions_params_value_hashes, self.conditions_timeouts, service_agreement_id, did_id
+            web3, self.sla_template_id, self.conditions_keys, self.conditions_params_value_hashes, self.conditions_timeouts, service_agreement_id
         )
-        return web3.eth.sign(consumer, agreement_hash), agreement_hash
+        return web3.eth.sign(consumer, agreement_hash).hex(), agreement_hash.hex()
 
     def as_dictionary(self):
         return {

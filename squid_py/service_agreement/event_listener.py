@@ -1,8 +1,8 @@
 import importlib
 
 from squid_py.keeper.service_agreement import ServiceAgreement
-from squid_py.keeper.utils import get_contract_abi_by_address
-from squid_py.utils import watch_event
+from squid_py.keeper.utils import get_contract_by_name
+from squid_py.utils import watch_event, network_name
 
 from .storage import record_service_agreement
 
@@ -32,16 +32,16 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
         if event['actorType'] != actor_type:
                 continue
 
-        events.append((service_definition['serviceAgreementContract']['address'], event))
+        events.append((service_definition['serviceAgreementContract']['contractName'], event))
 
     for condition in service_definition['conditions']:
         for event in condition['events']:
             if event['actorType'] != actor_type:
                 continue
-            events.append((condition['conditionKey']['contractAddress'], event))
+            events.append((condition['contractName'], event))
 
     # subscribe to the events
-    for contract_address, event in events:
+    for contract_name, event in events:
         event_handler = event['handler']
         version = event_handler['version'].replace('.', '_')
         import_path = 'squid_py.modules.v{}.{}'.format(version, event_handler['moduleName'])
@@ -54,8 +54,8 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
 
             return _callback
 
-        contract_abi = get_contract_abi_by_address(contract_path, contract_address)
-        contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+        contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
+        contract = web3.eth.contract(address=contract_json['address'], abi=contract_json['abi'])
 
         # FIXME change this after AccessConditions contract is fixed
         _filters = filters \
@@ -77,9 +77,9 @@ def watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id,
     """ Subscribes to the service agreement fulfilled event, filtering by the given
         service agreement ID.
     """
-    contract_address = service_definition['serviceAgreementContract']['address']
-    contract_abi = get_contract_abi_by_address(contract_path, contract_address)
-    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+    contract_name = service_definition['serviceAgreementContract']['contractName']
+    contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
+    contract = web3.eth.contract(address=contract_json['address'], abi=contract_json['abi'])
 
     filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
     watch_event(

@@ -1,7 +1,9 @@
+from squid_py.keeper.utils import get_contract_by_name
 from squid_py.modules.v0_1.utils import (
     get_condition_contract_data,
     is_condition_fulfilled,
 )
+from squid_py.utils import network_name
 
 
 def lockPayment(web3, contract_path, account, service_agreement_id, service_definition,
@@ -18,17 +20,20 @@ def lockPayment(web3, contract_path, account, service_agreement_id, service_defi
         'lockPayment',
     )
 
-    service_agreement_address = service_definition['serviceAgreementContract']['address']
+    contract_name = service_definition['serviceAgreementContract']['contractName']
+    contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
+    service_agreement_address = contract_json['address']
     if is_condition_fulfilled(web3, contract_path, service_definition['templateId'],
                               service_agreement_id, service_agreement_address,
                               payment_conditions.address, abi, 'lockPayment'):
         return
 
     parameters = payment_condition_definition['parameters']
+    name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.lockPayment(
         service_agreement_id.encode(),
-        parameters['did'].encode(),
-        parameters['price'],
+        name_to_parameter['did']['value'].encode(),
+        name_to_parameter['price']['value'],
         transact={'from': account},
     )
 
@@ -45,16 +50,19 @@ def releasePayment(web3, contract_path, account, service_agreement_id, service_d
         'releasePayment',
     )
 
-    service_agreement_address = service_definition['serviceAgreementContract']['address']
+    contract_name = service_definition['serviceAgreementContract']['contractName']
+    contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
+    service_agreement_address = contract_json['address']
     if is_condition_fulfilled(web3, contract_path, service_definition['templateId'],
                               service_agreement_id, service_agreement_address,
                               payment_conditions.address, abi, 'releasePayment'):
         return
 
     parameters = payment_condition_definition['parameters']
+    name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.releasePayment(
         service_agreement_id.encode(),
-        parameters['did'].encode(),
-        parameters['price'],
+        name_to_parameter['did']['value'].encode(),
+        name_to_parameter['price']['value'],
         transact={'from': account},
     )
