@@ -246,7 +246,7 @@ def test_creating_did_using_ddo():
 def test_load_ddo_json():
     # TODO: Fix
     SAMPLE_DDO_PATH = pathlib.Path.cwd() / 'tests' / 'resources' / 'ddo' / 'ddo_sample1.json'
-    assert SAMPLE_DDO_PATH.exists(), "{} does not exist!".format(SAMPLE_METADATA_PATH)
+    assert SAMPLE_DDO_PATH.exists(), "{} does not exist!".format(SAMPLE_DDO_PATH)
     with open(SAMPLE_DDO_PATH) as f:
         SAMPLE_DDO_JSON_DICT = json.load(f)
 
