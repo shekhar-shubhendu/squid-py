@@ -52,13 +52,15 @@ def split_signature(web3, signature):
 
 def network_name(web3):
     """Give the network name."""
-    network_id = web3.version.network
+    network_id = int(web3.version.network)
     switcher = {
         1: 'Main',
         2: 'orden',
         3: 'Ropsten',
         4: 'Rinkeby',
         42: 'Kovan',
+        8995: 'Ocean_POA_AWS',
+        8996: 'ocean_poa_net_local',
     }
     return switcher.get(network_id, 'development')
 
