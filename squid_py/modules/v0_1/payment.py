@@ -29,8 +29,8 @@ def lockPayment(web3, contract_path, account, service_agreement_id, service_defi
     parameters = payment_condition_definition['parameters']
     name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.lockPayment(
-        service_agreement_id.encode(),
-        name_to_parameter['did']['value'].encode(),
+        service_agreement_id,
+        name_to_parameter['did']['value'],
         name_to_parameter['price']['value'],
         transact={'from': account},
     )
@@ -58,8 +58,8 @@ def releasePayment(web3, contract_path, account, service_agreement_id, service_d
     parameters = payment_condition_definition['parameters']
     name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.releasePayment(
-        service_agreement_id.encode(),
-        name_to_parameter['did']['value'].encode(),
+        service_agreement_id,
+        name_to_parameter['did']['value'],
         name_to_parameter['price']['value'],
         transact={'from': account},
     )

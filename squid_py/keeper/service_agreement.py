@@ -68,6 +68,3 @@ class ServiceAgreement(ContractBase):
 
     def get_condition_by_fingerprint(self, service_agreement_id, contract_address, function_fingerprint):
         return self.contract_concise.getConditionByFingerprint(service_agreement_id, contract_address, function_fingerprint)
-
-    def isValidSignature(self, prefixed_msg_hash, signature, signing_address, caller_address):
-        return self.contract_concise.isValidSignature(prefixed_msg_hash, signature, signing_address, call={'from': caller_address})

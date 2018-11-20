@@ -27,8 +27,8 @@ def grantAccess(web3, contract_path, account, service_agreement_id, service_defi
     parameters = access_condition_definition['parameters']
     name_to_parameter = {param['name']: param for param in parameters}
     access_conditions.grantAccess(
-        service_agreement_id.encode(),
-        name_to_parameter['did']['value'].encode(),
-        name_to_parameter['did']['value'].encode(),
+        service_agreement_id,
+        name_to_parameter['did']['value'],
+        name_to_parameter['did']['value'],
         transact={'from': account},
     )

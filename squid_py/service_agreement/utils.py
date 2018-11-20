@@ -8,7 +8,7 @@ from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from squid_py.keeper.utils import get_fingerprint_by_name, get_contract_abi_and_address, hexstr_to_bytes
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_types import ServiceTypes
-from squid_py.utils import network_name
+from squid_py.utils import get_network_name
 from squid_py.utils.utilities import get_publickey_from_address
 
 
@@ -34,17 +34,17 @@ def build_condition_key(web3, contract_address, fingerprint, sla_template_id):
     assert isinstance(fingerprint, bytes), 'Expecting `fingerprint` of type bytes, got %s' % type(fingerprint)
     return web3.soliditySha3(
         ['bytes32', 'address', 'bytes4'],
-        [sla_template_id.encode(), contract_address, fingerprint]
+        [sla_template_id, contract_address, fingerprint]
     ).hex()
 
 
 def build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id):
     return [build_condition_key(web3, address, fingerprints[i], sla_template_id)
-                       for i, address in enumerate(contract_addresses)]
+            for i, address in enumerate(contract_addresses)]
 
 
 def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, sla_template_id):
-    _network_name = network_name(web3)
+    _network_name = get_network_name(web3)
     names = {cond.contract_name for cond in conditions}
     name_to_contract_abi_n_address = {
         name: get_contract_abi_and_address(web3, contract_path, name, _network_name)
@@ -63,9 +63,6 @@ def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, s
     ]
     fulfillment_indices = [i for i, cond in enumerate(conditions) if cond.is_terminal]
     conditions_keys = build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id)
-    for i, address in enumerate(conditions):
-        conditions[i].condition_key = conditions_keys[i]
-
     return contract_addresses, fingerprints, fulfillment_indices, conditions_keys
 
 
@@ -79,7 +76,12 @@ def register_service_agreement_template(service_agreement_contract, contract_pat
     conditions_data = get_conditions_data_from_keeper_contracts(
         service_agreement_contract.web3, contract_path, sla_template_instance.conditions, sla_template_instance.template_id
     )
-    contract_addresses, fingerprints, fulfillment_indices, condition_keys = conditions_data
+    contract_addresses, fingerprints, fulfillment_indices, conditions_keys = conditions_data
+    # Fill the conditionKey in each condition in the template
+    conditions = sla_template_instance.conditions
+    for i in range(len(conditions)):
+        conditions[i].condition_key = conditions_keys[i]
+
     return service_agreement_contract.setup_agreement_template(
         sla_template_instance.template_id,
         contract_addresses, fingerprints, sla_template_instance.conditions_dependencies,

@@ -13,7 +13,7 @@ def is_condition_fulfilled(web3, contract_path, template_id, service_agreement_i
                            service_agreement_address, condition_address, condition_abi, fn_name):
     service_agreement = _get_concise_contract(web3, contract_path, service_agreement_address)
     status = service_agreement.getConditionStatus(
-        service_agreement_id.encode(),
+        service_agreement_id,
         get_condition_key(
             web3,
             template_id,

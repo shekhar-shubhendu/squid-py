@@ -50,7 +50,7 @@ def split_signature(web3, signature):
 
 # properties
 
-def network_name(web3):
+def get_network_name(web3):
     """Give the network name."""
     network_id = web3.version.network
     switcher = {
