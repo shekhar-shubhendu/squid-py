@@ -59,6 +59,7 @@ def network_name(web3):
         3: 'Ropsten',
         4: 'Rinkeby',
         42: 'Kovan',
+        8995: 'ocean_poa_net_local',
     }
     return switcher.get(network_id, 'development')
 
