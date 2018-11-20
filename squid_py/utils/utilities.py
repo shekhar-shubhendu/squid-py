@@ -52,7 +52,7 @@ def split_signature(web3, signature):
 
 def network_name(web3):
     """Give the network name."""
-    network_id = web3.version.network
+    network_id = int(web3.version.network)
     switcher = {
         1: 'Main',
         2: 'orden',
