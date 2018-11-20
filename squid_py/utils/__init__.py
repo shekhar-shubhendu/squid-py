@@ -7,5 +7,5 @@ from .utilities import (
     convert_to_text,
     to_32byte_hex,
     split_signature,
-    network_name
+    get_network_name
 )

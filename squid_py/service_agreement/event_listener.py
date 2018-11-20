@@ -1,8 +1,8 @@
 import importlib
 
 from squid_py.keeper.service_agreement import ServiceAgreement
-from squid_py.keeper.utils import get_contract_by_name
-from squid_py.utils import watch_event, network_name
+from squid_py.keeper.utils import get_contract_instance
+from squid_py.utils import watch_event
 
 from .storage import record_service_agreement
 
@@ -16,7 +16,7 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
         The service definition format is described in OEP-11.
     """
 
-    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
+    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: web3.toBytes(hexstr=service_agreement_id)}
 
     # subscribe cleanup
     def _cleanup(event):
@@ -54,13 +54,12 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
 
             return _callback
 
-        contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
-        contract = web3.eth.contract(address=contract_json['address'], abi=contract_json['abi'])
+        contract = get_contract_instance(web3, contract_path, contract_name)
 
         # FIXME change this after AccessConditions contract is fixed
         _filters = filters \
                    if event_handler['functionName'] == 'lockPayment' \
-                   else {'serviceId': service_agreement_id.encode()}
+                   else {'serviceId': web3.toBytes(hexstr=service_agreement_id)}
         watch_event(
             contract,
             event['name'],
@@ -78,10 +77,9 @@ def watch_service_agreement_fulfilled(web3, contract_path, service_agreement_id,
         service agreement ID.
     """
     contract_name = service_definition['serviceAgreementContract']['contractName']
-    contract_json = get_contract_by_name(contract_path, network_name(web3), contract_name)
-    contract = web3.eth.contract(address=contract_json['address'], abi=contract_json['abi'])
+    contract = get_contract_instance(web3, contract_path, contract_name)
 
-    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: service_agreement_id.encode()}
+    filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: web3.toBytes(hexstr=service_agreement_id)}
     watch_event(
         contract,
         'AgreementFulfilled',
