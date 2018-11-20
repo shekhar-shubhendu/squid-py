@@ -5,14 +5,18 @@ from threading import Thread
 
 from web3 import Web3
 from eth_keys import KeyAPI
+from eth_utils import big_endian_to_int
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
 def get_publickey_from_address(web3, address):
     _hash = Web3.sha3(text='verify signature.')
-    signature = web3.eth.sign(address, _hash)
-    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(signature))
+    signature = split_signature(web3, web3.eth.sign(address, _hash))
+    signature_vrs = Signature(signature.v % 27,
+                              big_endian_to_int(signature.r),
+                              big_endian_to_int(signature.s))
+    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(vrs=signature_vrs))
 
 
 def generate_new_id():
@@ -60,7 +64,8 @@ def network_name(web3):
         4: 'Rinkeby',
         42: 'Kovan',
     }
-    return switcher.get(network_id, 'development')
+    return switcher.get(network_id, 'ocean_poa_net_local')
+    # return switcher.get(network_id, 'development')
 
 
 def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
