@@ -64,8 +64,7 @@ def network_name(web3):
         4: 'Rinkeby',
         42: 'Kovan',
     }
-    return switcher.get(network_id, 'ocean_poa_net_local')
-    # return switcher.get(network_id, 'development')
+    return switcher.get(network_id, 'development')
 
 
 def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
