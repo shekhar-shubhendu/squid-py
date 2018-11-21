@@ -6,6 +6,7 @@ from threading import Thread
 from eth_utils import big_endian_to_int
 from web3 import Web3
 from eth_keys import KeyAPI
+from eth_utils import big_endian_to_int
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
@@ -21,10 +22,8 @@ def get_publickey_from_address(web3, address):
     signature_vrs = Signature(signature.v % 27,
                               big_endian_to_int(signature.r),
                               big_endian_to_int(signature.s))
-
-    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(
-        prepare_prefixed_hash(_hash), KeyAPI.Signature(vrs=signature_vrs)
-    )
+    prefixed_hash = prepare_prefixed_hash(_hash)
+    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(prefixed_hash, KeyAPI.Signature(vrs=signature_vrs))
     assert pub_key.to_checksum_address() == address, 'recovered address does not match signing address.'
     return pub_key
 
