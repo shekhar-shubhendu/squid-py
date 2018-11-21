@@ -9,10 +9,21 @@ from eth_keys import KeyAPI
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 
 
+def prepare_prefixed_hash(msg_hash):
+    prefixed_hash = Web3.soliditySha3(['string', 'bytes32'], ["\x19Ethereum Signed Message:\n32", msg_hash])
+    return prefixed_hash
+
+
 def get_publickey_from_address(web3, address):
     _hash = Web3.sha3(text='verify signature.')
     signature = web3.eth.sign(address, _hash)
-    return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(signature))
+    v, r, s = split_signature(web3, signature, v01=True)
+    r = web3.toInt(r)
+    s = web3.toInt(s)
+    prefixed_hash = prepare_prefixed_hash(_hash)
+    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(prefixed_hash, KeyAPI.Signature(vrs=(v, r, s)))
+    assert pub_key.to_checksum_address() == address, 'recovered address does not match signing address.'
+    return pub_key
 
 
 def generate_new_id():
@@ -39,12 +50,18 @@ def convert_to_text(web3, data):
     return web3.toText(data)
 
 
-def split_signature(web3, signature):
+def split_signature(web3, signature, v01=False):
+    assert len(signature) == 65, 'invalid signature, expecting bytes of length 65, got %s' % len(signature)
     v = web3.toInt(signature[-1])
     r = to_32byte_hex(web3, int.from_bytes(signature[:32], 'big'))
     s = to_32byte_hex(web3, int.from_bytes(signature[32:64], 'big'))
-    if v != 27 and v != 28:
+    if v01:
+        v = (v - 27) if v >= 27 else v
+        assert v == 0 or v == 1, 'invalid v value %s' % v
+
+    elif v != 27 and v != 28:
         v = 27 + v % 2
+
     return Signature(v, r, s)
 
 

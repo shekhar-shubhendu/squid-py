@@ -20,7 +20,7 @@ from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
 from squid_py.service_agreement.utils import make_public_key_and_authentication, register_service_agreement_template
-from squid_py.utils.utilities import generate_new_id
+from squid_py.utils.utilities import generate_new_id, prepare_prefixed_hash
 from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -279,10 +279,16 @@ class Ocean:
             self._web3, sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
             sa.conditions_timeouts, service_agreement_id
         )
-        prefixed_hash = self._web3.soliditySha3(['string', 'bytes32'], ["\x19Ethereum Signed Message:\n32", agreement_hash])
-        return True
-        # valid = self.keeper.service_agreement.isValidSignature(prefixed_hash, signature, consumer_address, consumer_address)
-        # return valid
+        prefixed_hash = prepare_prefixed_hash(agreement_hash)
+        # :NOTE: An alternative to `web3.eth.account.recoverHash`, we can
+        # use `eth_keys.KeyAPI.PublicKey.recover_from_msg_hash()` just like we do
+        # in `squid_py.utils.utilities.get_publickey_from_address`. When using that, make sure
+        # to use `split_signature` with `v01` set to True because KeyAPI only supports `v` values of 0 or 1
+        # but some eth clients can produce a `v` of 27 or 28. This is why we have to use
+        # the `recover_from_msg_hash` method with the `vrs` argument instead of `signature` unless we
+        # reassemble the signature from the split `(v,r,s)` tuple.
+        recovered_address = self._web3.eth.account.recoverHash(prefixed_hash, signature=signature)
+        return recovered_address == consumer_address
 
     def _register_service_agreement_template(self, template_dict, owner_address):
         sla_template = ServiceAgreementTemplate(template_json=template_dict)
