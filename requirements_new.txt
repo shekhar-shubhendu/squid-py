@@ -1,6 +1,0 @@
-pip install web3
-pip install pyyaml
-pip install coloredlogs
-pip install jwt
-pip install pyopenssl
-pip install eciespy
