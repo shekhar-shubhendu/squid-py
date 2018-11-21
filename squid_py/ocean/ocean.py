@@ -15,11 +15,12 @@ from squid_py.keeper import Keeper
 from squid_py.log import setup_logging
 from squid_py.didresolver import DIDResolver
 from squid_py.exceptions import OceanDIDAlreadyExist, OceanInvalidMetadata
+from squid_py.service_agreement.register_service_agreement import register_service_agreement
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
 from squid_py.service_agreement.utils import make_public_key_and_authentication, register_service_agreement_template
-from squid_py.utils.utilities import generate_new_id
+from squid_py.utils.utilities import generate_new_id, prepare_prefixed_hash
 from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -196,10 +197,9 @@ class Ocean:
         })
         requests.post(purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
 
-        # :TODO: enable event handling
-        # # subscribe to events related to this service_agreement_id
-        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
-        #                            service_agreement_id, did, service, 'consumer', 3)
+        # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
+                                   service_agreement_id, did, service, 'consumer', 3)
 
         return service_agreement_id
 
@@ -245,10 +245,9 @@ class Ocean:
             publisher_address
         )
 
-        # :TODO: enable event handling
-        # # subscribe to events related to this service_agreement_id
-        # register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
-        #                            service_agreement_id, did, service, 'publisher', 3)
+        # subscribe to events related to this service_agreement_id
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
+                                   service_agreement_id, did, service, 'publisher', 3)
 
         return receipt
 
@@ -280,16 +279,23 @@ class Ocean:
             self._web3, sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
             sa.conditions_timeouts, service_agreement_id
         )
-        # :TODO: complete the signature verification below. This is disabled because the KeyAPI recovery does not match the original
-        # consumer address/public key.
-        return True
-        # pub_key = KeyAPI.PublicKey.recover_from_msg_hash(agreement_hash, KeyAPI.Signature(self._web3.toBytes(hexstr=signature)))
-        # address = pub_key.to_address()
-        # return address == consumer_address
+        prefixed_hash = prepare_prefixed_hash(agreement_hash)
+        # :NOTE: An alternative to `web3.eth.account.recoverHash`, we can
+        # use `eth_keys.KeyAPI.PublicKey.recover_from_msg_hash()` just like we do
+        # in `squid_py.utils.utilities.get_public-key_from_address`. When using that, make sure
+        # to manipulate the `v` value because KeyAPI only supports `v` values of 0 or 1
+        # but some eth clients can produce a `v` of 27 or 28. This is why we have to use
+        # the `recover_from_msg_hash` method with the `vrs` argument instead of `signature` unless we
+        # reassemble the signature from the split `(v,r,s)` tuple. Also must use the prefixed hash
+        # message to get an accurate recovery of public-key and address.
+        recovered_address = self._web3.eth.account.recoverHash(prefixed_hash, signature=signature)
+        return recovered_address == consumer_address
 
     def _register_service_agreement_template(self, template_dict, owner_address):
         sla_template = ServiceAgreementTemplate(template_json=template_dict)
-        return register_service_agreement_template(self.keeper, owner_address, sla_template)
+        return register_service_agreement_template(
+            self.keeper.service_agreement, self.keeper.contract_path, owner_address, sla_template
+        )
 
     def resolve_did(self, did):
         """

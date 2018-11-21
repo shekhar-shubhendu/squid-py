@@ -70,7 +70,8 @@ def registered_ddo():
     publisher = list(ocean_instance.accounts)[0]
     # register an AssetAccess service agreement template
     register_service_agreement_template(
-        ocean_instance.keeper, publisher, ServiceAgreementTemplate.from_json_file(get_sla_template_path())
+        ocean_instance.keeper.service_agreement, ocean_instance.keeper.contract_path,
+        publisher, ServiceAgreementTemplate.from_json_file(get_sla_template_path())
     )
 
     metadata = Metadata.get_example()

@@ -1,5 +1,6 @@
 import pytest
 from web3 import Web3
+import pytest
 
 from squid_py.utils import utilities
 
@@ -16,7 +17,8 @@ def test_get_publickey_from_address(ocean_instance):
     from eth_keys.exceptions import BadSignature
     for account in ocean_instance.accounts:
         try:
-            utilities.get_publickey_from_address(ocean_instance._web3, account)
+            pub_key = utilities.get_publickey_from_address(ocean_instance._web3, account)
+            assert pub_key.to_checksum_address() == account, 'recovered public key address does not match original address.'
         except BadSignature:
             pytest.fail("BadSignature")
         except ValueError:
