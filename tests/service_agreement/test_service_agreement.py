@@ -112,7 +112,7 @@ class TestServiceAgreement(unittest.TestCase):
         self.asset_ddo = ddo
 
     def _load_sla_template(self):
-        with open(os.path.join(pathlib.Path.cwd(), 'tests', 'resources', 'sla_template.json')) as jsf:
+        with open(os.path.join(pathlib.Path.cwd(), 'tests', 'resources', 'access_sla_template.json')) as jsf:
             template_json = json.load(jsf)
             self.sla_template = ServiceAgreementTemplate(template_json=template_json)
 

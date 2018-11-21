@@ -8,9 +8,8 @@ import logging
 import os
 
 from web3.contract import ConciseContract
-from squid_py.exceptions import OceanInvalidContractAddress
 from squid_py.keeper.utils import get_contract_by_name
-from squid_py.utils.utilities import network_name
+from squid_py.utils.utilities import get_network_name
 
 
 class ContractBase(object):
@@ -38,7 +37,7 @@ class ContractBase(object):
         """Retrieve a tuple with the concise contract and the contract definition."""
         contract_definition = get_contract_by_name(
             contract_path,
-            network_name(self.web3),
+            get_network_name(self.web3),
             contract_name,
         )
         address = self.to_checksum_address(contract_definition['address'])

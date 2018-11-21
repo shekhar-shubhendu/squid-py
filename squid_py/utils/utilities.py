@@ -1,7 +1,4 @@
-import logging
 import uuid
-import json
-import hashlib
 import time
 from collections import namedtuple
 from threading import Thread
@@ -18,7 +15,7 @@ def get_publickey_from_address(web3, address):
     return KeyAPI.PublicKey.recover_from_msg_hash(_hash, KeyAPI.Signature(signature))
 
 
-def generate_new_id(metadata):
+def generate_new_id():
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 
@@ -26,12 +23,46 @@ def get_id_from_did(did):
     return convert_to_bytes(Web3, did.split(':')[-1])
 
 
-def sign(web3, account_address, message):
-    return web3.eth.sign(account_address, message)
+def to_32byte_hex(web3, val):
+    return web3.toBytes(val).rjust(32, b'\0')
 
 
-def get_balance(web3, account_address, block_identifier):
-    return web3.eth.getBalance(account_address, block_identifier)
+def convert_to_bytes(web3, data):
+    return web3.toBytes(text=data)
+
+
+def convert_to_string(web3, data):
+    return web3.toHex(data)
+
+
+def convert_to_text(web3, data):
+    return web3.toText(data)
+
+
+def split_signature(web3, signature):
+    v = web3.toInt(signature[-1])
+    r = to_32byte_hex(web3, int.from_bytes(signature[:32], 'big'))
+    s = to_32byte_hex(web3, int.from_bytes(signature[32:64], 'big'))
+    if v != 27 and v != 28:
+        v = 27 + v % 2
+    return Signature(v, r, s)
+
+
+# properties
+
+def get_network_name(web3):
+    """Give the network name."""
+    network_id = int(web3.version.network)
+    switcher = {
+        1: 'Main',
+        2: 'orden',
+        3: 'Ropsten',
+        4: 'Rinkeby',
+        42: 'Kovan',
+        8995: 'Ocean_POA_AWS',
+        8996: 'ocean_poa_net_local',
+    }
+    return switcher.get(network_id, 'development')
 
 
 def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
@@ -56,34 +87,6 @@ def install_filter(contract, event_name, fromBlock=0, toBlock='latest', filters=
         fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
     )
     return event_filter
-
-
-def to_32byte_hex(web3, val):
-    return web3.toBytes(val).rjust(32, b'\0')
-
-
-def split_signature(web3, signature):
-    v = web3.toInt(signature[-1])
-    r = to_32byte_hex(web3, int.from_bytes(signature[:32], 'big'))
-    s = to_32byte_hex(web3, int.from_bytes(signature[32:64], 'big'))
-    if v != 27 and v != 28:
-        v = 27 + v % 2
-    return Signature(v, r, s)
-
-
-# properties
-
-def network_name(web3):
-    """Give the network name."""
-    network_id = web3.version.network
-    switcher = {
-        1: 'Main',
-        2: 'orden',
-        3: 'Ropsten',
-        4: 'Rinkeby',
-        42: 'Kovan',
-    }
-    return switcher.get(network_id, 'development')
 
 
 def watcher(event_filter, callback, num_confirmations=12):
@@ -134,15 +137,3 @@ def await_confirmations(event_filter, block_number, block_hash, num_confirmation
             break
 
         time.sleep(0.1)
-
-
-def convert_to_bytes(web3, data):
-    return web3.toBytes(text=data)
-
-
-def convert_to_string(web3, data):
-    return web3.toHex(data)
-
-
-def convert_to_text(web3, data):
-    return web3.toText(data)

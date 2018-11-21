@@ -1,6 +1,6 @@
 
 class AdditionalInfoMeta(object):
-    KEY = 'additionalInfo'
+    KEY = 'additionalInformation'
     VALUES_KEYS = (
         "updateFrequency",
         "structuredMarkup"
@@ -120,6 +120,6 @@ class Metadata(object):
     def get_example():
         example = dict()
         for section_key, section in Metadata.MAIN_SECTIONS.items():
-            example[section_key] = section.EXAMPLE
+            example[section_key] = section.EXAMPLE.copy()
 
         return example
