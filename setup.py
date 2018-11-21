@@ -23,11 +23,10 @@ install_requirements = [
     'PyJWT',  # not jwt
     'PyYAML',
     'web3==4.5.0',
-    'ocean-secret-store-client==0.0.1',
+    'ocean-secret-store-client==0.0.1'
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
-    'ocean-secret-store-client==0.0.1'
 ]
 
 # Required to run setup.py:
