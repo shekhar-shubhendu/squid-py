@@ -93,7 +93,7 @@ def register_service_agreement_template(service_agreement_contract, contract_pat
 
 def make_public_key_and_authentication(did, publisher_address, web3):
     # set public key
-    public_key_value = get_publickey_from_address(web3, publisher_address)
+    public_key_value = get_publickey_from_address(web3, publisher_address).to_hex()
     pub_key = PublicKeyBase('keys-1', **{'value': public_key_value, 'owner': publisher_address,
                                          'type': PUBLIC_KEY_STORE_TYPE_HEX})
     pub_key.assign_did(did)

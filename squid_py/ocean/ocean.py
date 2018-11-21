@@ -282,11 +282,12 @@ class Ocean:
         prefixed_hash = prepare_prefixed_hash(agreement_hash)
         # :NOTE: An alternative to `web3.eth.account.recoverHash`, we can
         # use `eth_keys.KeyAPI.PublicKey.recover_from_msg_hash()` just like we do
-        # in `squid_py.utils.utilities.get_publickey_from_address`. When using that, make sure
-        # to use `split_signature` with `v01` set to True because KeyAPI only supports `v` values of 0 or 1
+        # in `squid_py.utils.utilities.get_public-key_from_address`. When using that, make sure
+        # to manipulate the `v` value because KeyAPI only supports `v` values of 0 or 1
         # but some eth clients can produce a `v` of 27 or 28. This is why we have to use
         # the `recover_from_msg_hash` method with the `vrs` argument instead of `signature` unless we
-        # reassemble the signature from the split `(v,r,s)` tuple.
+        # reassemble the signature from the split `(v,r,s)` tuple. Also must use the prefixed hash
+        # message to get an accurate recovery of public-key and address.
         recovered_address = self._web3.eth.account.recoverHash(prefixed_hash, signature=signature)
         return recovered_address == consumer_address
 
