@@ -3,8 +3,8 @@ from web3.contract import ConciseContract
 from squid_py.keeper.utils import get_contract_abi_and_address
 
 
-def fulfillAgreement(web3, contract_path, account, service_agreement_id, service_definition,
-                *args, **kwargs):
+def fulfillAgreement(web3, contract_path, account, service_agreement_id,
+                     service_definition, *args, **kwargs):
     """ Checks if serviceAgreement has been fulfilled and if not calls
         ServiceAgreement.fulfillAgreement smart contract function.
     """
@@ -17,5 +17,6 @@ def fulfillAgreement(web3, contract_path, account, service_agreement_id, service
     )
 
 
-def terminateAgreement(web3, contract_path, account, service_agreement_id, service_definition, *args, **kwargs):
+def terminateAgreement(web3, contract_path, account, service_agreement_id,
+                       service_definition, *args, **kwargs):
     fulfillAgreement(web3, contract_path, account, service_agreement_id, service_definition, *args, **kwargs)

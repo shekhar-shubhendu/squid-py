@@ -154,7 +154,7 @@
             "functionName": "terminateAgreement",
             "version": "0.1"
           }
-        },
+        }
       ],
       "dependencies": ["lockPayment", "grantAccess"],
       "dependencyTimeoutFlags": [0, 1],

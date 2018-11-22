@@ -6,11 +6,13 @@ from .storage import get_service_agreements, record_service_agreement
 
 def register_service_agreement(web3, contract_path, storage_path, account, service_agreement_id,
                                did, service_definition, actor_type, service_index, price,
-                               content_urls, num_confirmations=12):
+                               content_urls, num_confirmations=12, start_time=None):
     """ Registers the given service agreement in the local storage.
         Subscribes to the service agreement events.
     """
-    start_time = datetime.now()
+    if start_time is None:
+        start_time = int(datetime.now().timestamp())
+
     record_service_agreement(storage_path, service_agreement_id, service_index, price, content_urls, start_time, did)
     watch_service_agreement_events(
         web3, contract_path, storage_path, account, did,

@@ -10,7 +10,7 @@ def record_service_agreement(storage_path, service_agreement_id, did, service_in
         cursor.execute(
             '''CREATE TABLE IF NOT EXISTS service_agreements
                (id VARCHAR PRIMARY KEY, did VARCHAR, service_index INTEGER, 
-               price INTEGER, content_urls VARCHAR, start_time TIMESTAMP, status VARCHAR(10));'''
+                price INTEGER, content_urls VARCHAR, start_time INTEGER, status VARCHAR(10));'''
         )
         cursor.execute(
             'INSERT OR REPLACE INTO service_agreements VALUES (?,?,?,?,?,?,?)',
@@ -38,8 +38,15 @@ def get_service_agreements(storage_path, status='pending'):
     conn = sqlite3.connect(storage_path)
     try:
         cursor = conn.cursor()
-        return [row for row in
-                cursor.execute("SELECT * FROM service_agreements WHERE status='%s';" % status)]
+        return [
+            row for row in
+            cursor.execute(
+                ''' SELECT id, did, service_index, price, content_urls, start_time, status 
+                    FROM service_agreements 
+                    WHERE status=?
+                    ;''',
+                (status,))
+        ]
     finally:
         conn.close()
 

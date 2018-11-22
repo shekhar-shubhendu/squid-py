@@ -1,7 +1,7 @@
 import importlib
 
 from squid_py.keeper.service_agreement import ServiceAgreement
-from squid_py.keeper.utils import get_contract_instance
+from squid_py.keeper.utils import get_contract_instance, get_event_def_from_abi
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition, Event
 from squid_py.service_agreement.storage import update_service_agreement_status
 from squid_py.utils import watch_event
@@ -45,7 +45,7 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
         if event['actorType'] != actor_type:
                 continue
 
-        events.append((service_definition['serviceAgreementContract']['contractName'], Event(event)))
+        events.append((service_definition['serviceAgreementContract']['contractName'], Event(event), None, None))
 
     conditions = [ServiceAgreementCondition(condition_json=condition_dict)
                   for condition_dict in service_definition['conditions']]
@@ -85,6 +85,7 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
 
         # event of type service_agreement_condition.Event
         fn = get_event_handler_function(event)
+        timeout_fn = None
         if timeout_event and timeout:
             assert MIN_TIMEOUT < timeout < MAX_TIMEOUT, 'TIMEOUT value not within allowed range %s.' % (MIN_TIMEOUT, MAX_TIMEOUT)
             timeout_fn = get_event_handler_function(timeout_event)
@@ -96,7 +97,9 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
             return _callback
 
         contract = get_contract_instance(web3, contract_path, contract_name)
-        service_id_arg_name = contract.events[event.name].argument_names[0]
+        event_abi_dict = get_event_def_from_abi(contract.abi, event.name)
+        service_id_arg_name = event_abi_dict['inputs'][0]['name']
+        # service_id_arg_name = contract.events[event.name].argument_names[0]
         assert service_id_arg_name in ('serviceId', ServiceAgreement.SERVICE_AGREEMENT_ID), \
             'unknown event first arg, expected serviceAgreementId, got "%s"' % service_id_arg_name
 
@@ -115,7 +118,7 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
             interval=0.5,
             start_time=start_time,
             timeout=timeout,
-            timeout_callback=_get_callback(timeout_fn),
+            timeout_callback=_get_callback(timeout_fn) if timeout_fn else None,
             fromBlock='latest',
             filters=_filters,
             num_confirmations=num_confirmations,

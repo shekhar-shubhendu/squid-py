@@ -45,7 +45,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         cls.storage_path = 'test_squid_py.db'
         cls.content_url = '/content/url'
-        cls.start_time = datetime.now()
+        cls.start_time = int(datetime.now().timestamp())
 
     def tearDown(self):
         os.remove(self.storage_path)
@@ -80,6 +80,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             },
             'conditions': [{
                 'name': 'lockPayment',
+                'timeout': 0,
+                'isTerminalCondition': 0,
+                'dependencies': [],
+                'dependencyTimeoutFlags': [],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'lockPayment',
@@ -106,6 +110,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 }],
             }, {
                 'name': 'grantAccess',
+                'timeout': 0,
+                'isTerminalCondition': 0,
+                'dependencies': ['lockPayment'],
+                'dependencyTimeoutFlags': [0],
                 'conditionKey': "",
                 'contractName': 'AccessConditions',
                 'functionName': 'grantAccess',
@@ -132,6 +140,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 }],
             }, {
                 'name': 'releasePayment',
+                'timeout': 0,
+                'isTerminalCondition': 1,
+                'dependencies': ['grantAccess'],
+                'dependencyTimeoutFlags': [0],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'releasePayment',
@@ -172,10 +184,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             'consumer',
             0,
             10,
-            self.content_url
+            self.content_url,
+            start_time=self.start_time
         )
-        expected_agreements = [(service_agreement_id, did, 3, 10, self.content_url, self.start_time, 'pending')]
-        assert expected_agreements == get_service_agreements(self.storage_path)
+        expected_agreements = (service_agreement_id, did, 0, 10, self.content_url, self.start_time, 'pending')
+        stored_agreements = get_service_agreements(self.storage_path)[0]
+        assert sorted([str(i) for i in expected_agreements]) == sorted([str(i) for i in stored_agreements])
 
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = '0x%s' % generate_new_id()
@@ -194,7 +208,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             0,
             price,
             self.content_url,
-            num_confirmations=1
+            num_confirmations=1,
+            start_time=self.start_time
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
@@ -217,7 +232,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             0,
             price,
             self.content_url,
-            num_confirmations=0
+            num_confirmations=0,
+            start_time=self.start_time
         )
 
         register_service_agreement(
@@ -232,7 +248,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             0,
             price,
             self.content_url,
-            num_confirmations=0
+            num_confirmations=0,
+            start_time=self.start_time
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
@@ -251,16 +268,17 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             transact={'from': self.consumer},
         )
         self.web3.eth.waitForTransactionReceipt(receipt)
-        expected_agreements = [(service_agreement_id, did, 0, price, self.content_url, self.start_time, 'fulfilled')]
+        expected_agreements = (service_agreement_id, did, 0, price, self.content_url, self.start_time, 'fulfilled')
+        expected_agreements = sorted([str(i) for i in expected_agreements])
         agreements = []
-        for i in range(10):
+        for i in range(5):
             agreements = get_service_agreements(self.storage_path, 'fulfilled')
-            if expected_agreements == agreements:
+            if agreements and expected_agreements == sorted([str(i) for i in agreements[0]]):
                 break
 
             time.sleep(0.5)
 
-        assert expected_agreements == agreements
+        assert agreements and expected_agreements == sorted([str(i) for i in agreements[0]])
         assert not get_service_agreements(self.storage_path)
 
     def test_execute_pending_service_agreements_subscribes_to_events(self):
