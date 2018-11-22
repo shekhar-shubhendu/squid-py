@@ -2,6 +2,7 @@ import os
 import time
 import unittest
 import uuid
+from datetime import datetime
 
 from web3 import Web3, HTTPProvider
 
@@ -43,6 +44,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls._setup_token()
 
         cls.storage_path = 'test_squid_py.db'
+        cls.content_url = '/content/url'
+        cls.start_time = datetime.now()
 
     def tearDown(self):
         os.remove(self.storage_path)
@@ -167,9 +170,11 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'conditions': []
             },
             'consumer',
+            0,
+            10,
+            self.content_url
         )
-
-        expected_agreements = [(service_agreement_id, did, 'pending')]
+        expected_agreements = [(service_agreement_id, did, 3, 10, self.content_url, self.start_time, 'pending')]
         assert expected_agreements == get_service_agreements(self.storage_path)
 
     def test_register_service_agreement_subscribes_to_events(self):
@@ -186,6 +191,9 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'consumer',
+            0,
+            price,
+            self.content_url,
             num_confirmations=1
         )
 
@@ -197,7 +205,6 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
         price = 10
-
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
@@ -207,6 +214,9 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'consumer',
+            0,
+            price,
+            self.content_url,
             num_confirmations=0
         )
 
@@ -219,6 +229,9 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'publisher',
+            0,
+            price,
+            self.content_url,
             num_confirmations=0
         )
 
@@ -238,8 +251,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             transact={'from': self.consumer},
         )
         self.web3.eth.waitForTransactionReceipt(receipt)
-
-        expected_agreements = [(service_agreement_id, did, 'fulfilled')]
+        expected_agreements = [(service_agreement_id, did, 0, price, self.content_url, self.start_time, 'fulfilled')]
+        agreements = []
         for i in range(10):
             agreements = get_service_agreements(self.storage_path, 'fulfilled')
             if expected_agreements == agreements:
@@ -254,8 +267,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
         price = 10
-
-        record_service_agreement(self.storage_path, service_agreement_id, did)
+        record_service_agreement(self.storage_path, service_agreement_id, did, 0, price, self.content_url, self.start_time)
 
         def _did_resolver_fn(did):
             return {

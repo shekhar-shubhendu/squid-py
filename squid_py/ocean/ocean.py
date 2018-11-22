@@ -19,6 +19,7 @@ from squid_py.service_agreement.register_service_agreement import register_servi
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
+from squid_py.service_agreement.service_types import ServiceTypes
 from squid_py.service_agreement.utils import make_public_key_and_authentication, register_service_agreement_template
 from squid_py.utils.utilities import generate_new_id, prepare_prefixed_hash
 from squid_py.did import did_to_id, did_generate
@@ -147,10 +148,14 @@ class Ocean:
         # Setup metadata service
         # First replace `contentUrls` with encrypted `contentUrls`
         assert metadata_copy['base']['contentUrls'], 'contentUrls is required in the metadata base attributes.'
+        assert Metadata.validate(metadata), 'metadata seems invalid.'
+
         content_urls_encrypted = self._encrypt_metadata_content_urls(did, json.dumps(metadata_copy['base']['contentUrls']))
         # only assign if the encryption worked
         if content_urls_encrypted:
             metadata_copy['base']['contentUrls'] = content_urls_encrypted
+        else:
+            raise AssertionError('Encrypting the contentUrls failed. Make sure the secret store is setup properly in your config file.')
 
         # DDO url and `Metadata` service
         ddo_service_endpoint = self.metadata_store.get_service_endpoint(did)
@@ -183,6 +188,8 @@ class Ocean:
             raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
 
         service = service.as_dictionary()
+        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
+        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
         sa = ServiceAgreement.from_service_dict(service)
         purchase_endpoint = sa.purchase_endpoint
 
@@ -199,7 +206,8 @@ class Ocean:
 
         # subscribe to events related to this service_agreement_id
         register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer,
-                                   service_agreement_id, did, service, 'consumer', 3)
+                                   service_agreement_id, did, service, 'consumer', service_definition_id,
+                                   sa.get_price(), content_urls, 3)
 
         return service_agreement_id
 
@@ -223,6 +231,8 @@ class Ocean:
         :param publisher_address: ethereum account address of publisher
         :return:
         """
+        assert consumer_address and self._web3.isChecksumAddress(consumer_address), 'Invalid consumer address "%s"' % consumer_address
+        assert publisher_address and self._web3.isChecksumAddress(publisher_address), 'Invalid publisher address "%s"' % publisher_address
         # Extract all of the params necessary for execute agreement from the ddo
         ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
         service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
@@ -231,6 +241,9 @@ class Ocean:
 
         asset_id = did_to_id(did)
         service = service.as_dictionary()
+        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
+        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
+
         sa = ServiceAgreement.from_service_dict(service)
         self.verify_service_agreement_signature(did, service_agreement_id, service_definition_id, consumer_address, service_agreement_signature, ddo=ddo)
 
@@ -247,7 +260,8 @@ class Ocean:
 
         # subscribe to events related to this service_agreement_id
         register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
-                                   service_agreement_id, did, service, 'publisher', 3)
+                                   service_agreement_id, did, service, 'publisher', service_definition_id,
+                                   sa.get_price(), content_urls, 3)
 
         return receipt
 

@@ -32,6 +32,26 @@ class Event:
     def __init__(self, event_json):
         self.values_dict = dict(event_json)
 
+    @property
+    def name(self):
+        return self.values_dict['name']
+
+    @property
+    def actor_type(self):
+        return self.values_dict['actorType']
+
+    @property
+    def handler_module_name(self):
+        return self.values_dict['handler']['moduleName']
+
+    @property
+    def handler_function_name(self):
+        return self.values_dict['handler']['functionName']
+
+    @property
+    def handler_version(self):
+        return self.values_dict['handler']['version']
+
     def as_dictionary(self):
         return self.values_dict
 
