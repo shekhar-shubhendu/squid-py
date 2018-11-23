@@ -41,10 +41,11 @@ def get_service_agreements(storage_path, status='pending'):
         return [
             row for row in
             cursor.execute(
-                ''' SELECT id, did, service_index, price, content_urls, start_time, status 
-                    FROM service_agreements 
-                    WHERE status=?
-                    ;''',
+                '''
+                SELECT id, did, service_index, price, content_urls, start_time, status
+                FROM service_agreements 
+                WHERE status=?;
+                ''',
                 (status,))
         ]
     finally:
