@@ -356,7 +356,7 @@ class Ocean:
         if secret store is enabled then return the result from secret store encryption
 
         return None for no encryption performed
-        """   
+        """
         result = None
         if self.config.secret_store_url and self.config.parity_url and self.main_account:
             publisher = Client(self.config.secret_store_url, self.config.parity_url,
