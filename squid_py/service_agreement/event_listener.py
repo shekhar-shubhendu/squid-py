@@ -6,7 +6,7 @@ from squid_py.service_agreement.service_agreement_condition import ServiceAgreem
 from squid_py.service_agreement.storage import update_service_agreement_status
 from squid_py.utils import watch_event
 
-MIN_TIMEOUT = 3  # seconds
+MIN_TIMEOUT = 2  # seconds
 MAX_TIMEOUT = 60 * 60 * 24 * 7  # 7 days expressed in seconds
 
 
@@ -20,14 +20,12 @@ def get_event_handler_function(event):
 
 def watch_service_agreement_events(web3, contract_path, storage_path, account, did,
                                    service_agreement_id, service_definition, actor_type,
-                                   start_time, num_confirmations=12):
+                                   start_time, consume_callback=None, num_confirmations=12):
     """ Subscribes to the events defined in the given service definition, targeted
         for the given actor type. Filters events by the given service agreement ID.
 
         The service definition format is described in OEP-11.
     """
-
-    # filters = {ServiceAgreement.SERVICE_AGREEMENT_ID: web3.toBytes(hexstr=service_agreement_id)}
 
     # subscribe cleanup
     def _cleanup(event):
@@ -81,35 +79,30 @@ def watch_service_agreement_events(web3, contract_path, storage_path, account, d
         dependent_cond, timeout = None, None
         if dependent_cond_timeout and timeout_event:
             dependent_cond_name, timeout = dependent_cond_timeout
-            # dependent_cond = name_to_cond[dependent_cond_name]
 
         # event of type service_agreement_condition.Event
         fn = get_event_handler_function(event)
         timeout_fn = None
         if timeout_event and timeout:
-            assert MIN_TIMEOUT < timeout < MAX_TIMEOUT, 'TIMEOUT value not within allowed range %s.' % (MIN_TIMEOUT, MAX_TIMEOUT)
+            assert MIN_TIMEOUT < timeout < MAX_TIMEOUT, 'TIMEOUT value not within allowed range %s-%s.' % (MIN_TIMEOUT, MAX_TIMEOUT)
             timeout_fn = get_event_handler_function(timeout_event)
 
         def _get_callback(func_to_call):
             def _callback(payload):
-                func_to_call(web3, contract_path, account, service_agreement_id, service_definition, payload)
+                func_to_call(
+                    web3, contract_path, account, service_agreement_id,
+                    service_definition, consume_callback, payload
+                )
 
             return _callback
 
         contract = get_contract_instance(web3, contract_path, contract_name)
         event_abi_dict = get_event_def_from_abi(contract.abi, event.name)
         service_id_arg_name = event_abi_dict['inputs'][0]['name']
-        # service_id_arg_name = contract.events[event.name].argument_names[0]
         assert service_id_arg_name in ('serviceId', ServiceAgreement.SERVICE_AGREEMENT_ID), \
             'unknown event first arg, expected serviceAgreementId, got "%s"' % service_id_arg_name
 
-        # FIXME change this after AccessConditions contract is fixed
-        _filters = {service_id_arg_name: web3.toBytes(hexstr=service_agreement_id)}\
-        #         (
-        #     filters
-        #     if event_name == 'ExecuteAgreement'
-        #     else {'serviceId': web3.toBytes(hexstr=service_agreement_id)}
-        # )
+        _filters = {service_id_arg_name: web3.toBytes(hexstr=service_agreement_id)}
 
         watch_event(
             contract,

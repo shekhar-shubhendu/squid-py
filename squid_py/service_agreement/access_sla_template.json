@@ -41,9 +41,7 @@
       "events": [
         {
           "name": "PaymentLocked",
-          "actorType": [
-            "publisher"
-          ],
+          "actorType": "publisher",
           "handler": {
             "moduleName": "accessControl",
             "functionName": "grantAccess",
@@ -114,9 +112,7 @@
       "events": [
         {
           "name": "PaymentReleased",
-          "actorType": [
-            "consumer"
-          ],
+          "actorType": "consumer",
           "handler": {
             "moduleName": "serviceAgreement",
             "functionName": "fulfillAgreement",

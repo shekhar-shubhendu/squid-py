@@ -5,8 +5,8 @@ from squid_py.modules.v0_1.utils import (
 )
 
 
-def lockPayment(web3, contract_path, account, service_agreement_id, service_definition,
-                *args, **kwargs):
+def lockPayment(web3, contract_path, account, service_agreement_id,
+                service_definition, *args, **kwargs):
     """ Checks if the lockPayment condition has been fulfilled and if not calls
         PaymentConditions.lockPayment smart contract function.
 
@@ -30,14 +30,14 @@ def lockPayment(web3, contract_path, account, service_agreement_id, service_defi
     name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.lockPayment(
         service_agreement_id,
-        name_to_parameter['did']['value'],
+        name_to_parameter['assetId']['value'],
         name_to_parameter['price']['value'],
         transact={'from': account},
     )
 
 
-def releasePayment(web3, contract_path, account, service_agreement_id, service_definition,
-                   *args, **kwargs):
+def releasePayment(web3, contract_path, account, service_agreement_id,
+                   service_definition, *args, **kwargs):
     """ Checks if the releasePayment condition has been fulfilled and if not calls
         PaymentConditions.releasePayment smart contract function.
     """
@@ -59,14 +59,14 @@ def releasePayment(web3, contract_path, account, service_agreement_id, service_d
     name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.releasePayment(
         service_agreement_id,
-        name_to_parameter['did']['value'],
+        name_to_parameter['assetId']['value'],
         name_to_parameter['price']['value'],
         transact={'from': account},
     )
 
 
-def refundPayment(web3, contract_path, account, service_agreement_id, service_definition,
-                   *args, **kwargs):
+def refundPayment(web3, contract_path, account, service_agreement_id,
+                  service_definition, *args, **kwargs):
     """ Checks if the refundPayment condition has been fulfilled and if not calls
         PaymentConditions.refundPayment smart contract function.
     """
@@ -89,7 +89,7 @@ def refundPayment(web3, contract_path, account, service_agreement_id, service_de
     name_to_parameter = {param['name']: param for param in parameters}
     payment_conditions.refundPayment(
         service_agreement_id,
-        name_to_parameter['did']['value'],
+        name_to_parameter['assetId']['value'],
         name_to_parameter['price']['value'],
         transact={'from': account},
     )

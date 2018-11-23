@@ -150,7 +150,7 @@ def watcher(event_filter, callback, start_time, timeout, timeout_callback, num_c
                 break
 
     if timed_out and timeout_callback:
-        timeout_callback(start_time, timeout, int(datetime.now().timestamp()))
+        timeout_callback((start_time, timeout, int(datetime.now().timestamp())))
 
 
 def await_confirmations(event_filter, block_number, block_hash, num_confirmations, callback, event):
