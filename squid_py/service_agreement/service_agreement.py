@@ -20,6 +20,11 @@ class ServiceAgreement(object):
         self.purchase_endpoint = purchase_endpoint
         self.service_endpoint = service_endpoint
 
+    def get_price(self):
+        for cond in self.conditions:
+            for p in cond.parameters:
+                if p.name == 'price':
+                    return p.value
 
     @property
     def conditions_params_value_hashes(self):

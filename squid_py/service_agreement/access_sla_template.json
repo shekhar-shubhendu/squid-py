@@ -41,10 +41,8 @@
       "events": [
         {
           "name": "PaymentLocked",
-          "actorType": [
-            "publisher"
-          ],
-          "handlers": {
+          "actorType": "publisher",
+          "handler": {
             "moduleName": "accessControl",
             "functionName": "grantAccess",
             "version": "0.1"
@@ -74,9 +72,18 @@
           "actorType": [
             "consumer"
           ],
-          "handlers": {
+          "handler": {
             "moduleName": "paymentProcessing",
             "functionName": "releasePayment",
+            "version": "0.1"
+          }
+        },
+        {
+          "name": "AccessTimeout",
+          "actorType": "consumer",
+          "handler": {
+            "moduleName": "paymentProcessing",
+            "functionName": "refundPayment",
             "version": "0.1"
           }
         }
@@ -105,10 +112,8 @@
       "events": [
         {
           "name": "PaymentReleased",
-          "actorType": [
-            "consumer"
-          ],
-          "handlers": {
+          "actorType": "consumer",
+          "handler": {
             "moduleName": "serviceAgreement",
             "functionName": "fulfillAgreement",
             "version": "0.1"
@@ -139,10 +144,8 @@
       "events": [
         {
           "name": "PaymentRefund",
-          "actorType": [
-            "consumer", "publisher"
-          ],
-          "handlers": {
+          "actorType": "publisher",
+          "handler": {
             "moduleName": "serviceAgreement",
             "functionName": "terminateAgreement",
             "version": "0.1"

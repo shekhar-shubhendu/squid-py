@@ -68,7 +68,7 @@ class ContractBase(object):
         """Return the event signature from a named event. """
         signature = None
         for item in self.contract.abi:
-            if 'name' in item and item['name'] == name and item['type'] == 'event':
+            if item.get('type') == 'event' and item.get('name') == name:
                 signature = item['signature']
                 break
 

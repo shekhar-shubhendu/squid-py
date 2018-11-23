@@ -2,7 +2,7 @@ from squid_py.models.balance import Balance
 
 
 class Account:
-    def __init__(self, keeper, address):
+    def __init__(self, keeper, address, password=None):
         """
         Hold account address, and update balances of Ether and Ocean token
 
@@ -11,6 +11,7 @@ class Account:
         """
         self.keeper = keeper
         self.address = address
+        self.password = password
         self.balance = self.get_balance()
 
     def request_tokens(self, amount):

@@ -41,9 +41,17 @@ def get_contract_instance(web3, contract_path, contract_name, network_name=None)
     return web3.eth.contract(address=address, abi=abi)
 
 
+def get_event_def_from_abi(abi, event_name):
+    for item in abi:
+        if item.get('type') == 'event' and item.get('name') == event_name:
+            return item
+
+    raise ValueError('event {} not found in the given ABI'.format(event_name))
+
+
 def get_fingerprint_by_name(abi, name):
     for item in abi:
-        if 'name' in item and item['name'] == name:
+        if item.get('name') == name:
             return item['signature']
 
     raise ValueError('{} not found in the given ABI'.format(name))

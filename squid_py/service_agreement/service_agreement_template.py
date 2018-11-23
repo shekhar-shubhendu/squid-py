@@ -176,6 +176,15 @@ class ServiceAgreementTemplate(object):
                     "functionName": "releasePayment",
                     "version": "0.1"
                   }
+                },
+                {
+                    "name": "AccessTimeout",
+                    "actorType": "consumer",
+                    "handler": {
+                        "moduleName": "paymentProcessing",
+                        "functionName": "refundPayment",
+                        "version": "0.1"
+                    }
                 }
               ],
               "dependencies": ["lockPayment"],

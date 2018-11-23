@@ -1,6 +1,7 @@
 import uuid
 import time
 from collections import namedtuple
+from datetime import datetime
 from threading import Thread
 
 from eth_utils import big_endian_to_int
@@ -80,15 +81,18 @@ def get_network_name(web3):
     return switcher.get(network_id, 'development')
 
 
-def watch_event(contract_name, event_name, callback, interval, fromBlock=0, toBlock='latest',
+def watch_event(contract_name, event_name, callback, interval,
+                start_time, timeout=None, timeout_callback=None,
+                fromBlock=0, toBlock='latest',
                 filters=None, num_confirmations=12):
+
     event_filter = install_filter(
         contract_name, event_name, fromBlock, toBlock, filters
     )
     event_filter.poll_interval = interval
     Thread(
         target=watcher,
-        args=(event_filter, callback),
+        args=(event_filter, callback, start_time, timeout, timeout_callback),
         kwargs={'num_confirmations': num_confirmations},
         daemon=True,
     ).start()
@@ -104,7 +108,8 @@ def install_filter(contract, event_name, fromBlock=0, toBlock='latest', filters=
     return event_filter
 
 
-def watcher(event_filter, callback, num_confirmations=12):
+def watcher(event_filter, callback, start_time, timeout, timeout_callback, num_confirmations=12):
+    timed_out = False
     while True:
         try:
             events = event_filter.get_new_entries()
@@ -113,6 +118,7 @@ def watcher(event_filter, callback, num_confirmations=12):
             print('Got error grabbing keeper events: ', str(err))
             events = []
 
+        processed = False
         for event in events:
             if num_confirmations > 0:
                 Thread(
@@ -129,9 +135,22 @@ def watcher(event_filter, callback, num_confirmations=12):
                 ).start()
             else:
                 callback(event)
+            processed = True
+
+        if processed:
+            break
 
         # always take a rest
         time.sleep(0.1)
+        if timeout_callback:
+            now = int(datetime.now().timestamp())
+            if (start_time + timeout) < now:
+                # timeout exceeded, break out of this loop and trigger the timeout callback
+                timed_out = True
+                break
+
+    if timed_out and timeout_callback:
+        timeout_callback((start_time, timeout, int(datetime.now().timestamp())))
 
 
 def await_confirmations(event_filter, block_number, block_hash, num_confirmations, callback, event):

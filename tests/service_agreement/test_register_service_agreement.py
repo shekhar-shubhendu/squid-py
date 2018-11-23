@@ -2,6 +2,7 @@ import os
 import time
 import unittest
 import uuid
+from datetime import datetime
 
 from web3 import Web3, HTTPProvider
 
@@ -43,11 +44,14 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls._setup_token()
 
         cls.storage_path = 'test_squid_py.db'
+        cls.content_url = '/content/url'
+        cls.start_time = int(datetime.now().timestamp())
 
     def tearDown(self):
-        os.remove(self.storage_path)
+        if os.path.exists(self.storage_path):
+            os.remove(self.storage_path)
 
-    def get_simple_service_agreement_definition(self, did, price):
+    def get_simple_service_agreement_definition(self, did, price, include_refund=False, timeout=3):
         grant_access_fingerprint = get_fingerprint_by_name(
             self.access_conditions.contract.abi,
             'grantAccess',
@@ -60,7 +64,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.payment_conditions.contract.abi,
             'releasePayment',
         )
-        return {
+        refund_payment_fingerprint = get_fingerprint_by_name(
+            self.payment_conditions.contract.abi,
+            'refundPayment',
+        )
+
+        sa_def = {
             'type': 'Access',
             'templateId': self.template_id,
             'serviceAgreementContract': {
@@ -75,14 +84,68 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     }
                 }],
             },
-            'conditions': [{
+            'conditions': [
+                {
+                'name': 'grantAccess',
+                'timeout': timeout,
+                'isTerminalCondition': 0,
+                'dependencies': ['lockPayment'],
+                'dependencyTimeoutFlags': [0],
+                'conditionKey': "",
+                'contractName': 'AccessConditions',
+                'functionName': 'grantAccess',
+                'parameters': [
+                    {
+                        'name': 'assetId',
+                        'type': 'byte32',
+                        'value': did,
+                    },
+                    {
+                        'name': 'price',
+                        'type': 'uint256',
+                        'value': price,
+                    }
+                ],
+                'events': [
+                    {
+                    'name': 'AccessGranted',
+                    'actorType': 'publisher',
+                    'handler': {
+                        'moduleName': 'payment',
+                        'functionName': 'releasePayment',
+                        'version': '0.1'
+                    }},
+                    {
+                    'name': 'AccessGranted',
+                    'actorType': 'consumer',
+                    'handler': {
+                        'moduleName': 'accessControl',
+                        'functionName': 'consumeAsset',
+                        'version': '0.1'
+                    }},
+                    {
+                      "name": "AccessTimeout",
+                      "actorType": "consumer",
+                      "handler": {
+                        "moduleName": "payment",
+                        "functionName": "refundPayment",
+                        "version": "0.1"
+                      }
+                    }
+
+                ],
+            },                 {
                 'name': 'lockPayment',
+                'timeout': 0,
+                'isTerminalCondition': 0,
+                'dependencies': [],
+                'dependencyTimeoutFlags': [],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'lockPayment',
                 'parameters': [
                     {
-                        'name': 'did',
+                        'name': 'assetId',
                         'type': 'byte32',
                         'value': did,
                     },
@@ -102,39 +165,17 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                     }
                 }],
             }, {
-                'name': 'grantAccess',
-                'conditionKey': "",
-                'contractName': 'AccessConditions',
-                'functionName': 'grantAccess',
-                'parameters': [
-                    {
-                        'name': 'did',
-                        'type': 'byte32',
-                        'value': did,
-                    },
-                    {
-                        'name': 'price',
-                        'type': 'uint256',
-                        'value': price,
-                    }
-                ],
-                'events': [{
-                    'name': 'AccessGranted',
-                    'actorType': 'publisher',
-                    'handler': {
-                        'moduleName': 'payment',
-                        'functionName': 'releasePayment',
-                        'version': '0.1'
-                    }
-                }],
-            }, {
                 'name': 'releasePayment',
+                'timeout': 0,
+                'isTerminalCondition': 1,
+                'dependencies': ['grantAccess'],
+                'dependencyTimeoutFlags': [0],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'releasePayment',
                 'parameters': [
                     {
-                        'name': 'did',
+                        'name': 'assetId',
                         'type': 'byte32',
                         'value': did,
                     },
@@ -144,9 +185,57 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                         'value': price,
                     }
                 ],
-                'events': [],
+                "events": [
+                    {
+                        "name": "PaymentReleased",
+                        "actorType": "consumer",
+                        "handler": {
+                            "moduleName": "serviceAgreement",
+                            "functionName": "fulfillAgreement",
+                            "version": "0.1"
+                        }
+                    }
+                ]
             }]
         }
+        if include_refund:
+            sa_def['conditions'].append(
+                {
+                "name": "refundPayment",
+                "timeout": timeout,
+                "conditionKey": "",
+                "contractName": "PaymentConditions",
+                "functionName": "refundPayment",
+                "index": 3,
+                "parameters": [
+                    {
+                        "name": "assetId",
+                        "type": "bytes32",
+                        "value": did
+                    }, {
+                        "name": "price",
+                        "type": "uint256",
+                        "value": price
+                    }
+                ],
+                "events": [
+                    {
+                        "name": "PaymentRefund",
+                        "actorType": "publisher",
+                        "handler": {
+                            "moduleName": "serviceAgreement",
+                            "functionName": "terminateAgreement",
+                            "version": "0.1"
+                        }
+                    }
+                ],
+                "dependencies": ["lockPayment", "grantAccess"],
+                "dependencyTimeoutFlags": [0, 1],
+                "isTerminalCondition": 1
+                }
+            )
+
+        return sa_def
 
     def test_register_service_agreement_stores_the_record(self):
         service_agreement_id = '0x%s' % generate_new_id()
@@ -167,10 +256,14 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'conditions': []
             },
             'consumer',
+            0,
+            10,
+            self.content_url,
+            start_time=self.start_time
         )
-
-        expected_agreements = [(service_agreement_id, did, 'pending')]
-        assert expected_agreements == get_service_agreements(self.storage_path)
+        expected_agreements = (service_agreement_id, did, 0, 10, self.content_url, self.start_time, 'pending')
+        stored_agreements = get_service_agreements(self.storage_path)[0]
+        assert sorted([str(i) for i in expected_agreements]) == sorted([str(i) for i in stored_agreements])
 
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = '0x%s' % generate_new_id()
@@ -186,18 +279,21 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'consumer',
-            num_confirmations=1
+            0,
+            price,
+            self.content_url,
+            num_confirmations=1,
+            start_time=self.start_time
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
-        payment_locked = self._wait_for_payment_locked()
+        payment_locked = self._wait_for_event(self.payment_conditions.events.PaymentLocked)
         assert payment_locked, 'Expected PaymentLocked to be emitted'
 
     def test_register_service_agreement_updates_fulfilled_agreements(self):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
         price = 10
-
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
@@ -207,7 +303,11 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'consumer',
-            num_confirmations=0
+            0,
+            price,
+            self.content_url,
+            num_confirmations=0,
+            start_time=self.start_time
         )
 
         register_service_agreement(
@@ -219,43 +319,115 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             did,
             self.get_simple_service_agreement_definition(did, price),
             'publisher',
-            num_confirmations=0
+            0,
+            price,
+            self.content_url,
+            num_confirmations=0,
+            start_time=self.start_time
         )
 
         self._execute_service_agreement(service_agreement_id, did, price)
 
-        payment_locked = self._wait_for_payment_locked()
+        payment_locked = self._wait_for_event(self.payment_conditions.events.PaymentLocked)
         assert payment_locked, 'Payment was not locked'
 
-        access_granted = self._wait_for_access_granted()
+        access_granted = self._wait_for_event(self.access_conditions.events.AccessGranted)
         assert access_granted, 'Access was not granted'
 
-        payment_released = self._wait_for_payment_released()
+        payment_released = self._wait_for_event(self.payment_conditions.events.PaymentReleased)
         assert payment_released, 'Payment was not released'
 
-        receipt = self.service_agreement.contract_concise.fulfillAgreement(
-            service_agreement_id,
-            transact={'from': self.consumer},
-        )
-        self.web3.eth.waitForTransactionReceipt(receipt)
+        agreement_fulfilled = self._wait_for_event(self.service_agreement.events.AgreementFulfilled)
+        assert agreement_fulfilled, 'Agreement was not fulfilled.'
 
-        expected_agreements = [(service_agreement_id, did, 'fulfilled')]
-        for i in range(10):
+        expected_agreements = (service_agreement_id, did, 0, price, self.content_url, self.start_time, 'fulfilled')
+        expected_agreements = sorted([str(i) for i in expected_agreements])
+        agreements = []
+        for i in range(5):
             agreements = get_service_agreements(self.storage_path, 'fulfilled')
-            if expected_agreements == agreements:
+            if agreements and expected_agreements == sorted([str(i) for i in agreements[0]]):
                 break
 
             time.sleep(0.5)
 
-        assert expected_agreements == agreements
+        assert agreements and expected_agreements == sorted([str(i) for i in agreements[0]])
+        assert not get_service_agreements(self.storage_path)
+
+    def test_refund_terminates_agreements(self):
+        return
+        service_agreement_id = '0x%s' % generate_new_id()
+        did = '0x%s' % generate_new_id()
+        price = 10
+        register_service_agreement(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,
+            service_agreement_id,
+            did,
+            self.get_simple_service_agreement_definition(did, price, include_refund=True),
+            'consumer',
+            0,
+            price,
+            self.content_url,
+            num_confirmations=0,
+            start_time=self.start_time
+        )
+
+        register_service_agreement(
+            self.web3,
+            self.config.keeper_path,
+            self.storage_path,
+            self.consumer,  # using the same account for the sake of simplicity here
+            service_agreement_id,
+            did,
+            self.get_simple_service_agreement_definition(did, price, include_refund=True),
+            'publisher',
+            0,
+            price,
+            self.content_url,
+            num_confirmations=0,
+            start_time=self.start_time
+        )
+
+        self._execute_service_agreement(service_agreement_id, did, price)
+
+        def get_condition_key(i):
+            return self.web3.soliditySha3(['bytes32', 'address', 'bytes4'], [self.template_id, self.contracts[i], self.fingerprints[i]]).hex()
+
+        payment_locked = self._wait_for_event(self.payment_conditions.events.PaymentLocked)
+        lock_cond_status = self.service_agreement.contract_concise.getConditionStatus(service_agreement_id, get_condition_key(1))
+        assert lock_cond_status > 0
+        grant_access_cond_status = self.service_agreement.contract_concise.getConditionStatus(service_agreement_id, get_condition_key(0))
+        release_cond_status = self.service_agreement.contract_concise.getConditionStatus(service_agreement_id, get_condition_key(2))
+        assert grant_access_cond_status == 0 and release_cond_status == 0, 'grantAccess and/or releasePayment is fulfilled but not expected to.'
+
+        payment_refund = self._wait_for_event(self.payment_conditions.events.PaymentRefund)
+        if not payment_refund:
+            refund_cond_status = self.service_agreement.contract_concise.getConditionStatus(service_agreement_id, get_condition_key(3))
+            assert refund_cond_status > 0, 'refundPayment not fulfilled'
+
+        agreement_fulfilled = self._wait_for_event(self.service_agreement.events.AgreementFulfilled)
+        assert agreement_fulfilled, 'Agreement was not fulfilled.'
+
+        expected_agreements = (service_agreement_id, did, 0, price, self.content_url, self.start_time, 'fulfilled')
+        expected_agreements = sorted([str(i) for i in expected_agreements])
+        agreements = []
+        for i in range(5):
+            agreements = get_service_agreements(self.storage_path, 'fulfilled')
+            if agreements and expected_agreements == sorted([str(i) for i in agreements[0]]):
+                break
+
+            time.sleep(0.5)
+
+        assert agreements and expected_agreements == sorted([str(i) for i in agreements[0]])
         assert not get_service_agreements(self.storage_path)
 
     def test_execute_pending_service_agreements_subscribes_to_events(self):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
         price = 10
-
-        record_service_agreement(self.storage_path, service_agreement_id, did)
+        record_service_agreement(self.storage_path, service_agreement_id, did, 0, price, self.content_url, self.start_time)
 
         def _did_resolver_fn(did):
             return {
@@ -288,9 +460,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     @classmethod
     def _setup_service_agreement(cls):
         cls.template_id = '0x%s' % generate_new_id()
-        cls.contract_names = [cls.access_conditions.name, cls.payment_conditions.name, cls.payment_conditions.name]
+        cls.contract_names = [cls.access_conditions.name, cls.payment_conditions.name, cls.payment_conditions.name, cls.payment_conditions.name]
         cls.contract_abis = [
             cls.access_conditions.contract.abi,
+            cls.payment_conditions.contract.abi,
             cls.payment_conditions.contract.abi,
             cls.payment_conditions.contract.abi
         ]
@@ -298,6 +471,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             cls.access_conditions.contract.address,
             cls.payment_conditions.contract.address,
             cls.payment_conditions.contract.address,
+            cls.payment_conditions.contract.address
         ]
         cls.fingerprints = [
             hexstr_to_bytes(
@@ -311,11 +485,15 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             hexstr_to_bytes(
                 cls.web3,
                 get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'releasePayment'),
+            ),
+            hexstr_to_bytes(
+                cls.web3,
+                get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'refundPayment'),
             )
         ]
-        # lockPayment -> grantAccess -> releasePayment
-        # 4, 8           1, 2           16, 32
-        cls.dependencies = [4, 0, 1]
+        # lockPayment -> grantAccess -> releasePayment -> refundPayment
+        # 4, 8           1, 2           16, 32            64, 128
+        cls.dependencies = [4, 0, 1, 4 | 1 | 2]
 
         template_name = uuid.uuid4().hex.encode()
         setup_args = [
@@ -324,8 +502,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             cls.fingerprints,
             cls.dependencies,
             template_name,
-            [0],  # root condition
-            0,  # AND
+            [2, 3],  # root condition
+            1,  # AND
         ]
         receipt = cls.service_agreement.contract_concise.setupAgreementTemplate(
             *setup_args,
@@ -346,6 +524,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3.soliditySha3(
                 ['bytes32', 'uint256'],
                 [did, price]
+            ).hex(),
+            self.web3.soliditySha3(
+                ['bytes32', 'uint256'],
+                [did, price]
             ).hex()
         ]
         condition_keys = [
@@ -356,7 +538,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                  fingerprint]
             ).hex() for contract, fingerprint in zip(self.contracts, self.fingerprints)
         ]
-        function_names = ['grantAccess', 'lockPayment', 'releasePayment']
+        function_names = ['grantAccess', 'lockPayment', 'releasePayment', 'refundPayment']
         _network_name = get_network_name(self.web3)
         for i, key in enumerate(condition_keys):
             fn_name = function_names[i]
@@ -368,7 +550,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             _key = build_condition_key(self.web3, self.contracts[i], f, self.template_id)
             assert _key == key, 'condition key does not match: %s vs %s' % (_key, key)
 
-        timeouts = [0, 0, 0]
+        timeouts = [3, 0, 0, 3]
         signature = self.web3.eth.sign(
             self.consumer,
             hexstr=self.web3.soliditySha3(
@@ -405,26 +587,10 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             transact={'from': cls.consumer},
         )
 
-    def _wait_for_payment_locked(self):
-        flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
+    def _wait_for_event(self, event):
+        _filter = event.createFilter(fromBlock=0)
         for check in range(NUM_WAIT_ITERATIONS):
-            events = flt.get_new_entries()
-            if events:
-                return events[0]
-            time.sleep(0.5)
-
-    def _wait_for_access_granted(self):
-        flt = self.access_conditions.events.AccessGranted.createFilter(fromBlock='latest')
-        for check in range(NUM_WAIT_ITERATIONS):
-            events = flt.get_new_entries()
-            if events:
-                return events[0]
-            time.sleep(0.5)
-
-    def _wait_for_payment_released(self):
-        flt = self.payment_conditions.events.PaymentReleased.createFilter(fromBlock='latest')
-        for check in range(NUM_WAIT_ITERATIONS):
-            events = flt.get_new_entries()
+            events = _filter.get_new_entries()
             if events:
                 return events[0]
             time.sleep(0.5)
