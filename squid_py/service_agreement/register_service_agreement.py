@@ -13,7 +13,7 @@ def register_service_agreement(web3, contract_path, storage_path, account, servi
     if start_time is None:
         start_time = int(datetime.now().timestamp())
 
-    record_service_agreement(storage_path, service_agreement_id, service_index, price, content_urls, start_time, did)
+    record_service_agreement(storage_path, service_agreement_id, did, service_index, price, content_urls, start_time)
     watch_service_agreement_events(
         web3, contract_path, storage_path, account, did,
         service_agreement_id, service_definition, actor_type,
