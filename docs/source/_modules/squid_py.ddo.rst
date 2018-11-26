@@ -28,6 +28,14 @@ squid\_py.ddo.ddo module
     :undoc-members:
     :show-inheritance:
 
+squid\_py.ddo.metadata module
+-----------------------------
+
+.. automodule:: squid_py.ddo.metadata
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 squid\_py.ddo.public\_key\_base module
 --------------------------------------
 

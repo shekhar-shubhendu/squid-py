@@ -28,6 +28,14 @@ squid\_py.modules.v0\_1.payment module
     :undoc-members:
     :show-inheritance:
 
+squid\_py.modules.v0\_1.serviceAgreement module
+-----------------------------------------------
+
+.. automodule:: squid_py.modules.v0_1.serviceAgreement
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 squid\_py.modules.v0\_1.utils module
 ------------------------------------
 

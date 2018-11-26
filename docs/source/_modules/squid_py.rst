@@ -17,14 +17,6 @@ Subpackages
 Submodules
 ----------
 
-squid\_py.acl module
---------------------
-
-.. automodule:: squid_py.acl
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 squid\_py.aquariuswrapper module
 --------------------------------
 
@@ -37,14 +29,6 @@ squid\_py.config module
 -----------------------
 
 .. automodule:: squid_py.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-squid\_py.ddo module
---------------------
-
-.. automodule:: squid_py.ddo
     :members:
     :undoc-members:
     :show-inheritance:
@@ -77,14 +61,6 @@ squid\_py.log module
 --------------------
 
 .. automodule:: squid_py.log
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-squid\_py.services module
--------------------------
-
-.. automodule:: squid_py.services
     :members:
     :undoc-members:
     :show-inheritance:

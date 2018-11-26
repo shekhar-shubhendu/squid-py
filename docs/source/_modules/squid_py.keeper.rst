@@ -11,14 +11,6 @@ Subpackages
 Submodules
 ----------
 
-squid\_py.keeper.ServiceAgreement module
-----------------------------------------
-
-.. automodule:: squid_py.keeper.ServiceAgreement
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 squid\_py.keeper.auth module
 ----------------------------
 
@@ -55,6 +47,14 @@ squid\_py.keeper.market module
 ------------------------------
 
 .. automodule:: squid_py.keeper.market
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+squid\_py.keeper.service\_agreement module
+------------------------------------------
+
+.. automodule:: squid_py.keeper.service_agreement
     :members:
     :undoc-members:
     :show-inheritance:
