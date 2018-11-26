@@ -16,6 +16,6 @@ help:
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+# Removed:  	sphinx-apidoc -f -o source/_modules ../squid_py/
 %: Makefile
-	sphinx-apidoc -f -o source/_modules ../squid_py/
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
