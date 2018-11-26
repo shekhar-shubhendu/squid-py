@@ -62,11 +62,11 @@ class Ocean:
         # Collect the accounts
         self.accounts = self.get_accounts()
         assert self.accounts
-
-        if self.config.parity_address and self.config.parity_address in self.accounts:
-            self.main_account = self.accounts.get(self.config.parity_address,
-                                                  Account(self.keeper, self.config.parity_address, self.config.parity_password))
-            self.main_account.address = self.config.parity_password
+        parity_address = self._web3.toChecksumAddress(self.config.parity_address) if self.config.parity_address else None
+        if parity_address and parity_address in self.accounts:
+            self.main_account = self.accounts.get(parity_address,
+                                                  Account(self.keeper, parity_address, self.config.parity_password))
+            self.main_account.password = self.config.parity_password
         else:
             self.main_account = self.accounts[self._web3.eth.accounts[0]]
 
