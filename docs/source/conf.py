@@ -36,21 +36,29 @@ version = release_parts[0] + '.' + release_parts[1]
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxcontrib.apidoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
 ]
 
+# apidoc settings
+# See https://github.com/sphinx-contrib/apidoc
+apidoc_module_dir = '../../squid_py'
+apidoc_separate_modules = True
+# See https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
+apidoc_extra_args = []
+
 # autodoc settings
 # Setting None is equivalent to giving the option name
 # in the list format (i.e. it means “yes/true/on”).
-autodoc_default_options = {
-    'members': None,
-    'member-order': 'bysource',
-    'undoc-members': None,
-    'private-members': None,
-    'special-members': None,
-    'inherited-members': None,
-}
+# autodoc_default_options = {
+#     'members': None,
+#     'member-order': 'bysource',
+#     'undoc-members': None,
+#     'private-members': None,
+#     'special-members': None,
+#     'inherited-members': None,
+# }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

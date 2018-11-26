@@ -54,6 +54,7 @@ dev_requirements = [
 docs_requirements = [
     'Sphinx',
     'sphinx-rtd-theme',
+    'sphinxcontrib-apidoc',
 ]
 
 packages = []
