@@ -12,7 +12,7 @@ services:
     - backend
 
   keeper-contracts:
-    image: oceanprotocol/keeper-contracts:latest
+    image: oceanprotocol/keeper-contracts:v0.4.0
     ports:
     - 8545:8545
     networks:
@@ -27,7 +27,7 @@ services:
     - artifacts:/keeper-contracts/artifacts/
 
   aquarius:
-    image: oceanprotocol/aquarius:develop
+    image: oceanprotocol/aquarius:v0.1.4
 
     ports:
     - 5000:5000
