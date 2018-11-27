@@ -31,21 +31,6 @@ def grantAccess(web3, contract_path, account, service_agreement_id, service_defi
     document_key_id = name_to_parameter['documentKeyId']['value']
     transact = {'from': account.address, 'gas': DEFAULT_GAS_LIMIT}
 
-    #######################
-    sa_contracts = get_eth_contracts(web3, contract_path, service_agreement_address)
-    fingerprint = hexstr_to_bytes(web3, get_fingerprint_by_name(abi, 'grantAccess'))
-    value_hash = web3.soliditySha3(['bytes32', 'bytes32'], [asset_id, asset_id])
-    cond_key = access_condition_definition['conditionKey']
-    k = build_condition_key(web3, access_conditions.address, fingerprint, service_definition['slaTemplateId'])
-    assert k == cond_key
-    cond_inst_1 = web3.soliditySha3(['bytes32', 'bytes32'], [cond_key, value_hash])
-    cond_inst = sa_contracts[0].getConditionInstance(service_agreement_id, access_conditions.address, fingerprint)
-    assert cond_inst == cond_inst_1
-    valid_access_controller = sa_contracts[0].isValidControllerHandlerFunc(service_agreement_id, fingerprint, value_hash, access_conditions.address)
-    print('valid controller: ', valid_access_controller)
-    assert valid_access_controller, 'something not right.'
-    ##########################
-
     try:
         if account.password:
             web3.personal.unlockAccount(account.address, account.password)

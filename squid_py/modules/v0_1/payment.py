@@ -33,18 +33,6 @@ def lockPayment(web3, contract_path, account, service_agreement_id,
     price = name_to_parameter['price']['value']
     transact = {'from': account.address, 'gas': DEFAULT_GAS_LIMIT}
 
-    sa_contracts = get_eth_contracts(web3, contract_path, service_agreement_address)
-    fingerprint = hexstr_to_bytes(web3, get_fingerprint_by_name(abi, 'lockPayment'))
-    value_hash = web3.soliditySha3(['bytes32', 'uint256'], [asset_id, price])
-    cond_key = payment_condition_definition['conditionKey']
-    k = build_condition_key(web3, payment_conditions.address, fingerprint, service_definition['slaTemplateId'])
-    assert k == cond_key
-    cond_inst_1 = web3.soliditySha3(['bytes32', 'bytes32'], [cond_key, value_hash])
-    cond_inst = sa_contracts[0].getConditionInstance(service_agreement_id, payment_conditions.address, fingerprint)
-    assert cond_inst == cond_inst_1
-    valid_pay_controller = sa_contracts[0].isValidControllerHandlerFunc(service_agreement_id, fingerprint, value_hash, payment_conditions.address)
-    print('valid controller: ', valid_pay_controller)
-
     try:
         if account.password:
             web3.personal.unlockAccount(account.address, account.password)
