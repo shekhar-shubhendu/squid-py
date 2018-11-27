@@ -19,7 +19,7 @@ services:
     - backend
     environment:
       LOCAL_CONTRACTS: "true"
-      DEPLOY_CONTRACTS: "false"
+      DEPLOY_CONTRACTS: "true"
       DATABASE_PATH: ""
       REUSE_DATABASE: "false"
       NETWORK_NAME: "ganache"
