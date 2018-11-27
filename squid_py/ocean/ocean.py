@@ -1,8 +1,6 @@
 import json
 
-import requests
 from web3 import Web3, HTTPProvider
-from secret_store_client.client import Client
 
 from squid_py.ddo.metadata import Metadata
 from squid_py.ocean.account import Account
@@ -21,7 +19,7 @@ from squid_py.service_agreement.service_agreement_template import ServiceAgreeme
 from squid_py.service_agreement.service_factory import ServiceFactory, ServiceDescriptor
 from squid_py.service_agreement.service_types import ServiceTypes
 from squid_py.service_agreement.utils import make_public_key_and_authentication, register_service_agreement_template
-from squid_py.utils.utilities import generate_new_id, prepare_prefixed_hash
+from squid_py.utils.utilities import generate_prefixed_id, prepare_prefixed_hash, prepare_purchase_payload, get_metadata_url
 from squid_py.did import did_to_id, did_generate
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -31,7 +29,7 @@ setup_logging()
 
 class Ocean:
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, http_client=None, secret_store_client=None):
         """
         The Ocean class is the entry point into Ocean Protocol.
         This class is an aggregation of
@@ -41,7 +39,9 @@ class Ocean:
         Ocean is also a wrapper for the web3.py interface (https://github.com/ethereum/web3.py)
         An instance of Ocean is parameterized by a configuration file.
 
-        :param config_file:
+        :param config_file: path to configuration file
+        :param http_client: http client used for sending http requests such as `requests`
+        :param secret_store_client: reference to `secret_store_client.client.Client` class or similar
         """
 
         # Configuration information for the market is stored in the Config class
@@ -62,23 +62,25 @@ class Ocean:
         # Collect the accounts
         self.accounts = self.get_accounts()
         assert self.accounts
+
         parity_address = self._web3.toChecksumAddress(self.config.parity_address) if self.config.parity_address else None
         if parity_address and parity_address in self.accounts:
-            self.main_account = self.accounts.get(parity_address,
-                                                  Account(self.keeper, parity_address, self.config.parity_password))
+            self.main_account = self.accounts[parity_address]
             self.main_account.password = self.config.parity_password
         else:
             self.main_account = self.accounts[self._web3.eth.accounts[0]]
 
         self.did_resolver = DIDResolver(self._web3, self.keeper.didregistry)
 
-    def print_config(self):
-        # TODO: Cleanup
-        print("Ocean object configuration:".format())
-        print("Ocean.config.keeper_path: {}".format(self.config.keeper_path))
-        print("Ocean.config.keeper_url: {}".format(self.config.keeper_url))
-        print("Ocean.config.gas_limit: {}".format(self.config.gas_limit))
-        print("Ocean.config.aquarius_url: {}".format(self.config.aquarius_url))
+        self._http_client = http_client
+        if not http_client:
+            import requests
+            self._http_client = requests
+
+        self._secret_store_client = secret_store_client
+        if not secret_store_client:
+            from secret_store_client.client import Client
+            self._secret_store_client = Client
 
     def get_accounts(self):
         """
@@ -134,7 +136,7 @@ class Ocean:
         if not metadata or not Metadata.validate(metadata):
             raise OceanInvalidMetadata('Metadata seems invalid. Please make sure the required metadata values are filled in.')
 
-        asset_id = generate_new_id()
+        asset_id = generate_prefixed_id()
         # Check if it's already registered first!
         if asset_id in self.metadata_store.list_assets():
             raise OceanDIDAlreadyExist('Asset id "%s" is already registered to another asset.' % asset_id)
@@ -185,40 +187,55 @@ class Ocean:
 
         return ddo
 
-    def sign_service_agreement(self, did, service_definition_id, consumer_address):
-        assert consumer_address in self.accounts, 'Unrecognized consumer address %s' % consumer_address
-        service_agreement_id = '0x%s' % generate_new_id()
+    def _fetch_ddo(self, did):
+        return DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
+
+    def _approve_token_transfer(self, amount):
+        if self.keeper.token.get_token_balance(self.main_account.address) < amount:
+            raise ValueError('Account "%s" does not have sufficient tokens to approve for transfer.' % self.main_account.address)
+
+        self.keeper.token.token_approve(self.keeper.payment_conditions.address, amount, self.main_account)
+
+    def _get_ddo_and_service_agreement(self, did, service_index):
+        ddo = self.resolve_did(did)
         # Extract all of the params necessary for execute agreement from the ddo
-        ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
-        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_index)
         if not service:
-            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
-
+            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_index)
         service = service.as_dictionary()
-        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
-        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
         sa = ServiceAgreement.from_service_dict(service)
-        purchase_endpoint = sa.purchase_endpoint
+        sa.update_conditions_keys(self._web3, self.keeper.contract_path)
+        service[ServiceAgreement.SERVICE_CONDITIONS_KEY] = [cond.as_dictionary() for cond in sa.conditions]
+        return ddo, sa, service
 
-        signature, sa_hash = sa.get_signed_agreement_hash(self._web3, did_to_id(did), service_agreement_id, consumer_address)
-        # Prepare a payload to send to `Brizo`
-        payload = json.dumps({
-            'did': did,
-            'serviceAgreementId': service_agreement_id,
-            'serviceDefinitionId': service_definition_id,
-            'signature': signature,
-            'consumerPublicKey': consumer_address
-        })
-        requests.post(purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
+    def _get_service_agreement_to_sign(self, did, service_index):
+        ddo, service_agreement, service_def = self._get_ddo_and_service_agreement(did, service_index)
+        return generate_prefixed_id(), service_agreement, service_def, ddo
 
-        # subscribe to events related to this service_agreement_id
-        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, consumer_address,
-                                   service_agreement_id, did, service, 'consumer', service_definition_id,
-                                   sa.get_price(), content_urls, self.consume_service, 3)
+    def sign_service_agreement(self, did, service_index, consumer_address):
+        assert consumer_address in self.accounts, 'Unrecognized consumer address %s' % consumer_address
+        assert consumer_address == self.main_account.address, \
+            'consumer address must be already set as the main account in this instance of Ocean.'
 
-        return service_agreement_id
+        agreement_id, service_agreement, service_def, ddo = self._get_service_agreement_to_sign(did, service_index)
+        signature = service_agreement.get_signed_agreement_hash(
+            self._web3, self.keeper.contract_path, agreement_id, consumer_address
+        )[0]
 
-    def execute_service_agreement(self, did, service_definition_id, service_agreement_id,
+        # Must approve token transfer for this purchase
+        self._approve_token_transfer(service_agreement.get_price())
+
+        # subscribe to events related to this service_agreement_id before sending the request.
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, self.main_account,
+                                   agreement_id, did, service_def, 'consumer', service_index,
+                                   service_agreement.get_price(), get_metadata_url(ddo), self.consume_service, 0)
+
+        payload = prepare_purchase_payload(did, agreement_id, service_index, signature, consumer_address)
+        self._http_client.post(service_agreement.purchase_endpoint, data=payload, headers={'content-type': 'application/json'})
+
+        return agreement_id
+
+    def execute_service_agreement(self, did, service_index, service_agreement_id,
                                   service_agreement_signature, consumer_address, publisher_address):
         """
         Execute the service agreement on-chain using keeper's ServiceAgreement contract.
@@ -230,7 +247,7 @@ class Ocean:
         match the signed hashes.
 
         :param did: str representation fo the asset DID. Use this to retrieve the asset DDO.
-        :param service_definition_id: str identifies the specific service in the ddo to use in this agreement.
+        :param service_index: int identifies the specific service in the ddo to use in this agreement.
         :param service_agreement_id: 32 bytes identifier created by the consumer and will be used on-chain for the executed agreement.
         :param service_agreement_signature: str the signed agreement message hash which includes conditions and their parameters
             values and other details of the agreement.
@@ -242,35 +259,30 @@ class Ocean:
         assert publisher_address and self._web3.isChecksumAddress(publisher_address), 'Invalid publisher address "%s"' % publisher_address
         assert publisher_address in self.accounts, 'Unrecognized publisher address %s' % publisher_address
 
-        # Extract all of the params necessary for execute agreement from the ddo
-        ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
-        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
-        if not service:
-            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
-
         asset_id = did_to_id(did)
-        service = service.as_dictionary()
-        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
-        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
+        ddo, service_agreement, service_def = self._get_ddo_and_service_agreement(did, service_index)
+        content_urls = get_metadata_url(ddo)
 
-        sa = ServiceAgreement.from_service_dict(service)
-        self.verify_service_agreement_signature(did, service_agreement_id, service_definition_id, consumer_address, service_agreement_signature, ddo=ddo)
-
-        receipt = self.keeper.service_agreement.execute_service_agreement(
-            sa.sla_template_id,
-            service_agreement_signature,
-            consumer_address,
-            sa.conditions_params_value_hashes,
-            sa.conditions_timeouts,
-            service_agreement_id,
-            asset_id,
-            publisher_address
+        self.verify_service_agreement_signature(
+            did, service_agreement_id, service_index,
+            consumer_address, service_agreement_signature, ddo=ddo
         )
 
         # subscribe to events related to this service_agreement_id
-        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, publisher_address,
-                                   service_agreement_id, did, service, 'publisher', service_definition_id,
-                                   sa.get_price(), content_urls, None, 3)
+        register_service_agreement(self._web3, self.keeper.contract_path, self.config.storage_path, self.main_account,
+                                   service_agreement_id, did, service_def, 'publisher', service_index,
+                                   service_agreement.get_price(), content_urls, None, 0)
+
+        receipt = self.keeper.service_agreement.execute_service_agreement(
+            service_agreement.sla_template_id,
+            service_agreement_signature,
+            consumer_address,
+            service_agreement.conditions_params_value_hashes,
+            service_agreement.conditions_timeouts,
+            service_agreement_id,
+            asset_id,
+            self.main_account
+        )
 
         return receipt
 
@@ -291,19 +303,19 @@ class Ocean:
         document_id = did_to_id(did)
         return self.keeper.access_conditions.check_permissions(consumer_address, document_id, self.main_account.address)
 
-    def verify_service_agreement_signature(self, did, service_agreement_id, service_definition_id, consumer_address, signature, ddo=None):
+    def verify_service_agreement_signature(self, did, service_agreement_id, service_index, consumer_address, signature, ddo=None):
         if not ddo:
             ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
 
-        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_index)
         if not service:
-            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_definition_id)
+            raise ValueError('Service with definition id "%s" is not found in this DDO.' % service_index)
 
         service = service.as_dictionary()
         sa = ServiceAgreement.from_service_dict(service)
-        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-            self._web3, sa.sla_template_id, sa.conditions_keys, sa.conditions_params_value_hashes,
-            sa.conditions_timeouts, service_agreement_id
+
+        agreement_hash = sa.get_service_agreement_hash(
+            self._web3, self.keeper.contract_path, service_agreement_id
         )
         prefixed_hash = prepare_prefixed_hash(agreement_hash)
         # :NOTE: An alternative to `web3.eth.account.recoverHash`, we can
@@ -317,10 +329,13 @@ class Ocean:
         recovered_address = self._web3.eth.account.recoverHash(prefixed_hash, signature=signature)
         return recovered_address == consumer_address
 
-    def _register_service_agreement_template(self, template_dict, owner_address):
+    def _register_service_agreement_template(self, template_dict, owner_account=None):
+        if not owner_account:
+            owner_account = self.main_account
+
         sla_template = ServiceAgreementTemplate(template_json=template_dict)
         return register_service_agreement_template(
-            self.keeper.service_agreement, self.keeper.contract_path, owner_address, sla_template
+            self.keeper.service_agreement, self.keeper.contract_path, owner_account, sla_template
         )
 
     def resolve_did(self, did):
@@ -334,9 +349,67 @@ class Ocean:
             return self.did_resolver.resolve(did).ddo
         elif resolver.is_url:
             aquarius = AquariusWrapper(resolver.url)
-            return aquarius.get_asset_metadata(did)
+            return DDO(json_text=json.dumps(aquarius.get_asset_metadata(did)))
         else:
             return None
+
+    def _encrypt_metadata_content_urls(self, did, data):
+        """
+        encrypt string data using the DID as an secret store id,
+        if secret store is enabled then return the result from secret store encryption
+
+        return None for no encryption performed
+        """
+        result = None
+        if self.config.secret_store_url and self.config.parity_url and self.main_account:
+            publisher = self._secret_store_client(self.config.secret_store_url, self.config.parity_url,
+                               self.main_account.address, self.main_account.password)
+
+            document_id = did_to_id(did)
+            result = publisher.publish_document(document_id, data)
+        return result
+
+    def _decrypt_content_urls(self, did, encrypted_data):
+        result = None
+        if self.config.secret_store_url and self.config.parity_url and self.main_account:
+            consumer = self._secret_store_client(self.config.secret_store_url, self.config.parity_url,
+                              self.main_account.address, self.main_account.password)
+
+            document_id = did_to_id(did)
+            result = consumer.decrypt_document(document_id, encrypted_data)
+
+        return result
+
+    def consume_service(self, service_agreement_id, did, service_index, consumer_account):
+        ddo = self.resolve_did(did)
+
+        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
+        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
+        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_index)
+        sa = ServiceAgreement.from_service_dict(service.as_dictionary())
+        service_url = sa.service_endpoint
+        if not service_url:
+            print('Consume asset failed, service definition is missing the "serviceEndpoint".')
+            raise AssertionError('Consume asset failed, service definition is missing the "serviceEndpoint".')
+
+        # decrypt the contentUrls
+        decrypted_content_urls = self._decrypt_content_urls(did, content_urls)
+        print('got decrypted contentUrls: ', decrypted_content_urls)
+        consume_url = (
+            '%s?url=%s&serviceAgreementId=%s&consumerAddress=%s'
+            % (service_url, decrypted_content_urls, service_agreement_id, consumer_account.address)
+        )
+        response = self._http_client.get(consume_url)
+        print('got consume response: ', response)
+        return response
+
+    def set_main_account(self, address, password):
+        self.main_account = Account(self.keeper, self._web3.toChecksumAddress(address), password)
+        self.keeper.web3.eth.defaultAccount = self.main_account.address
+        if password:
+            unlocked = self._web3.personal.unlockAccount(self.main_account.address, self.main_account.password)
+            if not unlocked:
+                raise AssertionError('Sorry, could not unlock account.')
 
     def get_order(self):
         pass
@@ -349,52 +422,3 @@ class Ocean:
 
     def get_service_agreement(self):
         pass
-
-    def _encrypt_metadata_content_urls(self, did, data):
-        """
-        encrypt string data using the DID as an secret store id,
-        if secret store is enabled then return the result from secret store encryption
-
-        return None for no encryption performed
-        """
-        result = None
-        if self.config.secret_store_url and self.config.parity_url and self.main_account:
-            publisher = Client(self.config.secret_store_url, self.config.parity_url,
-                               self.main_account.address, self.main_account.password)
-
-            document_id = did_to_id(did)
-            result = publisher.publish_document(document_id, data)
-        return result
-
-    def _decrypt_content_urls(self, did, encrypted_data):
-        result = None
-        if self.config.secret_store_url and self.config.parity_url and self.main_account:
-            consumer = Client(self.config.secret_store_url, self.config.parity_url,
-                              self.main_account.address, self.main_account.password)
-
-            document_id = did_to_id(did)
-            result = consumer.decrypt_document(document_id, encrypted_data)
-
-        return result
-
-    def consume_service(self, service_agreement_id, did, service_definition_id, consumer_address):
-        ddo = self.resolve_did(did)
-
-        metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
-        content_urls = metadata_service.get_values()['metadata']['base']['contentUrls']
-        service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_definition_id)
-        sa = ServiceAgreement.from_service_dict(service)
-        service_url = sa.service_endpoint
-        if not service_url:
-            print('Consume asset failed, service definition is missing the "serviceEndpoint".')
-            raise AssertionError('Consume asset failed, service definition is missing the "serviceEndpoint".')
-
-        # decrypt the contentUrls
-        decrypted_content_urls = self._decrypt_content_urls(did, content_urls)
-        print('got decrypted contentUrls: ', decrypted_content_urls)
-        consume_url = (
-            '%s?url=%s&serviceAgreementId=%s&consumerAddress=%s'
-            % (service_url, decrypted_content_urls, service_agreement_id, consumer_address)
-        )
-        response = requests.get(consume_url)
-        print('got consume response: ', response)

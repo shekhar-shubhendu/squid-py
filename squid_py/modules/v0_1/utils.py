@@ -46,12 +46,31 @@ def get_condition_contract_data(web3, contract_path, service_definition, name):
     # if get_fingerprint_by_name(abi, name) != functionName:
     #     raise InvalidModule('The {} fingerprint specified in the service definition ' +
     #                         'does not match the known fingerprint'.format(name))
-
-    return web3.eth.contract(
+    concise_contract = web3.eth.contract(
         address=address,
         abi=abi,
         ContractFactoryClass=ConciseContract,
-    ), abi, condition_definition
+    )
+    contract = web3.eth.contract(
+        address=address,
+        abi=abi
+    )
+    return concise_contract, contract, abi, condition_definition
+
+
+def get_eth_contracts(web3, contract_path, address):
+    abi = get_contract_abi_by_address(contract_path, address)
+    concise_contract = web3.eth.contract(
+        address=address,
+        abi=abi,
+        ContractFactoryClass=ConciseContract,
+    )
+    contract = web3.eth.contract(
+        address=address,
+        abi=abi
+    )
+
+    return concise_contract, contract
 
 
 def _get_concise_contract(web3, contract_path, address):

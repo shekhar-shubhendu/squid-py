@@ -1,11 +1,9 @@
-from web3 import Web3
-
 from squid_py.ddo.service import Service
+from squid_py.did import did_to_id
 from squid_py.service_agreement.service_agreement import ServiceAgreement
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 from squid_py.service_agreement.service_types import ServiceTypes
 from squid_py.service_agreement.utils import get_sla_template_path
-from squid_py.utils.utilities import get_id_from_did
 
 
 class ServiceDescriptor(object):
@@ -15,10 +13,10 @@ class ServiceDescriptor(object):
                 {'metadata': metadata, 'serviceEndpoint': service_endpoint})
 
     @staticmethod
-    def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
+    def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout, template_id):
         return (ServiceTypes.ASSET_ACCESS,
                 {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint,
-                 'timeout': timeout})
+                 'timeout': timeout, 'slaTemplateId': template_id})
 
     @staticmethod
     def compute_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
@@ -35,7 +33,7 @@ class ServiceFactory(object):
         for i, service_desc in enumerate(service_descriptors):
             service = ServiceFactory.build_service(service_desc, did)
             # set serviceDefinitionId for each service
-            service.update_value(sa_def_key, 'services-{}'.format(i + 1))
+            service.update_value(sa_def_key, str(i+1))
             services.append(service)
 
         return services
@@ -50,7 +48,7 @@ class ServiceFactory(object):
 
         elif service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
-                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout']
+                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout'], kwargs['slaTemplateId']
             )
 
         elif service_type == ServiceTypes.CLOUD_COMPUTE:
@@ -65,13 +63,15 @@ class ServiceFactory(object):
         return Service(did, service_endpoint, ServiceTypes.METADATA, values={'metadata': metadata})
 
     @staticmethod
-    def build_access_service(did, price, purchase_endpoint, service_endpoint, timeout):
+    def build_access_service(did, price, purchase_endpoint, service_endpoint, timeout, template_id):
         param_map = {
-            'assetId': Web3.toHex(get_id_from_did(did)),
-            'price': price
+            'assetId': did_to_id(did),
+            'price': price,
+            'documentKeyId': did_to_id(did)
         }
         sla_template_path = get_sla_template_path()
         sla_template = ServiceAgreementTemplate.from_json_file(sla_template_path)
+        sla_template.template_id = template_id
         conditions = sla_template.conditions[:]
         conditions_json_list = []
         for cond in conditions:
@@ -83,7 +83,7 @@ class ServiceFactory(object):
 
             conditions_json_list.append(cond)
 
-        sa = ServiceAgreement('services-1', sla_template.template_id, sla_template.conditions,
+        sa = ServiceAgreement(1, sla_template.template_id, sla_template.conditions,
                               sla_template.service_agreement_contract)
         other_values = {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: sa.sa_definition_id,

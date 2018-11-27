@@ -8,6 +8,7 @@ from web3 import Web3, HTTPProvider
 
 from squid_py.config import Config
 from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes, get_contract_abi_and_address
+from squid_py.ocean.account import Account
 from squid_py.ocean.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import (
     execute_pending_service_agreements,
@@ -37,9 +38,11 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls.access_conditions = cls.ocean.keeper.access_conditions
         cls.service_agreement = cls.ocean.keeper.service_agreement
 
-        cls.consumer = cls.web3.eth.accounts[0]
+        cls.consumer_acc = Account(cls.ocean.keeper, cls.web3.eth.accounts[0])
+        cls.consumer = cls.consumer_acc.address
         cls.web3.eth.defaultAccount = cls.consumer
 
+        cls.price = 7
         cls._setup_service_agreement()
         cls._setup_token()
 
@@ -71,7 +74,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         sa_def = {
             'type': 'Access',
-            'templateId': self.template_id,
+            'slaTemplateId': self.template_id,
             'serviceAgreementContract': {
                 'contractName': 'ServiceAgreement',
                 'events': [{
@@ -97,13 +100,13 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'parameters': [
                     {
                         'name': 'assetId',
-                        'type': 'byte32',
+                        'type': 'bytes32',
                         'value': did,
                     },
                     {
-                        'name': 'price',
-                        'type': 'uint256',
-                        'value': price,
+                        'name': 'documentKeyId',
+                        'type': 'bytes32',
+                        'value': did,
                     }
                 ],
                 'events': [
@@ -146,7 +149,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'parameters': [
                     {
                         'name': 'assetId',
-                        'type': 'byte32',
+                        'type': 'bytes32',
                         'value': did,
                     },
                     {
@@ -176,7 +179,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'parameters': [
                     {
                         'name': 'assetId',
-                        'type': 'byte32',
+                        'type': 'bytes32',
                         'value': did,
                     },
                     {
@@ -221,7 +224,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 "events": [
                     {
                         "name": "PaymentRefund",
-                        "actorType": "publisher",
+                        "actorType": "consumer",
                         "handler": {
                             "moduleName": "serviceAgreement",
                             "functionName": "terminateAgreement",
@@ -234,6 +237,11 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 "isTerminalCondition": 1
                 }
             )
+        for i, cond_dict in enumerate(sa_def['conditions']):
+            cond_dict['conditionKey'] = self.condition_keys[i]
+
+        for i, cond_dict in enumerate(sa_def['conditions']):
+            assert cond_dict['conditionKey'] == self.condition_keys[i]
 
         return sa_def
 
@@ -245,7 +253,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,
+            self.consumer_acc,
             service_agreement_id,
             did,
             {
@@ -268,13 +276,13 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def test_register_service_agreement_subscribes_to_events(self):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
-        price = 10
+        price = self.price
 
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,
+            self.consumer_acc,
             service_agreement_id,
             did,
             self.get_simple_service_agreement_definition(did, price),
@@ -293,12 +301,13 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def test_register_service_agreement_updates_fulfilled_agreements(self):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
-        price = 10
+        price = self.price
+
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,
+            self.consumer_acc,
             service_agreement_id,
             did,
             self.get_simple_service_agreement_definition(did, price),
@@ -314,7 +323,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,  # using the same account for the sake of simplicity here
+            self.consumer_acc,  # using the same account for the sake of simplicity here
             service_agreement_id,
             did,
             self.get_simple_service_agreement_definition(did, price),
@@ -357,12 +366,13 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         return
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
-        price = 10
+        price = self.price
+
         register_service_agreement(
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,
+            self.consumer_acc,
             service_agreement_id,
             did,
             self.get_simple_service_agreement_definition(did, price, include_refund=True),
@@ -378,7 +388,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,  # using the same account for the sake of simplicity here
+            self.consumer_acc,  # using the same account for the sake of simplicity here
             service_agreement_id,
             did,
             self.get_simple_service_agreement_definition(did, price, include_refund=True),
@@ -426,7 +436,8 @@ class TestRegisterServiceAgreement(unittest.TestCase):
     def test_execute_pending_service_agreements_subscribes_to_events(self):
         service_agreement_id = '0x%s' % generate_new_id()
         did = '0x%s' % generate_new_id()
-        price = 10
+        price = self.price
+
         record_service_agreement(self.storage_path, service_agreement_id, did, 0, price, self.content_url, self.start_time)
 
         def _did_resolver_fn(did):
@@ -440,7 +451,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             self.web3,
             self.config.keeper_path,
             self.storage_path,
-            self.consumer,
+            self.consumer_acc,
             'consumer',
             _did_resolver_fn,
             num_confirmations=0,
@@ -491,6 +502,15 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 get_fingerprint_by_name(cls.payment_conditions.contract.abi, 'refundPayment'),
             )
         ]
+        cls.condition_keys = [
+            cls.web3.soliditySha3(
+                ['bytes32', 'address', 'bytes4'],
+                [cls.template_id,
+                 contract,
+                 fingerprint]
+            ).hex() for contract, fingerprint in zip(cls.contracts, cls.fingerprints)
+        ]
+
         # lockPayment -> grantAccess -> releasePayment -> refundPayment
         # 4, 8           1, 2           16, 32            64, 128
         cls.dependencies = [4, 0, 1, 4 | 1 | 2]
@@ -511,7 +531,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         )
         cls.web3.eth.waitForTransactionReceipt(receipt)
 
-    def _execute_service_agreement(self, service_agreement_id, did, price):
+    def _get_conditions_data(self, did, price):
         hashes = [
             self.web3.soliditySha3(
                 ['bytes32', 'bytes32'],
@@ -530,17 +550,9 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 [did, price]
             ).hex()
         ]
-        condition_keys = [
-            self.web3.soliditySha3(
-                ['bytes32', 'address', 'bytes4'],
-                [self.template_id,
-                 contract,
-                 fingerprint]
-            ).hex() for contract, fingerprint in zip(self.contracts, self.fingerprints)
-        ]
         function_names = ['grantAccess', 'lockPayment', 'releasePayment', 'refundPayment']
         _network_name = get_network_name(self.web3)
-        for i, key in enumerate(condition_keys):
+        for i, key in enumerate(self.condition_keys):
             fn_name = function_names[i]
             abi, address = get_contract_abi_and_address(self.web3, self.ocean.keeper.contract_path, self.contract_names[i], _network_name)
             assert abi == self.contract_abis[i], 'abi does not match.'
@@ -551,12 +563,18 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             assert _key == key, 'condition key does not match: %s vs %s' % (_key, key)
 
         timeouts = [3, 0, 0, 3]
+
+        return hashes, timeouts
+
+    def _execute_service_agreement(self, service_agreement_id, did, price):
+        hashes, timeouts = self._get_conditions_data(did, price)
+
         signature = self.web3.eth.sign(
             self.consumer,
             hexstr=self.web3.soliditySha3(
                 ['bytes32', 'bytes32[]', 'bytes32[]', 'uint256[]', 'bytes32'],
                 [self.template_id,
-                 condition_keys,
+                 self.condition_keys,
                  hashes,
                  timeouts,
                  service_agreement_id]
