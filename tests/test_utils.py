@@ -1,3 +1,4 @@
+import configparser
 import os
 import pytest
 from web3 import Web3
@@ -63,20 +64,29 @@ def make_ocean_instance(secret_store_client, account_index):
 
 def get_publisher_ocean_instance():
     ocn = make_ocean_instance(SecretStoreClientMock, PUBLISHER_INDEX)
-    address = ocn.config.get('keeper-contracts', 'parity.address')
+    address = None
+    if ocn.config.has_option('keeper-contracts', 'parity.address'):
+        address = ocn.config.get('keeper-contracts', 'parity.address')
     address = ocn._web3.toChecksumAddress(address) if address else None
     if address and address in ocn.accounts:
-        ocn.set_main_account(address, ocn.config.get('keeper-contracts', 'parity.password'))
+        password = ocn.config.get('keeper-contracts', 'parity.password') \
+            if ocn.config.has_option('keeper-contracts', 'parity.password') else None
+        ocn.set_main_account(address, password)
     init_ocn_tokens(ocn)
     return ocn
 
 
 def get_consumer_ocean_instance():
     ocn = make_ocean_instance(SecretStoreClientMock, CONSUMER_INDEX)
-    address = ocn.config.get('keeper-contracts', 'parity.address1')
+    address = None
+    if ocn.config.has_option('keeper-contracts', 'parity.address1'):
+        address = ocn.config.get('keeper-contracts', 'parity.address1')
+
     address = ocn._web3.toChecksumAddress(address) if address else None
     if address and address in ocn.accounts:
-        ocn.set_main_account(address, ocn.config.get('keeper-contracts', 'parity.password1'))
+        password = ocn.config.get('keeper-contracts', 'parity.password1') \
+            if ocn.config.has_option('keeper-contracts', 'parity.password1') else None
+        ocn.set_main_account(address, password)
     init_ocn_tokens(ocn)
     return ocn
 
