@@ -218,9 +218,9 @@ class Ocean:
             'consumer address must be already set as the main account in this instance of Ocean.'
 
         agreement_id, service_agreement, service_def, ddo = self._get_service_agreement_to_sign(did, service_index)
-        signature, sa_hash = service_agreement.get_signed_agreement_hash(
+        signature = service_agreement.get_signed_agreement_hash(
             self._web3, self.keeper.contract_path, agreement_id, consumer_address
-        )
+        )[0]
 
         # Must approve token transfer for this purchase
         self._approve_token_transfer(service_agreement.get_price())

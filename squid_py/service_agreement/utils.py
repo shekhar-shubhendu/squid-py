@@ -3,7 +3,6 @@ import json
 
 from squid_py.ddo.authentication import Authentication
 from squid_py.ddo.public_key_hex import PublicKeyHex, PUBLIC_KEY_TYPE_HEX, AUTHENTICATION_TYPE_HEX
-from squid_py.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from squid_py.keeper.utils import get_fingerprint_by_name, get_contract_abi_and_address, hexstr_to_bytes
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
@@ -118,11 +117,11 @@ def get_conditions_with_updated_keys(web3, contract_path, conditions, sla_templa
     conditions_data = get_conditions_data_from_keeper_contracts(
         web3, contract_path, conditions, sla_template_id
     )
-    contract_addresses, fingerprints, fulfillment_indices, conditions_keys = conditions_data
+    fingerprints, fulfillment_indices, conditions_keys = conditions_data[1:]
     # Fill the conditionKey in each condition in the template
     _conditions = [ServiceAgreementCondition(cond.as_dictionary()) for cond in conditions]
-    for i in range(len(_conditions)):
-        _conditions[i].condition_key = conditions_keys[i]
+    for i, cond in enumerate(_conditions):
+        cond.condition_key = conditions_keys[i]
 
     return _conditions
 

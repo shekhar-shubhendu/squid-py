@@ -15,8 +15,7 @@ from squid_py.ddo.metadata import Metadata
 from squid_py.did import did_generate, did_to_id
 from squid_py.keeper.utils import get_fingerprint_by_name
 from squid_py.service_agreement.utils import build_condition_key
-from tests.test_utils import get_publisher_ocean_instance, get_registered_ddo, get_consumer_ocean_instance
-from squid_py.utils.utilities import generate_new_id, get_metadata_url
+from squid_py.utils.utilities import generate_new_id
 from squid_py.modules.v0_1.accessControl import grantAccess
 from squid_py.modules.v0_1.payment import lockPayment, releasePayment
 from squid_py.modules.v0_1.serviceAgreement import fulfillAgreement
@@ -166,9 +165,7 @@ def test_sign_agreement(publisher_ocean_instance, consumer_ocean_instance, regis
     #  - service agreement template must already be registered
     #  - asset ddo already registered
 
-    publisher = publisher_ocean_instance.main_account.address
     consumer = consumer_ocean_instance.main_account.address
-    keeper = consumer_ocean_instance.keeper
 
     # point consumer_ocean_instance's brizo mock to the publisher's ocean instance
     consumer_ocean_instance._http_client.ocean_instance = publisher_ocean_instance
@@ -176,8 +173,6 @@ def test_sign_agreement(publisher_ocean_instance, consumer_ocean_instance, regis
     service = registered_ddo.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     assert ServiceAgreement.SERVICE_DEFINITION_ID_KEY in service.as_dictionary()
     sa = ServiceAgreement.from_service_dict(service.as_dictionary())
-    cons_allowed = keeper.token.get_allowance(consumer, keeper.payment_conditions.address)
-    pub_allowed = keeper.token.get_allowance(publisher, keeper.payment_conditions.address)
 
     service_agreement_id = consumer_ocean_instance.sign_service_agreement(registered_ddo.did, sa.sa_definition_id, consumer)
     print('got new service agreement id:', service_agreement_id)
@@ -220,16 +215,12 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
     )
     # Must approve token transfer for this purchase
     consumer_ocn._approve_token_transfer(service_agreement.get_price())
-    cons_allowed = keeper.token.get_allowance(consumer_acc.address, keeper.payment_conditions.address)
-    pub_allowed = keeper.token.get_allowance(publisher_acc.address, keeper.payment_conditions.address)
-
 
     # execute the agreement
     pub_ocn = publisher_ocean_instance
     asset_id = did_to_id(ddo.did)
     ddo, service_agreement, service_def = pub_ocn._get_ddo_and_service_agreement(ddo.did, service_index)
-    content_urls = get_metadata_url(ddo)
-    receipt = pub_ocn.keeper.service_agreement.execute_service_agreement(
+    pub_ocn.keeper.service_agreement.execute_service_agreement(
         service_agreement.sla_template_id,
         signature,
         consumer_acc.address,
@@ -240,29 +231,24 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
         pub_ocn.main_account
     )
 
-    transact_pub = {'from': pub_ocn.main_account.address, 'gas': 4000000}
-    transact_cons = {'from': consumer_ocn.main_account.address, 'gas': 4000000}
     filter1 = {'serviceAgreementId': Web3.toBytes(hexstr=agreement_id)}
     filter_2 = {'serviceId': Web3.toBytes(hexstr=agreement_id)}
 
     # WAIT FOR ####### ExecuteAgreement Event
-    executed = wait_for_event(pub_ocn.keeper.service_agreement.events.ExecuteAgreement, filter1)  ##############################
+    executed = wait_for_event(pub_ocn.keeper.service_agreement.events.ExecuteAgreement, filter1)
+    assert executed, ''
     cons = keeper.service_agreement.get_service_agreement_consumer(agreement_id)
     pub = keeper.service_agreement.get_service_agreement_publisher(agreement_id)
     assert cons == consumer_acc.address
     assert pub == publisher_acc.address
 
-
     cond = service_agreement.conditions[0]
     fn_fingerprint = get_fingerprint_by_name(keeper.payment_conditions.contract.abi, cond.function_name)
     sa_contract = keeper.service_agreement.contract_concise
-    pay_contract = keeper.payment_conditions.contract_concise
     pay_cont_address = keeper.payment_conditions.address
 
     terminated = sa_contract.isAgreementTerminated(agreement_id)
     assert terminated is False
-    fulfilled = sa_contract.fulfillAgreement(agreement_id, transact=transact_pub)
-    # assert fulfilled is False, ''
     template_id = web3.toHex(sa_contract.getTemplateId(agreement_id))
     assert template_id == service_agreement.sla_template_id
 
@@ -279,7 +265,7 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
     # Lock payment
     lockPayment(web3, keeper.contract_path, consumer_acc, agreement_id, service_def)
     # WAIT FOR ####### PaymentLocked event
-    locked = wait_for_event(keeper.payment_conditions.events.PaymentLocked, filter_2)  ##############################
+    locked = wait_for_event(keeper.payment_conditions.events.PaymentLocked, filter_2)
     # assert locked, ''
     if not locked:
         lock_cond_status = keeper.service_agreement.contract_concise.getConditionStatus(agreement_id, service_agreement.conditions_keys[0])
@@ -291,12 +277,12 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
     # Grant access
     grantAccess(web3, keeper.contract_path, publisher_acc, agreement_id, service_def)
     # WAIT FOR ####### AccessGranted event
-    granted = wait_for_event(keeper.access_conditions.events.AccessGranted, filter_2)  ##############################
+    granted = wait_for_event(keeper.access_conditions.events.AccessGranted, filter_2)
     assert granted, ''
     # Release payment
     releasePayment(web3, keeper.contract_path, publisher_acc, agreement_id, service_def)
     # WAIT FOR ####### PaymentReleased event
-    released = wait_for_event(keeper.payment_conditions.events.PaymentReleased, filter_2)  ##############################
+    released = wait_for_event(keeper.payment_conditions.events.PaymentReleased, filter_2)
     assert released, ''
     # Fulfill agreement
     fulfillAgreement(web3, keeper.contract_path, publisher_acc, agreement_id, service_def)

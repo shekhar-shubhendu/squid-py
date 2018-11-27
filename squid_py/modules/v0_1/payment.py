@@ -1,10 +1,9 @@
 from squid_py.config import DEFAULT_GAS_LIMIT
-from squid_py.keeper.utils import get_contract_abi_and_address, get_fingerprint_by_name, hexstr_to_bytes
+from squid_py.keeper.utils import get_contract_abi_and_address
 from squid_py.modules.v0_1.utils import (
     get_condition_contract_data,
-    is_condition_fulfilled,
-    get_eth_contracts)
-from squid_py.service_agreement.utils import build_condition_key
+    is_condition_fulfilled
+    )
 
 
 def lockPayment(web3, contract_path, account, service_agreement_id,

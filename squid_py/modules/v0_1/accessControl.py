@@ -1,11 +1,10 @@
 from squid_py.config import DEFAULT_GAS_LIMIT
-from squid_py.keeper.utils import get_contract_abi_and_address, hexstr_to_bytes, get_fingerprint_by_name
+from squid_py.keeper.utils import get_contract_abi_and_address
 from squid_py.modules.v0_1.utils import (
     get_condition_contract_data,
-    is_condition_fulfilled,
-    get_eth_contracts)
+    is_condition_fulfilled
+    )
 from squid_py.service_agreement.service_agreement import ServiceAgreement
-from squid_py.service_agreement.utils import build_condition_key
 
 
 def grantAccess(web3, contract_path, account, service_agreement_id, service_definition,
@@ -35,7 +34,7 @@ def grantAccess(web3, contract_path, account, service_agreement_id, service_defi
         if account.password:
             web3.personal.unlockAccount(account.address, account.password)
 
-        tx_hash = access_conditions.grantAccess(service_agreement_id, asset_id, asset_id, transact=transact)
+        tx_hash = access_conditions.grantAccess(service_agreement_id, asset_id, document_key_id, transact=transact)
     except Exception as e:
         print('error: ', e)
         raise
