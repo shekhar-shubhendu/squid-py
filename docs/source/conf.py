@@ -14,6 +14,8 @@
 #
 import os
 import sys
+import shutil
+
 print(os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../'))
 
@@ -44,6 +46,7 @@ extensions = [
 # apidoc settings
 # See https://github.com/sphinx-contrib/apidoc
 apidoc_module_dir = '../../squid_py'
+# apidoc_output_dir = 'api' by default, and leave it that way!
 apidoc_separate_modules = True
 # See https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
 apidoc_extra_args = []
@@ -117,3 +120,8 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {'sidebar.rst'}
+
+# Delete the api/ directory of auto-generated .rst docs files
+print("Removing the api/ directory via conf.py, if api/ exists.")
+shutil.rmtree('api', ignore_errors=True)
+print("Done removal.")
