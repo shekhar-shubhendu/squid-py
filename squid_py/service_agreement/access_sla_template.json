@@ -64,17 +64,29 @@
           "name": "assetId",
           "type": "bytes32",
           "value": ""
+        },
+        {
+          "name": "documentKeyId",
+          "type": "bytes32",
+          "value": ""
         }
       ],
       "events": [
         {
           "name": "AccessGranted",
-          "actorType": [
-            "consumer"
-          ],
+          "actorType": "publisher",
           "handler": {
-            "moduleName": "paymentProcessing",
+            "moduleName": "payment",
             "functionName": "releasePayment",
+            "version": "0.1"
+          }
+        },
+        {
+          "name": "AccessGranted",
+          "actorType": "consumer",
+          "handler": {
+            "moduleName": "accessControl",
+            "functionName": "consumeAsset",
             "version": "0.1"
           }
         },
@@ -82,7 +94,7 @@
           "name": "AccessTimeout",
           "actorType": "consumer",
           "handler": {
-            "moduleName": "paymentProcessing",
+            "moduleName": "payment",
             "functionName": "refundPayment",
             "version": "0.1"
           }

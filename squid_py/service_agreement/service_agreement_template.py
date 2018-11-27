@@ -117,7 +117,7 @@ class ServiceAgreementTemplate(object):
             ]
             },
             "conditions": [
-            {
+              {
               "name": "lockPayment",
               "timeout": 0,
               "conditionKey": "0x313d20f9cda19e1f5702af79e5ebfa7cb434918722f9b334000ea71cdaac1614",
@@ -129,7 +129,7 @@ class ServiceAgreementTemplate(object):
                   "name": "assetId",
                   "type": "bytes32",
                   "value": ""
-                },{
+                }, {
                   "name": "price",
                   "type": "uint256",
                   "value": ""
@@ -138,10 +138,8 @@ class ServiceAgreementTemplate(object):
               "events": [
                 {
                   "name": "PaymentLocked",
-                  "actorType": [
-                    "publisher"
-                  ],
-                  "handlers": {
+                  "actorType": "publisher",
+                  "handler": {
                     "moduleName": "accessControl",
                     "functionName": "grantAccess",
                     "version": "0.1"
@@ -163,17 +161,29 @@ class ServiceAgreementTemplate(object):
                   "name": "assetId",
                   "type": "bytes32",
                   "value": ""
+                },
+                {
+                  "name": "documentKeyId",
+                  "type": "bytes32",
+                  "value": ""
                 }
               ],
               "events": [
                 {
                   "name": "AccessGranted",
-                  "actorType": [
-                    "consumer"
-                  ],
-                  "handlers": {
-                    "moduleName": "paymentProcessing",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "payment",
                     "functionName": "releasePayment",
+                    "version": "0.1"
+                  }
+                },
+                {
+                  "name": "AccessGranted",
+                  "actorType": "consumer",
+                  "handler": {
+                    "moduleName": "accessControl",
+                    "functionName": "consumeAsset",
                     "version": "0.1"
                   }
                 },
@@ -181,7 +191,7 @@ class ServiceAgreementTemplate(object):
                     "name": "AccessTimeout",
                     "actorType": "consumer",
                     "handler": {
-                        "moduleName": "paymentProcessing",
+                        "moduleName": "payment",
                         "functionName": "refundPayment",
                         "version": "0.1"
                     }
@@ -202,7 +212,7 @@ class ServiceAgreementTemplate(object):
                   "name": "assetId",
                   "type": "bytes32",
                   "value": ""
-                },{
+                }, {
                   "name": "price",
                   "type": "uint256",
                   "value": ""
@@ -211,10 +221,8 @@ class ServiceAgreementTemplate(object):
               "events": [
                 {
                   "name": "PaymentReleased",
-                  "actorType": [
-                    "consumer"
-                  ],
-                  "handlers": {
+                  "actorType": "consumer",
+                  "handler": {
                     "moduleName": "serviceAgreement",
                     "functionName": "fulfillAgreement",
                     "version": "0.1"
@@ -236,7 +244,7 @@ class ServiceAgreementTemplate(object):
                   "name": "assetId",
                   "type": "bytes32",
                   "value": ""
-                },{
+                }, {
                   "name": "price",
                   "type": "uint256",
                   "value": ""
@@ -245,10 +253,8 @@ class ServiceAgreementTemplate(object):
               "events": [
                 {
                   "name": "PaymentRefund",
-                  "actorType": [
-                    "consumer", "publisher"
-                  ],
-                  "handlers": {
+                  "actorType": "consumer",
+                  "handler": {
                     "moduleName": "serviceAgreement",
                     "functionName": "terminateAgreement",
                     "version": "0.1"

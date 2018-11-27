@@ -92,7 +92,7 @@
                   "consumer"
                 ],
                 "handlers": {
-                  "moduleName": "paymentProcessing",
+                  "moduleName": "payment",
                   "functionName": "releasePayment",
                   "version": "0.1"
                 }

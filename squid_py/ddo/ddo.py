@@ -11,6 +11,7 @@ from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
 from web3 import Web3
 
+from squid_py.ddo.public_key_hex import PUBLIC_KEY_TYPE_HEX, PublicKeyHex
 from .authentication import Authentication
 from .constants import KEY_PAIR_MODULUS_BIT, DID_DDO_CONTEXT_URL
 from .public_key_base import PublicKeyBase, PUBLIC_KEY_STORE_TYPE_PEM
@@ -470,7 +471,11 @@ class DDO:
     def create_public_key_from_json(values):
         """create a public key object based on the values from the JSON record"""
         # currently we only support RSA public keys
-        public_key = PublicKeyRSA(values['id'], owner=values.get('owner', None))
+        if values['type'] == PUBLIC_KEY_TYPE_RSA:
+            public_key = PublicKeyRSA(values['id'], owner=values.get('owner', None))
+        else:
+            public_key = PublicKeyHex(values['id'], owner=values.get('owner', None))
+
         public_key.set_key_value(values)
         return public_key
 

@@ -3,6 +3,7 @@ from web3 import Web3
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
 from squid_py.service_agreement.service_agreement_contract import ServiceAgreementContract
 from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
+from squid_py.service_agreement.utils import get_conditions_with_updated_keys
 
 
 class ServiceAgreement(object):
@@ -66,20 +67,42 @@ class ServiceAgreement(object):
             [sa_template_id, condition_keys, values_hash_list, timeouts, service_agreement_id]
         )
 
-    def get_signed_agreement_hash(self, web3, did_id, service_agreement_id, consumer):
+    def get_service_agreement_hash(self, web3, contract_path, service_agreement_id):
+        """Return the hash of the service agreement values to be signed by a consumer.
+
+        :param web3: Web3 instance
+        :param contract_path: str -- path to keeper contracts artifacts (abi files)
+        :param service_agreement_id: hex str identifies an executed service agreement on-chain
+        :return:
         """
+        self.update_conditions_keys(web3, contract_path)
+        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
+            web3, self.sla_template_id, self.conditions_keys,
+            self.conditions_params_value_hashes, self.conditions_timeouts, service_agreement_id
+        )
+        return agreement_hash
+
+    def get_signed_agreement_hash(self, web3, contract_path, service_agreement_id, consumer_address):
+        """Return the consumer-signed service agreement hash and the raw hash.
 
         :param web3: Object -- instance of web3.Web3 to use for signing the message
-        :param did_id: str -- the *id* portion of the asset did
+        :param contract_path: str -- path to keeper contracts artifacts (abi files)
         :param service_agreement_id: hex str -- a new service agreement id for this service transaction
-        :param consumer: hex str -- address of consumer to sign the message with
+        :param consumer_address: hex str -- address of consumer to sign the message with
 
         :return: signed_msg_hash, msg_hash
         """
-        agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-            web3, self.sla_template_id, self.conditions_keys, self.conditions_params_value_hashes, self.conditions_timeouts, service_agreement_id
-        )
-        return web3.eth.sign(consumer, agreement_hash).hex(), agreement_hash.hex()
+        agreement_hash = self.get_service_agreement_hash(web3, contract_path, service_agreement_id)
+        return web3.eth.sign(consumer_address, agreement_hash).hex(), agreement_hash.hex()
+
+    def update_conditions_keys(self, web3, contract_path):
+        """Update the conditions keys based on the current keeper contracts.
+
+        :param web3:
+        :param contract_path:
+        :return:
+        """
+        self.conditions = get_conditions_with_updated_keys(web3, contract_path, self.conditions, self.sla_template_id)
 
     def as_dictionary(self):
         return {
