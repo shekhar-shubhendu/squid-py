@@ -97,11 +97,18 @@ def get_registered_ddo(ocean_instance):
         ocean_instance.main_account, ServiceAgreementTemplate.from_json_file(get_sla_template_path())
     )
 
-    metadata = Metadata.get_example()
+    config = ocean_instance.config
+    brizo_url = 'http://localhost:8030'
+    if config.has_option('resources', 'brizo.url'):
+        brizo_url = config.get('resources', 'brizo.url') or brizo_url
 
+    metadata = Metadata.get_example()
+    brizo_base_url = '/api/v1/brizo'
+    purchase_endpoint = '{}{}/services/access/initialize'.format(brizo_url, brizo_base_url)
+    service_endpoint = '{}{}/services/consume'.format(brizo_url, brizo_base_url)
     ddo = ocean_instance.register_asset(
         metadata, ocean_instance.main_account.address,
-        [ServiceDescriptor.access_service_descriptor(7, '/brizo/initialize', '/service/endpoint', 360, template_id)]
+        [ServiceDescriptor.access_service_descriptor(7, purchase_endpoint, service_endpoint, 360, template_id)]
     )
 
     return ddo

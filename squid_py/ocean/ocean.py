@@ -430,7 +430,10 @@ class Ocean:
                 )
                 response = self._http_client.get(consume_url)
                 print('got consume response: ', response)
-                f.write(response.data.decode())
+                if response.status_code == 200:
+                    f.write(response.text)
+                else:
+                    print('consume failed: %s' % response.reason)
 
     def set_main_account(self, address, password):
         self.main_account = Account(self.keeper, self._web3.toChecksumAddress(address), password)
