@@ -40,10 +40,9 @@ class Market(ContractBase):
             receipt = self.contract_concise.requestTokens(amount, transact={'from': address})
             logging.info("{} requests {} tokens, returning receipt".format(address, amount))
             return receipt
-        except:
+        except Exception:
             # TODO: Specify error
             raise
-            return False
 
     def register_asset(self, asset, price, publisher_address):
         """

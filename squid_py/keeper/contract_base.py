@@ -3,9 +3,7 @@
 
     All keeper contract inherit from this base class
 """
-import json
 import logging
-import os
 
 from web3.contract import ConciseContract
 from squid_py.keeper.utils import get_contract_by_name
@@ -54,6 +52,10 @@ class ContractBase(object):
         )
 
         return concise_contract, contract, address
+
+    def unlock_account(self, account):
+        if account.password:
+            self.web3.personal.unlockAccount(account.address, account.password)
 
     def to_checksum_address(self, address):
         """Validate the address provided."""

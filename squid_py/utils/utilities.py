@@ -1,15 +1,33 @@
+import json
 import uuid
 import time
 from collections import namedtuple
 from datetime import datetime
 from threading import Thread
 
-from eth_utils import big_endian_to_int
 from web3 import Web3
 from eth_keys import KeyAPI
 from eth_utils import big_endian_to_int
 
+from squid_py.service_agreement.service_types import ServiceTypes
+
 Signature = namedtuple('Signature', ('v', 'r', 's'))
+
+
+def prepare_purchase_payload(did, agreement_id, service_index, signature, consumer_address):
+    # Prepare a payload to send to `Brizo`
+    return json.dumps({
+        'did': did,
+        'serviceAgreementId': agreement_id,
+        'serviceDefinitionId': service_index,
+        'signature': signature,
+        'consumerAddress': consumer_address
+    })
+
+
+def get_metadata_url(ddo):
+    metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
+    return metadata_service.get_values()['metadata']['base']['contentUrls']
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -31,6 +49,10 @@ def get_publickey_from_address(web3, address):
 
 def generate_new_id():
     return uuid.uuid4().hex + uuid.uuid4().hex
+
+
+def generate_prefixed_id():
+    return '0x%s' % generate_new_id()
 
 
 def get_id_from_did(did):
@@ -102,7 +124,7 @@ def watch_event(contract_name, event_name, callback, interval,
 def install_filter(contract, event_name, fromBlock=0, toBlock='latest', filters=None):
     # contract_instance = self.contracts[contract_name][1]
     event = getattr(contract.events, event_name)
-    event_filter = event.createFilter(
+    event_filter = event().createFilter(
         fromBlock=fromBlock, toBlock=toBlock, argument_filters=filters
     )
     return event_filter

@@ -7,4 +7,4 @@ class AccessConditions(ContractBase):
         super().__init__(web3, contract_path, 'AccessConditions')
 
     def check_permissions(self, address, asset_id, sender_address):
-        self.contract_concise.checkPermissions(address, asset_id, call={'from': sender_address})
+        return self.contract_concise.checkPermissions(address, asset_id, call={'from': sender_address})

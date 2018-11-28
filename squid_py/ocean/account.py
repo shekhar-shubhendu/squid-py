@@ -14,7 +14,11 @@ class Account:
         self.password = password
         self.balance = self.get_balance()
 
+    def unlock(self):
+        self.keeper.market.unlock_account(self)
+
     def request_tokens(self, amount):
+        self.unlock()
         return self.keeper.market.request_tokens(amount, self.address)
 
     def get_balance(self):
