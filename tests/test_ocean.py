@@ -334,7 +334,6 @@ def test_agreement_hash(publisher_ocean_instance):
     service = ddo.get_service(service_type='Access')
     service = service.as_dictionary()
     sa = ServiceAgreement.from_service_dict(service)
-    sa.update_conditions_keys(pub_ocn.keeper.web3, pub_ocn.keeper.contract_path)
     service[ServiceAgreement.SERVICE_CONDITIONS_KEY] = [cond.as_dictionary() for cond in sa.conditions]
     assert template_id == sa.sla_template_id, ''
     assert did == ddo.did
@@ -342,8 +341,9 @@ def test_agreement_hash(publisher_ocean_instance):
         pub_ocn.keeper.web3, sa.sla_template_id, sa.conditions_keys,
         sa.conditions_params_value_hashes, sa.conditions_timeouts, service_agreement_id
     )
-    print('agreement hash: ', agreement_hash.hex(), agreement_hash)
-    assert agreement_hash.hex() == "0x71dde05ab58b8ff8e08b2714b46c1f8ba3efb2a0333462e5d26421cc1f2b197e", 'hash does not match.'
+    print('agreement hash: ', agreement_hash.hex())
+    print('expected hash: ', "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb")
+    assert agreement_hash.hex() == "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb", 'hash does not match.'
     # signed_hash = pub_ocn.keeper.web3.eth.sign(user_address, agreement_hash).hex()
     # print('signed agreement hash:', signed_hash)
 
