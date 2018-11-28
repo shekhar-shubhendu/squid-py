@@ -1,17 +1,15 @@
-.. Squid-py documentation master file, created by
-   sphinx-quickstart on Fri Aug 24 10:24:40 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+squid-py API Reference Docs
+===========================
 
-squid-py
-========
+These docs are API Reference docs.
+They are not tutorials or examples of how to use squid-py.
+For those, see `the Ocean Protocol docs site <https://docs.oceanprotocol.com/>`_.
 
 .. toctree::
+   :maxdepth: 4
+   :caption: Contents
 
-   API Reference <_modules/modules>
+   api/modules
 
-Indices and Tables
-==================
 
-* :ref:`genindex`
-* :ref:`search`
+* :ref:`modindex`
