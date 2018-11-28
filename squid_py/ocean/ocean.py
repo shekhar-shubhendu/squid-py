@@ -1,4 +1,6 @@
 import json
+import os
+import os.path
 
 from web3 import Web3, HTTPProvider
 
@@ -58,6 +60,11 @@ class Ocean:
             self.metadata_store = AquariusWrapper(self.config.aquarius_url)
         else:
             self.metadata_store = None
+
+        downloads_path = os.path.join(os.getcwd(), 'downloads')
+        if self.config.has_option('resources', 'downloads.path'):
+            downloads_path = self.config.get('resources', 'downloads.path') or downloads_path
+        self._downloads_path = downloads_path
 
         # Collect the accounts
         self.accounts = self.get_accounts()
@@ -218,6 +225,7 @@ class Ocean:
             'consumer address must be already set as the main account in this instance of Ocean.'
 
         agreement_id, service_agreement, service_def, ddo = self._get_service_agreement_to_sign(did, service_index)
+        self.main_account.unlock()
         signature = service_agreement.get_signed_agreement_hash(
             self._web3, self.keeper.contract_path, agreement_id, consumer_address
         )[0]
@@ -366,6 +374,10 @@ class Ocean:
                                self.main_account.address, self.main_account.password)
 
             document_id = did_to_id(did)
+            # :FIXME: -- modify the secret store lib to handle this.
+            if document_id.startswith('0x'):
+                document_id = document_id[2:]
+
             result = publisher.publish_document(document_id, data)
         return result
 
@@ -376,6 +388,10 @@ class Ocean:
                               self.main_account.address, self.main_account.password)
 
             document_id = did_to_id(did)
+            # :FIXME: -- modify the secret store lib to handle this.
+            if document_id.startswith('0x'):
+                document_id = document_id[2:]
+
             result = consumer.decrypt_document(document_id, encrypted_data)
 
         return result
@@ -393,23 +409,35 @@ class Ocean:
             raise AssertionError('Consume asset failed, service definition is missing the "serviceEndpoint".')
 
         # decrypt the contentUrls
-        decrypted_content_urls = self._decrypt_content_urls(did, content_urls)
+        decrypted_content_urls = json.loads(self._decrypt_content_urls(did, content_urls))
+        if isinstance(decrypted_content_urls, str):
+            decrypted_content_urls = [decrypted_content_urls]
         print('got decrypted contentUrls: ', decrypted_content_urls)
-        consume_url = (
-            '%s?url=%s&serviceAgreementId=%s&consumerAddress=%s'
-            % (service_url, decrypted_content_urls, service_agreement_id, consumer_account.address)
-        )
-        response = self._http_client.get(consume_url)
-        print('got consume response: ', response)
-        return response
+
+        file_name = 'datafile.%s.%s' % (did_to_id(did), service_index)
+        if not os.path.exists(self._downloads_path):
+            os.mkdir(self._downloads_path)
+
+        with open(os.path.join(self._downloads_path, file_name), 'w') as f:
+            for url in decrypted_content_urls:
+                if url.startswith('"') or url.startswith("'"):
+                    url = url[1:-1]
+
+                print('invoke consume endpoint for this url: %s' % url)
+                consume_url = (
+                    '%s?url=%s&serviceAgreementId=%s&consumerAddress=%s'
+                    % (service_url, url, service_agreement_id, consumer_account.address)
+                )
+                response = self._http_client.get(consume_url)
+                print('got consume response: ', response)
+                if response.status_code == 200:
+                    f.write(response.text)
+                else:
+                    print('consume failed: %s' % response.reason)
 
     def set_main_account(self, address, password):
         self.main_account = Account(self.keeper, self._web3.toChecksumAddress(address), password)
         self.keeper.web3.eth.defaultAccount = self.main_account.address
-        if password:
-            unlocked = self._web3.personal.unlockAccount(self.main_account.address, self.main_account.password)
-            if not unlocked:
-                raise AssertionError('Sorry, could not unlock account.')
 
     def get_order(self):
         pass
