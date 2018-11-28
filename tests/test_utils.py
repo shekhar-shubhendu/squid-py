@@ -44,11 +44,11 @@ def test_convert():
 
 
 def init_ocn_tokens(ocn, amount=100):
-    ocn.keeper.market.contract_concise.requestTokens(amount, transact={'from': ocn.main_account.address})
-    ocn.keeper.token.contract_concise.approve(
+    ocn.main_account.request_tokens(amount)
+    ocn.keeper.token.token_approve(
         ocn.keeper.payment_conditions.address,
         amount,
-        transact={'from': ocn.main_account.address},
+        ocn.main_account
     )
 
 

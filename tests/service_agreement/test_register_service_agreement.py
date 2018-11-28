@@ -8,7 +8,6 @@ from web3 import Web3, HTTPProvider
 
 from squid_py.config import Config
 from squid_py.keeper.utils import get_fingerprint_by_name, hexstr_to_bytes, get_contract_abi_and_address
-from squid_py.ocean.account import Account
 from squid_py.ocean.ocean import Ocean
 from squid_py.service_agreement.register_service_agreement import (
     execute_pending_service_agreements,
@@ -38,7 +37,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         cls.access_conditions = cls.ocean.keeper.access_conditions
         cls.service_agreement = cls.ocean.keeper.service_agreement
 
-        cls.consumer_acc = Account(cls.ocean.keeper, cls.web3.eth.accounts[0])
+        cls.consumer_acc = cls.ocean.main_account
         cls.consumer = cls.consumer_acc.address
         cls.web3.eth.defaultAccount = cls.consumer
 
@@ -460,7 +459,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
         self._execute_service_agreement(service_agreement_id, did, price)
 
         flt = self.payment_conditions.events.PaymentLocked.createFilter(fromBlock='latest')
-        for check in range(10):
+        for check in range(20):
             events = flt.get_new_entries()
             if events:
                 break
@@ -525,6 +524,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             [2, 3],  # root condition
             1,  # AND
         ]
+        cls.consumer_acc.unlock()
         receipt = cls.service_agreement.contract_concise.setupAgreementTemplate(
             *setup_args,
             transact={'from': cls.consumer}
@@ -568,7 +568,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
     def _execute_service_agreement(self, service_agreement_id, did, price):
         hashes, timeouts = self._get_conditions_data(did, price)
-
+        self.consumer_acc.unlock()
         signature = self.web3.eth.sign(
             self.consumer,
             hexstr=self.web3.soliditySha3(
@@ -590,6 +590,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
             service_agreement_id,
             did,
         ]
+        self.consumer_acc.unlock()
         self.service_agreement.contract_concise.executeAgreement(
             *execute_args,
             transact={'from': self.consumer}
