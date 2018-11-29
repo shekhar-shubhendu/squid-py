@@ -395,14 +395,19 @@ def test_integration(consumer_ocean_instance):
     assert granted
     fulfilled = wait_for_event(consumer_ocean_instance.keeper.service_agreement.events.AgreementFulfilled, filter1)
     assert fulfilled
-    time.sleep(3)
+    time.sleep(5)
     path = consumer_ocean_instance._downloads_path
     # check consumed data file in the downloads folder
     assert os.path.exists(path), ''
-    filenames = os.listdir(path)
-    assert filenames, ''
-    for fname in filenames:
-        with open(os.path.join(path, fname)) as f:
-            lines = f.readlines()
-            print('signed url from service endpoint: %s' % (lines[0] if lines else 'empty'))
+    folder_names = os.listdir(path)
+    assert folder_names, ''
+    for name in folder_names:
+        asset_path = os.path.join(path, name)
+        if os.path.isfile(asset_path):
+            continue
+
+        filenames = os.listdir(asset_path)
+        assert filenames, 'no files created in this dir'
+        assert os.path.isfile(os.path.join(asset_path, filenames[0])), ''
+
     print('agreement was fulfilled.')
