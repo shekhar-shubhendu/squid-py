@@ -414,26 +414,31 @@ class Ocean:
             decrypted_content_urls = [decrypted_content_urls]
         print('got decrypted contentUrls: ', decrypted_content_urls)
 
-        file_name = 'datafile.%s.%s' % (did_to_id(did), service_index)
+        asset_folder = 'datafile.%s.%s' % (did_to_id(did), service_index)
+        asset_folder = os.path.join(self._downloads_path, asset_folder)
         if not os.path.exists(self._downloads_path):
             os.mkdir(self._downloads_path)
+        if not os.path.exists(asset_folder):
+            os.mkdir(asset_folder)
 
-        with open(os.path.join(self._downloads_path, file_name), 'w') as f:
-            for url in decrypted_content_urls:
-                if url.startswith('"') or url.startswith("'"):
-                    url = url[1:-1]
+        for url in decrypted_content_urls:
+            if url.startswith('"') or url.startswith("'"):
+                url = url[1:-1]
 
-                print('invoke consume endpoint for this url: %s' % url)
-                consume_url = (
+            print('invoke consume endpoint for this url: %s' % url)
+            consume_url = (
                     '%s?url=%s&serviceAgreementId=%s&consumerAddress=%s'
                     % (service_url, url, service_agreement_id, consumer_account.address)
-                )
-                response = self._http_client.get(consume_url)
-                print('got consume response: ', response)
-                if response.status_code == 200:
-                    f.write(response.text)
-                else:
-                    print('consume failed: %s' % response.reason)
+            )
+            response = self._http_client.get(consume_url)
+            if response.status_code == 200:
+                url = response.url.split('?')[0]
+                file_name = os.path.basename(url)
+                with open(os.path.join(asset_folder, file_name), 'wb') as f:
+                    f.write(response.content)
+                    print('Saved downloaded file in "%s"' % f.name)
+            else:
+                print('consume failed: %s' % response.reason)
 
     def set_main_account(self, address, password):
         self.main_account = Account(self.keeper, self._web3.toChecksumAddress(address), password)
