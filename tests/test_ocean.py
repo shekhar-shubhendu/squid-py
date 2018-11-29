@@ -2,7 +2,7 @@
     Test ocean class
 
 """
-
+import json
 import logging
 import os
 import pathlib
@@ -11,12 +11,13 @@ import time
 import pytest
 from web3 import Web3
 
+from squid_py.ddo import DDO
 from squid_py.exceptions import OceanDIDNotFound
 from squid_py.ddo.metadata import Metadata
 from squid_py.did import did_generate, did_to_id
 from squid_py.keeper.utils import get_fingerprint_by_name
 from squid_py.service_agreement.utils import build_condition_key
-from squid_py.utils.utilities import generate_new_id
+from squid_py.utils.utilities import generate_new_id, generate_prefixed_id
 from squid_py.modules.v0_1.accessControl import grantAccess
 from squid_py.modules.v0_1.payment import lockPayment, releasePayment
 from squid_py.modules.v0_1.serviceAgreement import fulfillAgreement
@@ -311,6 +312,40 @@ def wait_for_event(event, arg_filter, wait_iterations=20):
         if events:
             return events[0]
         time.sleep(0.5)
+
+
+def test_agreement_hash(publisher_ocean_instance):
+    """
+    This test verifies generating agreement hash using fixed inputs and ddo example.
+    This will make it easier to compare the hash generated from different languages.
+    """
+    pub_ocn = publisher_ocean_instance
+
+    did = "did:op:0xcb36cf78d87f4ce4a784f17c2a4a694f19f3fbf05b814ac6b0b7197163888865"
+    user_address = pub_ocn.keeper.web3.toChecksumAddress("0x00bd138abd70e2f00903268f3db08f2d25677c9e")
+    template_id = "0x044852b2a670ade5407e78fb2863c51de9fcb96542a07186fe3aeda6bb8a116d"
+    service_agreement_id = '0xf136d6fadecb48fdb2fc1fb420f5a5d1c32d22d9424e47ab9461556e058fefaa'
+    print('sid: ', service_agreement_id)
+    ddo_file_name = 'shared_ddo_example.json'
+
+    filepath = os.path.join(os.path.sep, *os.path.realpath(__file__).split(os.path.sep)[:-1], 'resources', 'ddo', ddo_file_name)
+    ddo = DDO(json_filename=filepath)
+
+    service = ddo.get_service(service_type='Access')
+    service = service.as_dictionary()
+    sa = ServiceAgreement.from_service_dict(service)
+    service[ServiceAgreement.SERVICE_CONDITIONS_KEY] = [cond.as_dictionary() for cond in sa.conditions]
+    assert template_id == sa.sla_template_id, ''
+    assert did == ddo.did
+    agreement_hash = ServiceAgreement.generate_service_agreement_hash(
+        pub_ocn.keeper.web3, sa.sla_template_id, sa.conditions_keys,
+        sa.conditions_params_value_hashes, sa.conditions_timeouts, service_agreement_id
+    )
+    print('agreement hash: ', agreement_hash.hex())
+    print('expected hash: ', "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb")
+    assert agreement_hash.hex() == "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb", 'hash does not match.'
+    # signed_hash = pub_ocn.keeper.web3.eth.sign(user_address, agreement_hash).hex()
+    # print('signed agreement hash:', signed_hash)
 
 
 def test_integration(consumer_ocean_instance):
