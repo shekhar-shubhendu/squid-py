@@ -429,8 +429,8 @@ class Ocean:
             )
             response = self._http_client.get(consume_url)
             if response.status_code == 200:
-                url = response.url.split('?')[0]
-                file_name = os.path.basename(url)
+                download_url = response.url.split('?')[0]
+                file_name = os.path.basename(download_url)
                 with open(os.path.join(asset_folder, file_name), 'wb') as f:
                     f.write(response.content)
                     print('Saved downloaded file in "%s"' % f.name)
