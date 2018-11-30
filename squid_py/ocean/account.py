@@ -1,4 +1,6 @@
-from squid_py.models.balance import Balance
+from collections import namedtuple
+
+Balance = namedtuple('Balance', ('eth', 'ocn'))
 
 
 class Account:
@@ -12,7 +14,6 @@ class Account:
         self.keeper = keeper
         self.address = address
         self.password = password
-        self.balance = self.get_balance()
 
     def unlock(self):
         self.keeper.market.unlock_account(self)
@@ -29,6 +30,10 @@ class Account:
 
     def get_ocean_balance(self):
         return self.ocean_balance
+
+    @property
+    def balance(self):
+        return Balance(self.ether_balance, self.ocean_balance)
 
     @property
     def ether_balance(self):
