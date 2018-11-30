@@ -389,14 +389,14 @@ def test_integration(consumer_ocean_instance):
     print('got new service agreement id:', service_agreement_id)
     filter1 = {'serviceAgreementId': Web3.toBytes(hexstr=service_agreement_id)}
     filter_2 = {'serviceId': Web3.toBytes(hexstr=service_agreement_id)}
-    time.sleep(5)
+
     executed = wait_for_event(consumer_ocean_instance.keeper.service_agreement.events.ExecuteAgreement, filter1)
     assert executed
     granted = wait_for_event(consumer_ocean_instance.keeper.access_conditions.events.AccessGranted, filter_2)
     assert granted
     fulfilled = wait_for_event(consumer_ocean_instance.keeper.service_agreement.events.AgreementFulfilled, filter1)
     assert fulfilled
-    time.sleep(5)
+
     path = consumer_ocean_instance._downloads_path
     # check consumed data file in the downloads folder
     assert os.path.exists(path), ''
