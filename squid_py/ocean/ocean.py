@@ -105,7 +105,7 @@ class Ocean:
         :return: Asset object
         """
 
-        return Asset.from_ddo_dict(self.metadata_store.get_asset_metadata(asset_did))
+        return Asset.from_ddo_dict(self.resolve_did(asset_did))
 
     def search_assets(self, text, sort=None, offset=100, page=0, aquarius_url=None):
         """
@@ -193,9 +193,6 @@ class Ocean:
         )
 
         return ddo
-
-    def _fetch_ddo(self, did):
-        return DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
 
     def _approve_token_transfer(self, amount):
         if self.keeper.token.get_token_balance(self.main_account.address) < amount:
@@ -313,7 +310,7 @@ class Ocean:
 
     def verify_service_agreement_signature(self, did, service_agreement_id, service_index, consumer_address, signature, ddo=None):
         if not ddo:
-            ddo = DDO(json_text=json.dumps(self.metadata_store.get_asset_metadata(did)))
+            ddo = self.resolve_did(did)
 
         service = ddo.find_service_by_key_value(ServiceAgreement.SERVICE_DEFINITION_ID_KEY, service_index)
         if not service:
