@@ -413,20 +413,28 @@ def test_integration(consumer_ocean_instance):
     print('got new service agreement id:', service_agreement_id)
     filter1 = {'serviceAgreementId': Web3.toBytes(hexstr=service_agreement_id)}
     filter_2 = {'serviceId': Web3.toBytes(hexstr=service_agreement_id)}
+
     executed = wait_for_event(consumer_ocean_instance.keeper.service_agreement.events.ExecuteAgreement, filter1)
     assert executed
     granted = wait_for_event(consumer_ocean_instance.keeper.access_conditions.events.AccessGranted, filter_2)
     assert granted
     fulfilled = wait_for_event(consumer_ocean_instance.keeper.service_agreement.events.AgreementFulfilled, filter1)
     assert fulfilled
-    time.sleep(3)
+
     path = consumer_ocean_instance._downloads_path
     # check consumed data file in the downloads folder
     assert os.path.exists(path), ''
-    filenames = os.listdir(path)
-    assert filenames, ''
-    for fname in filenames:
-        with open(os.path.join(path, fname)) as f:
-            lines = f.readlines()
-            print('signed url from service endpoint: %s' % (lines[0] if lines else 'empty'))
+    folder_names = os.listdir(path)
+    assert folder_names, ''
+    for name in folder_names:
+        asset_path = os.path.join(path, name)
+        if os.path.isfile(asset_path):
+            continue
+
+        filenames = os.listdir(asset_path)
+        assert filenames, 'no files created in this dir'
+        assert os.path.isfile(os.path.join(asset_path, filenames[0])), ''
+
     print('agreement was fulfilled.')
+    import shutil
+    shutil.rmtree(consumer_ocean_instance._downloads_path)

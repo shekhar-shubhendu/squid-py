@@ -440,14 +440,13 @@ class DDO:
     @staticmethod
     def sign_text(text, private_key, sign_type=PUBLIC_KEY_TYPE_RSA):
         """Sign some text using the private key provided"""
-        signed_text = None
         if sign_type == PUBLIC_KEY_TYPE_RSA:
             signer = PKCS1_v1_5.new(RSA.import_key(private_key))
             text_hash = SHA256.new(text.encode('utf-8'))
             signed_text = signer.sign(text_hash)
-        else:
-            raise NotImplementedError
-        return signed_text
+            return signed_text
+
+        raise NotImplementedError
 
     @staticmethod
     def validate_signature(text, key, signature, sign_type=AUTHENTICATION_TYPE_RSA):
@@ -471,10 +470,14 @@ class DDO:
     def create_public_key_from_json(values):
         """create a public key object based on the values from the JSON record"""
         # currently we only support RSA public keys
-        if values['type'] == PUBLIC_KEY_TYPE_RSA:
-            public_key = PublicKeyRSA(values['id'], owner=values.get('owner', None))
+        _id = values.get('id')
+        if not _id:
+            raise ValueError('publicKey definition is missing the "id" value.')
+
+        if values.get('type') == PUBLIC_KEY_TYPE_RSA:
+            public_key = PublicKeyRSA(_id, owner=values.get('owner'))
         else:
-            public_key = PublicKeyHex(values['id'], owner=values.get('owner', None))
+            public_key = PublicKeyHex(_id, owner=values.get('owner'))
 
         public_key.set_key_value(values)
         return public_key
@@ -482,8 +485,10 @@ class DDO:
     @staticmethod
     def create_authentication_from_json(values):
         """create authentitaciton object from a JSON string"""
-        key_id = values['publicKey']
-        authentication_type = values['type']
+        key_id = values.get('publicKey')
+        authentication_type = values.get('type')
+        if not key_id:
+            raise ValueError('Invalid authentication definition, "publicKey" is missing: "%s"' % values)
         if isinstance(key_id, dict):
             public_key = DDO.create_public_key_from_json(key_id)
             authentication = Authentication(public_key, public_key.get_authentication_type())
