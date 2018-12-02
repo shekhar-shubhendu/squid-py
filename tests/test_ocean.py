@@ -11,6 +11,14 @@ import time
 import pytest
 from web3 import Web3
 
+from web3.utils.encoding import (
+    hex_encode_abi_type,
+    to_bytes,
+    to_int,
+    to_hex,
+    to_text,
+)
+
 from squid_py.ddo import DDO
 from squid_py.exceptions import OceanDIDNotFound
 from squid_py.ddo.metadata import Metadata
@@ -341,12 +349,28 @@ def test_agreement_hash(publisher_ocean_instance):
         pub_ocn.keeper.web3, sa.sla_template_id, sa.conditions_keys,
         sa.conditions_params_value_hashes, sa.conditions_timeouts, service_agreement_id
     )
+
+    template_id_hash = pub_ocn.keeper.web3.soliditySha3(['bytes32'], [sa.sla_template_id])
+    conditions__keys_hash = pub_ocn.keeper.web3.soliditySha3(['bytes32[]'], [sa.conditions_keys])
+    conditions_values_hash = pub_ocn.keeper.web3.soliditySha3(['bytes32[]'], [sa.conditions_params_value_hashes])
+    conditions_timeouts_hash = pub_ocn.keeper.web3.soliditySha3(['uint256[]'], [sa.conditions_timeouts])
+    service_agreement_id_hash = pub_ocn.keeper.web3.soliditySha3(['bytes32'], [service_agreement_id])
+
+    int_hash= hex_encode_abi_type("uint256", 10)
+    print('Int Hash: ', int_hash)
+    print('Condition Values String:', sa.conditions_params_value_hashes)
+    print('sla_template_id:', sa.sla_template_id)
+    print('template_id_hash hex:', template_id_hash.hex())
+    print('conditions__keys_hash hex:', conditions__keys_hash.hex())
+    print('conditions_values_hash hex:', conditions_values_hash.hex())
+    print('conditions_timeouts_hash hex:', conditions_timeouts_hash.hex())
+    print('service_agreement_id_hash hex:', service_agreement_id_hash.hex())
+
     print('agreement hash: ', agreement_hash.hex())
     print('expected hash: ', "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb")
     assert agreement_hash.hex() == "0x66652d0f8f8ec464e67aa6981c17fa1b1644e57d9cfd39b6f1b58ad1b71d61bb", 'hash does not match.'
     # signed_hash = pub_ocn.keeper.web3.eth.sign(user_address, agreement_hash).hex()
     # print('signed agreement hash:', signed_hash)
-
 
 def test_integration(consumer_ocean_instance):
     # this test is disabled for now.
