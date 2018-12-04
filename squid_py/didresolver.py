@@ -207,7 +207,8 @@ class DIDResolver:
                 try:
                     did_bytes = Web3.toBytes(hexstr=data['value'].decode('utf8'))
                 except:
-                    raise TypeError('Invalid data type for a DID value at {}'.format(Web3.toHex(did_bytes)))
+                    raise TypeError('Invalid data type for a DID value at {}. Got "{}" which '
+                                    'does not seem like a valid did.'.format(Web3.toHex(did_bytes), data['value'].decode('utf8')))
                 resolved.add_data(data, did_bytes)
                 result = did_bytes
             elif data['value_type'] == VALUE_TYPE_DID_REF:
