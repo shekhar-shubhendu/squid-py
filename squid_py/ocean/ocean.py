@@ -151,6 +151,7 @@ class Ocean:
             item is a dict of parameters and values required by the service.
         :return:
         """
+        assert publisher_address and self._web3.isChecksumAddress(publisher_address), 'Invalid publisher address "%s"' % publisher_address
         assert publisher_address in self.accounts, 'Unrecognized publisher address %s' % publisher_address
         assert isinstance(metadata, dict), 'Expected metadata of type dict, got "%s"' % type(metadata)
         if not metadata or not Metadata.validate(metadata):
@@ -202,7 +203,7 @@ class Ocean:
             Web3.toBytes(hexstr=asset_id),
             key=Web3.sha3(text='Metadata'),
             url=ddo_service_endpoint,
-            account=publisher_address
+            account=self.accounts[publisher_address]
         )
 
         return ddo
