@@ -101,8 +101,8 @@ def test_register_asset(publisher_ocean_instance):
     ##########################################################
     # Setup account
     ##########################################################
-    publisher_address = list(publisher_ocean_instance.accounts)[1]
-    publisher_acct = publisher_ocean_instance.accounts[publisher_address]
+    publisher_acct = publisher_ocean_instance.main_account
+    publisher_address = publisher_acct.address
 
     # ensure Ocean token balance
     if publisher_acct.ocean_balance == 0:

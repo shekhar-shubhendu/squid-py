@@ -1,7 +1,6 @@
 import os
 import pytest
 from web3 import Web3
-import pytest
 
 from squid_py.ddo.metadata import Metadata
 from squid_py.ocean.account import Account
@@ -12,6 +11,7 @@ from squid_py.utils import utilities
 from squid_py.ocean.ocean import Ocean
 from tests.brizo_mock import BrizoMock
 from tests.secret_store_mock import SecretStoreClientMock
+from squid_py.utils.utilities import get_purchase_endpoint, get_service_endpoint
 
 PUBLISHER_INDEX = 1
 CONSUMER_INDEX = 0
@@ -98,16 +98,10 @@ def get_registered_ddo(ocean_instance):
     )
 
     config = ocean_instance.config
-    brizo_url = 'http://localhost:8030'
-    if config.has_option('resources', 'brizo.url'):
-        brizo_url = config.get('resources', 'brizo.url') or brizo_url
-
-    metadata = Metadata.get_example()
-    brizo_base_url = '/api/v1/brizo'
-    purchase_endpoint = '{}{}/services/access/initialize'.format(brizo_url, brizo_base_url)
-    service_endpoint = '{}{}/services/consume'.format(brizo_url, brizo_base_url)
+    purchase_endpoint = get_purchase_endpoint(config)
+    service_endpoint = get_service_endpoint(config)
     ddo = ocean_instance.register_asset(
-        metadata, ocean_instance.main_account.address,
+        Metadata.get_example(), ocean_instance.main_account.address,
         [ServiceDescriptor.access_service_descriptor(7, purchase_endpoint, service_endpoint, 360, template_id)]
     )
 
