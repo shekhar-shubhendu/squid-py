@@ -24,7 +24,19 @@ def get_contract_abi_by_address(contract_path, address):
 
 def get_contract_by_name(contract_path, network_name, contract_name):
     file_name = '{}.{}.json'.format(contract_name, network_name)
-    with open(os.path.join(contract_path, file_name)) as f:
+    path = os.path.join(contract_path, file_name)
+    if not os.path.exists(path):
+        file_name = '{}.{}.json'.format(contract_name, network_name.lower())
+        for name in os.listdir(contract_path):
+            if name.lower() == file_name.lower():
+                file_name = name
+                path = os.path.join(contract_path, file_name)
+                break
+
+    if not os.path.exists(path):
+        raise FileNotFoundError('Keeper contract {} file not found: {}'.format(contract_name, path))
+
+    with open(path) as f:
         contract = json.loads(f.read())
         return contract
 
