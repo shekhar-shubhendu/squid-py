@@ -6,7 +6,7 @@ from squid_py.service_agreement.service_agreement_contract import ServiceAgreeme
 
 class ServiceAgreementTemplate(object):
     DOCUMENT_TYPE = 'OceanProtocolServiceAgreementTemplate'
-    TEMPLATE_ID_KEY = 'slaTemplateId'
+    TEMPLATE_ID_KEY = 'templateId'
 
     def __init__(self, template_json=None):
         self.template_id = ''
@@ -148,7 +148,6 @@ class ServiceAgreementTemplate(object):
                 }
               ],
               "dependencies": [],
-              "dependencyTimeoutFlags": [],
               "isTerminalCondition": 0
             }, {
               "name": "grantAccess",
@@ -198,8 +197,12 @@ class ServiceAgreementTemplate(object):
                     }
                 }
               ],
-              "dependencies": ["lockPayment"],
-              "dependencyTimeoutFlags": [0],
+              "dependencies": [
+                {
+                    "name": "lockPayment",
+                    "timeout": 0
+                }
+              ],
               "isTerminalCondition": 0
             }, {
               "name": "releasePayment",
@@ -230,8 +233,12 @@ class ServiceAgreementTemplate(object):
                   }
                 }
               ],
-              "dependencies": ["grantAccess"],
-              "dependencyTimeoutFlags": [0],
+              "dependencies": [
+                {
+                    "name": "grantAccess",
+                    "timeout": 0
+                }
+              ],
               "isTerminalCondition": 1
             }, {
               "name": "refundPayment",
@@ -262,8 +269,16 @@ class ServiceAgreementTemplate(object):
                   }
                 }
               ],
-              "dependencies": ["lockPayment", "grantAccess"],
-              "dependencyTimeoutFlags": [0, 1],
+              "dependencies": [
+                {
+                    "name": "lockPayment",
+                    "timeout": 0
+                },
+                {
+                    "name": "grantAccess",
+                    "timeout": 1
+                }
+              ],
               "isTerminalCondition": 1
             }
             ]

@@ -16,7 +16,7 @@ class ServiceDescriptor(object):
     def access_service_descriptor(price, purchase_endpoint, service_endpoint, timeout, template_id):
         return (ServiceTypes.ASSET_ACCESS,
                 {'price': price, 'purchaseEndpoint': purchase_endpoint, 'serviceEndpoint': service_endpoint,
-                 'timeout': timeout, 'slaTemplateId': template_id})
+                 'timeout': timeout, 'templateId': template_id})
 
     @staticmethod
     def compute_service_descriptor(price, purchase_endpoint, service_endpoint, timeout):
@@ -48,7 +48,7 @@ class ServiceFactory(object):
 
         elif service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
-                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout'], kwargs['slaTemplateId']
+                did, kwargs['price'], kwargs['purchaseEndpoint'], kwargs['serviceEndpoint'], kwargs['timeout'], kwargs['templateId']
             )
 
         elif service_type == ServiceTypes.CLOUD_COMPUTE:
