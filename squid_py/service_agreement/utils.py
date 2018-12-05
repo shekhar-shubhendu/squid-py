@@ -29,27 +29,27 @@ def get_sla_template_dict(path):
         return json.load(template_file)
 
 
-def build_condition_key(web3, contract_address, fingerprint, sla_template_id):
+def build_condition_key(web3, contract_address, fingerprint, template_id):
     assert isinstance(fingerprint, bytes), 'Expecting `fingerprint` of type bytes, got %s' % type(fingerprint)
     return web3.soliditySha3(
         ['bytes32', 'address', 'bytes4'],
-        [sla_template_id, contract_address, fingerprint]
+        [template_id, contract_address, fingerprint]
     ).hex()
 
 
-def build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id):
-    return [build_condition_key(web3, address, fingerprints[i], sla_template_id)
+def build_conditions_keys(web3, contract_addresses, fingerprints, template_id):
+    return [build_condition_key(web3, address, fingerprints[i], template_id)
             for i, address in enumerate(contract_addresses)]
 
 
-def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, sla_template_id):
+def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, template_id):
     """Helper function to generate conditions data that is typically used together in a
     service agreement.
 
     :param web3:
     :param contract_path: str path to contracts artifacts
     :param conditions: list of ServiceAgreementCondition instances
-    :param sla_template_id:
+    :param template_id:
     :return:
     """
     _network_name = get_network_name(web3)
@@ -70,7 +70,7 @@ def get_conditions_data_from_keeper_contracts(web3, contract_path, conditions, s
         for i, cond in enumerate(conditions)
     ]
     fulfillment_indices = [i for i, cond in enumerate(conditions) if cond.is_terminal]
-    conditions_keys = build_conditions_keys(web3, contract_addresses, fingerprints, sla_template_id)
+    conditions_keys = build_conditions_keys(web3, contract_addresses, fingerprints, template_id)
     return contract_addresses, fingerprints, fulfillment_indices, conditions_keys
 
 
@@ -101,7 +101,7 @@ def register_service_agreement_template(service_agreement_contract, contract_pat
     return sla_template_instance.template_id
 
 
-def get_conditions_with_updated_keys(web3, contract_path, conditions, sla_template_id):
+def get_conditions_with_updated_keys(web3, contract_path, conditions, template_id):
     """Return a copy of `conditions` with updated conditions keys using the corresponding
     contracts addresses found in `contract_path`.
     Condition keys are used to identify an instance of a condition controller function in a specific
@@ -111,11 +111,11 @@ def get_conditions_with_updated_keys(web3, contract_path, conditions, sla_templa
     :param web3:
     :param contract_path:
     :param conditions:
-    :param sla_template_id:
+    :param template_id:
     :return:
     """
     conditions_data = get_conditions_data_from_keeper_contracts(
-        web3, contract_path, conditions, sla_template_id
+        web3, contract_path, conditions, template_id
     )
     fingerprints, fulfillment_indices, conditions_keys = conditions_data[1:]
     # Fill the conditionKey in each condition in the template

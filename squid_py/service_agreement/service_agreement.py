@@ -1,3 +1,4 @@
+from eth_utils import add_0x_prefix
 from web3 import Web3
 
 from squid_py.service_agreement.service_agreement_condition import ServiceAgreementCondition
@@ -13,9 +14,9 @@ class ServiceAgreement(object):
     PURCHASE_ENDPOINT_KEY = 'purchaseEndpoint'
     SERVICE_ENDPOINT_KEY = 'serviceEndpoint'
 
-    def __init__(self, sa_definition_id, sla_template_id, conditions, service_agreement_contract, purchase_endpoint=None, service_endpoint=None):
+    def __init__(self, sa_definition_id, template_id, conditions, service_agreement_contract, purchase_endpoint=None, service_endpoint=None):
         self.sa_definition_id = sa_definition_id
-        self.sla_template_id = sla_template_id
+        self.template_id = add_0x_prefix(template_id)
         self.conditions = conditions
         self.service_agreement_contract = service_agreement_contract
         self.purchase_endpoint = purchase_endpoint
@@ -77,7 +78,7 @@ class ServiceAgreement(object):
         """
         self.update_conditions_keys(web3, contract_path)
         agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-            web3, self.sla_template_id, self.conditions_keys,
+            web3, self.template_id, self.conditions_keys,
             self.conditions_params_value_hashes, self.conditions_timeouts, service_agreement_id
         )
         return agreement_hash
@@ -102,12 +103,12 @@ class ServiceAgreement(object):
         :param contract_path:
         :return:
         """
-        self.conditions = get_conditions_with_updated_keys(web3, contract_path, self.conditions, self.sla_template_id)
+        self.conditions = get_conditions_with_updated_keys(web3, contract_path, self.conditions, self.template_id)
 
     def as_dictionary(self):
         return {
             ServiceAgreement.SERVICE_DEFINITION_ID_KEY: self.sa_definition_id,
-            ServiceAgreementTemplate.TEMPLATE_ID_KEY: self.sla_template_id,
+            ServiceAgreementTemplate.TEMPLATE_ID_KEY: self.template_id,
             ServiceAgreement.SERVICE_CONTRACT_KEY: self.service_agreement_contract.as_dictionary(),
             ServiceAgreement.SERVICE_CONDITIONS_KEY: [cond.as_dictionary() for cond in self.conditions]
         }

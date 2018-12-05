@@ -73,7 +73,7 @@ class TestRegisterServiceAgreement(unittest.TestCase):
 
         sa_def = {
             'type': 'Access',
-            'slaTemplateId': self.template_id,
+            'templateId': self.template_id,
             'serviceAgreementContract': {
                 'contractName': 'ServiceAgreement',
                 'events': [{
@@ -91,8 +91,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'name': 'grantAccess',
                 'timeout': timeout,
                 'isTerminalCondition': 0,
-                'dependencies': ['lockPayment'],
-                'dependencyTimeoutFlags': [0],
+                'dependencies': [
+                    {
+                        'name': 'lockPayment',
+                        'timeout': 0
+                    }
+                ],
                 'conditionKey': "",
                 'contractName': 'AccessConditions',
                 'functionName': 'grantAccess',
@@ -141,7 +145,6 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'timeout': 0,
                 'isTerminalCondition': 0,
                 'dependencies': [],
-                'dependencyTimeoutFlags': [],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'lockPayment',
@@ -170,8 +173,12 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                 'name': 'releasePayment',
                 'timeout': 0,
                 'isTerminalCondition': 1,
-                'dependencies': ['grantAccess'],
-                'dependencyTimeoutFlags': [0],
+                'dependencies': [
+                     {
+                         'name': 'grantAccess',
+                         'timeout': 0
+                     }
+                 ],
                 'conditionKey': "",
                 'contractName': 'PaymentConditions',
                 'functionName': 'releasePayment',
@@ -231,8 +238,16 @@ class TestRegisterServiceAgreement(unittest.TestCase):
                         }
                     }
                 ],
-                "dependencies": ["lockPayment", "grantAccess"],
-                "dependencyTimeoutFlags": [0, 1],
+                "dependencies": [
+                     {
+                         'name': 'lockPayment',
+                         'timeout': 0
+                     },
+                     {
+                         'name': 'grantAccess',
+                         'timeout': 1
+                     }
+                 ],
                 "isTerminalCondition": 1
                 }
             )

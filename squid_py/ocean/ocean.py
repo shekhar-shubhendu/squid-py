@@ -293,7 +293,7 @@ class Ocean:
                                    service_agreement.get_price(), content_urls, None, 0)
 
         receipt = self.keeper.service_agreement.execute_service_agreement(
-            service_agreement.sla_template_id,
+            service_agreement.template_id,
             service_agreement_signature,
             consumer_address,
             service_agreement.conditions_params_value_hashes,

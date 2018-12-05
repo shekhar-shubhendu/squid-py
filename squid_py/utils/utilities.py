@@ -45,7 +45,8 @@ def get_service_endpoint(config):
 
 def get_metadata_url(ddo):
     metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
-    return metadata_service.get_values()['metadata']['base']['contentUrls']
+    url = metadata_service.get_values()['metadata']['base']['contentUrls']
+    return url if isinstance(url, str) else url[0]
 
 
 def prepare_prefixed_hash(msg_hash):

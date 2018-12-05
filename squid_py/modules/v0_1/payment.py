@@ -4,6 +4,7 @@ from squid_py.modules.v0_1.utils import (
     get_condition_contract_data,
     is_condition_fulfilled
     )
+from squid_py.service_agreement.service_agreement_template import ServiceAgreementTemplate
 
 
 def lockPayment(web3, contract_path, account, service_agreement_id,
@@ -22,7 +23,7 @@ def lockPayment(web3, contract_path, account, service_agreement_id,
 
     contract_name = service_definition['serviceAgreementContract']['contractName']
     service_agreement_address = get_contract_abi_and_address(web3, contract_path, contract_name)[1]
-    if is_condition_fulfilled(web3, contract_path, service_definition['slaTemplateId'],
+    if is_condition_fulfilled(web3, contract_path, service_definition[ServiceAgreementTemplate.TEMPLATE_ID_KEY],
                               service_agreement_id, service_agreement_address,
                               payment_conditions.address, abi, 'lockPayment'):
         return
@@ -63,7 +64,7 @@ def releasePayment(web3, contract_path, account, service_agreement_id,
 
     contract_name = service_definition['serviceAgreementContract']['contractName']
     service_agreement_address = get_contract_abi_and_address(web3, contract_path, contract_name)[1]
-    if is_condition_fulfilled(web3, contract_path, service_definition['slaTemplateId'],
+    if is_condition_fulfilled(web3, contract_path, service_definition[ServiceAgreementTemplate.TEMPLATE_ID_KEY],
                               service_agreement_id, service_agreement_address,
                               payment_conditions.address, abi, 'releasePayment'):
         return
@@ -102,7 +103,7 @@ def refundPayment(web3, contract_path, account, service_agreement_id,
 
     contract_name = service_definition['serviceAgreementContract']['contractName']
     service_agreement_address = get_contract_abi_and_address(web3, contract_path, contract_name)[1]
-    if is_condition_fulfilled(web3, contract_path, service_definition['slaTemplateId'],
+    if is_condition_fulfilled(web3, contract_path, service_definition[ServiceAgreementTemplate.TEMPLATE_ID_KEY],
                               service_agreement_id, service_agreement_address,
                               payment_conditions.address, abi, function_name):
         return

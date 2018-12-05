@@ -71,6 +71,19 @@ class ServiceAgreementCondition(object):
         if condition_json:
             self.init_from_condition_json(condition_json)
 
+    def _read_dependencies(self, dependencies):
+        dep_list = []
+        timeout_flags = []
+        for dep in dependencies:
+            dep_list.append(dep['name'])
+            timeout_flags.append(dep['timeout'])
+
+        return dep_list, timeout_flags
+
+    def _build_dependencies(self):
+        dependencies = [{'name': dep_name, 'timeout': self.timeout_flags[i]} for i, dep_name in enumerate(self.dependencies)]
+        return dependencies
+
     def init_from_condition_json(self, condition_json):
         self.name = condition_json['name']
         self.timeout = condition_json['timeout']
@@ -78,8 +91,7 @@ class ServiceAgreementCondition(object):
         self.contract_name = condition_json['contractName']
         self.function_name = condition_json['functionName']
         self.is_terminal = bool(condition_json['isTerminalCondition'])
-        self.dependencies = condition_json['dependencies']
-        self.timeout_flags = condition_json['dependencyTimeoutFlags']
+        self.dependencies, self.timeout_flags = self._read_dependencies(condition_json['dependencies'])
         assert len(self.dependencies) == len(self.timeout_flags)
         if self.dependencies:
             assert sum(self.timeout_flags) == 0 or self.timeout > 0, 'timeout must be set when any dependency is set to rely on a timeout.'
@@ -97,8 +109,7 @@ class ServiceAgreementCondition(object):
             "isTerminalCondition": int(self.is_terminal),
             "events": [e.as_dictionary() for e in self.events],
             "parameters": [p.as_dictionary() for p in self.parameters],
-            "dependencies": self.dependencies,
-            "dependencyTimeoutFlags": self.timeout_flags
+            "dependencies": self._build_dependencies(),
         }
 
         return condition_dict
@@ -121,7 +132,6 @@ class ServiceAgreementCondition(object):
             "name": "lockPayment",
             "timeout": 0,
             "dependencies": [],
-            "dependencyTimeoutFlags": [],
             "isTerminalCondition": 0,
             "conditionKey": "",
             "contractName": "PaymentConditions",
