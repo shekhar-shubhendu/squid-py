@@ -25,9 +25,28 @@ def prepare_purchase_payload(did, agreement_id, service_index, signature, consum
     })
 
 
+def get_brizo_url(config):
+    brizo_url = 'http://localhost:8030'
+    if config.has_option('resources', 'brizo.url'):
+        brizo_url = config.get('resources', 'brizo.url') or brizo_url
+
+    brizo_path = '/api/v1/brizo'
+    return '{}{}'.format(brizo_url, brizo_path)
+
+
+def get_purchase_endpoint(config):
+    return '{}/services/access/initialize'.format(get_brizo_url(config))
+
+
+def get_service_endpoint(config):
+    service_endpoint = '{}/services/consume'.format(get_brizo_url(config))
+    return service_endpoint
+
+
 def get_metadata_url(ddo):
     metadata_service = ddo.get_service(service_type=ServiceTypes.METADATA)
-    return metadata_service.get_values()['metadata']['base']['contentUrls']
+    url = metadata_service.get_values()['metadata']['base']['contentUrls']
+    return url if isinstance(url, str) else url[0]
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -97,7 +116,7 @@ def get_network_name(web3):
         3: 'Ropsten',
         4: 'Rinkeby',
         42: 'Kovan',
-        8995: 'Ocean_POA_AWS',
+        8995: 'ocean_poa_aws',
         8996: 'ocean_poa_net_local',
     }
     return switcher.get(network_id, 'development')

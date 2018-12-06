@@ -472,7 +472,9 @@ class DDO:
         # currently we only support RSA public keys
         _id = values.get('id')
         if not _id:
-            raise ValueError('publicKey definition is missing the "id" value.')
+            # Make it more forgiving for now.
+            _id = ''
+            # raise ValueError('publicKey definition is missing the "id" value.')
 
         if values.get('type') == PUBLIC_KEY_TYPE_RSA:
             public_key = PublicKeyRSA(_id, owner=values.get('owner'))
@@ -500,13 +502,15 @@ class DDO:
     @staticmethod
     def create_service_from_json(values):
         """create a service object from a JSON string"""
+        # id is the did, no big deal if missing
         if not 'id' in values:
-            raise IndexError
+            print('Service definition in DDO document is missing the "id" key/value.')
+            # raise IndexError
         if not 'serviceEndpoint' in values:
             raise IndexError
         if not 'type' in values:
             raise IndexError
-        service = Service(values['id'], values['serviceEndpoint'], values['type'], values)
+        service = Service(values.get('id', ''), values['serviceEndpoint'], values['type'], values)
         return service
 
     @staticmethod

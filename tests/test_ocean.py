@@ -109,8 +109,8 @@ def test_register_asset(publisher_ocean_instance):
     ##########################################################
     # Setup account
     ##########################################################
-    publisher_address = list(publisher_ocean_instance.accounts)[1]
-    publisher_acct = publisher_ocean_instance.accounts[publisher_address]
+    publisher_acct = publisher_ocean_instance.main_account
+    publisher_address = publisher_acct.address
 
     # ensure Ocean token balance
     if publisher_acct.ocean_balance == 0:
@@ -233,7 +233,7 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
     asset_id = did_to_id(ddo.did)
     ddo, service_agreement, service_def = pub_ocn._get_ddo_and_service_agreement(ddo.did, service_index)
     pub_ocn.keeper.service_agreement.execute_service_agreement(
-        service_agreement.sla_template_id,
+        service_agreement.template_id,
         signature,
         consumer_acc.address,
         service_agreement.conditions_params_value_hashes,
@@ -262,9 +262,9 @@ def test_execute_agreement(publisher_ocean_instance, consumer_ocean_instance, re
     terminated = sa_contract.isAgreementTerminated(agreement_id)
     assert terminated is False
     template_id = web3.toHex(sa_contract.getTemplateId(agreement_id))
-    assert template_id == service_agreement.sla_template_id
+    assert template_id == service_agreement.template_id
 
-    k = build_condition_key(web3, pay_cont_address, web3.toBytes(hexstr=fn_fingerprint), service_agreement.sla_template_id)
+    k = build_condition_key(web3, pay_cont_address, web3.toBytes(hexstr=fn_fingerprint), service_agreement.template_id)
     cond_key = web3.toHex(sa_contract.getConditionByFingerprint(agreement_id, pay_cont_address, fn_fingerprint))
     assert k == cond_key, 'problem with condition keys: %s vs %s' % (k, cond_key)
     assert cond_key == service_agreement.conditions_keys[0]
@@ -343,10 +343,10 @@ def test_agreement_hash(publisher_ocean_instance):
     service = service.as_dictionary()
     sa = ServiceAgreement.from_service_dict(service)
     service[ServiceAgreement.SERVICE_CONDITIONS_KEY] = [cond.as_dictionary() for cond in sa.conditions]
-    assert template_id == sa.sla_template_id, ''
+    assert template_id == sa.template_id, ''
     assert did == ddo.did
     agreement_hash = ServiceAgreement.generate_service_agreement_hash(
-        pub_ocn.keeper.web3, sa.sla_template_id, sa.conditions_keys,
+        pub_ocn.keeper.web3, sa.template_id, sa.conditions_keys,
         sa.conditions_params_value_hashes, sa.conditions_timeouts, service_agreement_id
     )
 

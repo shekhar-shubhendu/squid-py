@@ -61,9 +61,9 @@ class ServiceAgreement(ContractBase):
         self.unlock_account(from_account)
         return self.contract_concise.fulfillAgreement(service_agreement_id)
 
-    def revoke_agreement_template(self, sla_template_id, owner_account):
+    def revoke_agreement_template(self, template_id, owner_account):
         self.unlock_account(owner_account)
-        return self.contract_concise.revokeAgreementTemplate(sla_template_id)
+        return self.contract_concise.revokeAgreementTemplate(template_id)
 
     def get_template_status(self, sa_template_id):
         return self.contract_concise.getTemplateStatus(sa_template_id)

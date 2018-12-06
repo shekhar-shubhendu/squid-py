@@ -107,7 +107,7 @@ class Ocean:
 
         return Asset.from_ddo_dict(self.resolve_did(asset_did))
 
-    def search_assets(self, text, sort=None, offset=100, page=0, aquarius_url=None):
+    def search_assets_by_text(self, text, sort=None, offset=100, page=0, aquarius_url=None):
         """
         Search an asset in oceanDB using aquarius.
         :param text String with the value that you are searching.
@@ -123,10 +123,23 @@ class Ocean:
         else:
             return [Asset.from_ddo_dict(i) for i in self.metadata_store.text_search(text, sort, offset, page)]
 
-    def search_assets_by_text(self, search_text):
-        # TODO: implement this
-        assets = []
-        return assets
+    def search_assets(self, query):
+        """
+        Search an asset in oceanDB using search query.
+        :param query dict with query parameters
+            (e.g.) {"offset": 100, "page": 0, "sort": {"value": 1},
+                    query: {"service:{$elemMatch:{"metadata": {$exists : true}}}}}
+                    Here, OceanDB instance of mongodb can leverage power of mongo queries in 'query' attribute.
+                    For more info - https://docs.mongodb.com/manual/reference/method/db.collection.find
+        :return: List of assets that match with the query.
+        """
+        aquarius_url = self.config.aquarius_url
+
+        if aquarius_url is not None:
+            aquarius = AquariusWrapper(aquarius_url)
+            return [Asset.from_ddo_dict(i) for i in aquarius.query_search(query)]
+        else:
+            return [Asset.from_ddo_dict(i) for i in self.metadata_store.query_search(query)]
 
     def register_asset(self, metadata, publisher_address, service_descriptors, threshold=None):
         """
@@ -138,6 +151,7 @@ class Ocean:
             item is a dict of parameters and values required by the service.
         :return:
         """
+        assert publisher_address and self._web3.isChecksumAddress(publisher_address), 'Invalid publisher address "%s"' % publisher_address
         assert publisher_address in self.accounts, 'Unrecognized publisher address %s' % publisher_address
         assert isinstance(metadata, dict), 'Expected metadata of type dict, got "%s"' % type(metadata)
         if not metadata or not Metadata.validate(metadata):
@@ -189,7 +203,7 @@ class Ocean:
             Web3.toBytes(hexstr=asset_id),
             key=Web3.sha3(text='Metadata'),
             url=ddo_service_endpoint,
-            account=publisher_address
+            account=self.accounts[publisher_address]
         )
 
         return ddo
@@ -279,7 +293,7 @@ class Ocean:
                                    service_agreement.get_price(), content_urls, None, 0)
 
         receipt = self.keeper.service_agreement.execute_service_agreement(
-            service_agreement.sla_template_id,
+            service_agreement.template_id,
             service_agreement_signature,
             consumer_address,
             service_agreement.conditions_params_value_hashes,

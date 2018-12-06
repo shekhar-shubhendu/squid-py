@@ -50,7 +50,6 @@
         }
       ],
       "dependencies": [],
-      "dependencyTimeoutFlags": [],
       "isTerminalCondition": 0
     }, {
       "name": "grantAccess",
@@ -100,8 +99,12 @@
           }
         }
       ],
-      "dependencies": ["lockPayment"],
-      "dependencyTimeoutFlags": [0],
+      "dependencies": [
+        {
+          "name": "lockPayment",
+          "timeout": 0
+        }
+      ],
       "isTerminalCondition": 0
     }, {
       "name": "releasePayment",
@@ -132,8 +135,12 @@
           }
         }
       ],
-      "dependencies": ["grantAccess"],
-      "dependencyTimeoutFlags": [0],
+      "dependencies": [
+        {
+          "name": "grantAccess",
+          "timeout": 0
+        }
+      ],
       "isTerminalCondition": 1
     }, {
       "name": "refundPayment",
@@ -164,8 +171,16 @@
           }
         }
       ],
-      "dependencies": ["lockPayment", "grantAccess"],
-      "dependencyTimeoutFlags": [0, 1],
+      "dependencies": [
+        {
+          "name": "lockPayment",
+          "timeout": 0
+        },
+        {
+          "name": "grantAccess",
+          "timeout": 1
+        }
+      ],
       "isTerminalCondition": 1
     }
   ]
